@@ -1,0 +1,4251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planning de travail</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@400;500;600;700;800;900&family=Black+Ops+One&display=swap" rel="stylesheet">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg1: #000000;
+  --bg2: #2a2a2a;
+  --bg3: #3a3a3a;
+  --text1: #e8e8e8;
+  --text2: #aaa;
+  --border: #444;
+  --green: #148A00;
+  --blue: #0036A1;
+  --orange: #f0ad4e;
+  --red: #730000;
+  --cp: #207E96;
+  --formation: #A6A600;
+  --indispo: #9C009C;
+  --arret: #946868;
+  --accent: #00d4ff;
+}
+
+body {
+  font-family: 'Rajdhani', -apple-system, sans-serif;
+  background: var(--bg1);
+  color: var(--text1);
+  padding: 8px 15px 15px 15px;
+  transition: all 0.3s;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Enlever tous les glows/shadows par défaut */
+* {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeIn 0.6s ease-out;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+header {
+  text-align: center;
+  margin-bottom: 10px;
+  position: relative;
+  padding-top: 0;
+}
+
+.date-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 0 5px;
+  margin-top: 0;
+  gap: 6px;
+}
+
+.current-date, .current-time, .current-week {
+  font-family: 'Black Ops One', cursive;
+  font-size: 0.85em;
+  font-weight: 400;
+  color: #00FF00;
+  text-shadow: 0 0 15px rgba(0,255,0,0.8), 0 0 25px rgba(0,255,0,0.5), 0 2px 4px rgba(0,0,0,0.5);
+  padding: 4px 8px;
+  background: linear-gradient(135deg, rgba(74, 0, 128, 0.2), rgba(0, 66, 187, 0.15), rgba(0, 191, 255, 0.1));
+  border-radius: 10px;
+  border: 0.5px solid #FFD700;
+}
+
+.payslips-btn {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.2em;
+  background: linear-gradient(135deg, rgba(0, 206, 209, 0.3), rgba(0, 255, 65, 0.2));
+  border: 2px solid #00CED1;
+  color: #00CED1;
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 0 10px rgba(0,206,209,0.3);
+}
+
+.payslips-btn:hover {
+  background: linear-gradient(135deg, rgba(0, 206, 209, 0.5), rgba(0, 255, 65, 0.3));
+  box-shadow: 0 0 20px rgba(0,206,209,0.6);
+  transform: scale(1.05);
+}
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+h1 {
+  font-family: 'Black Ops One', cursive !important;
+  font-size: 3.8em !important;
+  font-weight: 400 !important;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, #FF00FF, #00FFFF, #FF00FF) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  background-size: 200% auto !important;
+  letter-spacing: 3px;
+  position: relative;
+  display: inline-block;
+  animation: shimmer 3s linear infinite !important;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+}
+
+.month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 8px;
+}
+
+.month-selector button {
+  background: linear-gradient(135deg, #4a0080, #6000a0);
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  color: #FFD700;
+  width: 38px;
+  height: 38px;
+  cursor: pointer;
+  border-radius: 50%;
+  font-size: 1em;
+  font-weight: 700;
+  transition: all 0.3s;
+  box-shadow: 
+    0 4px 8px rgba(0,0,0,0.3),
+    0 8px 16px rgba(74, 0, 128, 0.4),
+    inset 0 2px 4px rgba(255, 215, 0, 0.2),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 0 10px rgba(255,215,0,0.8), 0 2px 4px rgba(0,0,0,0.5);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.month-selector button::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent);
+  border-radius: 50% 50% 0 0;
+  pointer-events: none;
+}
+
+.month-selector button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 12px rgba(0,0,0,0.4),
+    0 12px 24px rgba(74, 0, 128, 0.6),
+    inset 0 2px 4px rgba(255, 215, 0, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(255, 215, 0, 0.5);
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.month-selector button:active {
+  transform: translateY(1px);
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.3),
+    0 4px 8px rgba(74, 0, 128, 0.3),
+    inset 0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 2px rgba(255, 215, 0, 0.1);
+}
+
+#currentMonth {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.2em;
+  font-weight: 400;
+  min-width: 200px;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #4a0080, #6000a0);
+  color: #FFD700;
+  text-shadow: 0 6px 12px rgba(0, 0, 0, 1);
+  padding: 6px 18px;
+  border-radius: 12px;
+  border: 0.5px solid #FFD700;
+}
+
+.legend {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 15px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(74, 0, 128, 0.2), rgba(0, 66, 187, 0.15), rgba(0, 191, 255, 0.1));
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 0 10px rgba(255, 215, 0, 0.1);
+  font-family: 'Black Ops One', cursive;
+  font-size: 0.85em;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255,255,255,0.3);
+}
+
+.legend-box {
+  width: 28px;
+  height: 20px;
+  border-radius: 5px;
+  border: 2px solid rgba(255,255,255,0.3);
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+
+/* Container pour l'effet 3D */
+.calendar-wrapper {
+  perspective: 1500px;
+  margin-bottom: 20px;
+  overflow: visible;
+}
+
+#calendar {
+  display: grid;
+  grid-template-columns: 40px repeat(7, 1fr);
+  gap: 3px;
+  background: linear-gradient(135deg, rgba(74, 0, 128, 0.4), rgba(0, 66, 187, 0.3), rgba(0, 191, 255, 0.2));
+  padding: 3px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  width: 100%;
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 1s ease;
+  transform-style: preserve-3d;
+}
+
+/* Effet page qui tourne vers la gauche (mois suivant - swipe gauche) */
+#calendar.cube-left {
+  animation: pageFlipLeft 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pageFlipLeft {
+  0% {
+    transform: rotateY(0deg);
+    transform-origin: left center;
+    opacity: 1;
+  }
+  50% {
+    transform: rotateY(-90deg);
+    transform-origin: left center;
+    opacity: 0.4;
+  }
+  100% {
+    transform: rotateY(0deg);
+    transform-origin: left center;
+    opacity: 1;
+  }
+}
+
+/* Effet page qui tourne vers la droite (mois précédent - swipe droite) */
+#calendar.cube-right {
+  animation: pageFlipRight 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pageFlipRight {
+  0% {
+    transform: rotateY(0deg);
+    transform-origin: right center;
+    opacity: 1;
+  }
+  50% {
+    transform: rotateY(90deg);
+    transform-origin: right center;
+    opacity: 0.4;
+  }
+  100% {
+    transform: rotateY(0deg);
+    transform-origin: right center;
+    opacity: 1;
+  }
+}
+
+.week-header {
+  background: linear-gradient(135deg, #1a3a52, #2a4a62);
+  padding: 12px 4px;
+  text-align: center;
+  font-size: 0.95em;
+  color: #A0F0FF;
+  font-weight: 700;
+  border-radius: 6px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  border: 0.5px solid #FFD700;
+}
+
+.day-header {
+  background: linear-gradient(135deg, #4a0080, #6000a0);
+  padding: 12px 8px;
+  text-align: center;
+  font-family: 'Black Ops One', cursive;
+  font-weight: 400;
+  color: #FFD700;
+  font-size: 1em;
+  text-shadow: 0 0 15px rgba(255,215,0,0.9), 0 0 25px rgba(255,215,0,0.5), 0 2px 4px rgba(0,0,0,0.5);
+  border-radius: 6px;
+  letter-spacing: 1.5px;
+  border: 0.5px solid #FFD700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+.week-number {
+  background: linear-gradient(135deg, #1a3a52, #2a4a62);
+  padding: 8px 2px;
+  text-align: center;
+  font-size: 0.95em;
+  color: #A0F0FF;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 0.5px solid #FFD700;
+}
+
+.day-cell {
+  background: #0a0a0a;
+  padding: 12px 8px;
+  min-height: 70px;
+  cursor: pointer;
+  transition: all 0.25s;
+  border-radius: 6px;
+  position: relative;
+  border: 1px solid rgba(0, 255, 0, 0.3);
+  box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.1);
+}
+
+.day-cell:active {
+  transform: scale(0.95);
+}
+
+.day-cell.other-month {
+  background: #8a8a8a;
+  opacity: 0.8;
+  pointer-events: none;
+  border: 1px solid rgba(0, 191, 255, 0.3);
+  box-shadow: inset 0 0 10px rgba(0, 191, 255, 0.1);
+}
+
+.day-cell.weekend {
+  background: #2d2d2d;
+  border: 0.5px solid #FFD700;
+}
+
+.day-cell.other-month.weekend {
+  background: #6a6a6a;
+  opacity: 0.8;
+  border: 1px solid rgba(0, 191, 255, 0.3);
+  box-shadow: inset 0 0 10px rgba(0, 191, 255, 0.1);
+}
+
+.day-cell.weekend .day-number {
+  color: #FFD700;
+  font-weight: 900;
+  text-shadow: 0 0 6px rgba(255,215,0,0.4), 0 0 10px rgba(255,215,0,0.2), 0 2px 4px rgba(0,0,0,0.5);
+  font-size: 1.25em;
+}
+
+.day-cell.holiday .day-number {
+  background: linear-gradient(135deg, #730000, #8a0000);
+  color: #fff;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  display: inline-block;
+  text-align: center;
+  font-weight: 700;
+}
+
+.day-cell.day-shift {
+  background: linear-gradient(135deg, #148A00, #1aa006) !important;
+}
+
+.day-cell.night-shift {
+  background: linear-gradient(135deg, #0036A1, #0042bb) !important;
+}
+
+.day-cell.cp-shift {
+  background: linear-gradient(135deg, #207E96, #2894ac) !important;
+}
+
+.day-cell.formation-shift {
+  background: linear-gradient(135deg, #A6A600, #b8b800) !important;
+}
+
+.day-cell.indispo-shift {
+  background: linear-gradient(135deg, #9C009C, #b000b0) !important;
+}
+
+.day-cell.arret-shift {
+  background: linear-gradient(135deg, #946868, #a47878) !important;
+}
+
+.day-cell.other-month.day-shift {
+  background: linear-gradient(135deg, #8cd682, #a8e89e) !important;
+  opacity: 1 !important;
+}
+
+.day-cell.other-month.night-shift {
+  background: linear-gradient(135deg, #7da8ff, #99bbff) !important;
+  opacity: 1 !important;
+}
+
+.day-cell.other-month.cp-shift {
+  background: linear-gradient(135deg, #70c4d8, #8cd4e4) !important;
+  opacity: 1 !important;
+}
+
+.day-cell.other-month.formation-shift {
+  background: linear-gradient(135deg, #d4d46e, #e4e484) !important;
+  opacity: 1 !important;
+}
+
+.day-cell.other-month.indispo-shift {
+  background: linear-gradient(135deg, #d66ed6, #e484e4) !important;
+  opacity: 1 !important;
+}
+
+.day-cell.other-month.arret-shift {
+  background: linear-gradient(135deg, #c4a0a0, #d4b0b0) !important;
+  opacity: 1 !important;
+}
+
+.day-cell.other-month.holiday .day-number {
+  background: linear-gradient(135deg, #5a3030, #6a4040);
+  opacity: 0.7;
+}
+
+.day-number {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.05em;
+  font-weight: 400;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+body.light-mode .day-cell:not(.weekend) .day-number {
+  color: #fff;
+}
+
+.shift-time {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75em;
+  color: rgba(255,255,255,0.95);
+  margin-top: 4px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+}
+
+.stats, .regulation {
+  background: linear-gradient(135deg, rgba(74, 0, 128, 0.2), rgba(0, 66, 187, 0.15), rgba(0, 191, 255, 0.1));
+  padding: 30px;
+  border-radius: 14px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(0, 191, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.stats::before, .regulation::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  border-radius: 14px 0 0 14px;
+  background: linear-gradient(180deg, #00BFFF, #4a0080);
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+}
+
+.regulation::before {
+  background: linear-gradient(180deg, #f0ad4e, #ff6b35);
+  box-shadow: 0 0 10px rgba(240, 173, 78, 0.5);
+}
+
+.stats h2, .regulation h2, h3 {
+  font-family: 'Black Ops One', cursive;
+  font-weight: 400;
+  position: relative;
+  padding-bottom: 22px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  letter-spacing: 1px;
+}
+
+.stats h2 {
+  font-size: 1.6em;
+  margin-bottom: 25px;
+  white-space: nowrap;
+  padding-bottom: 10px;
+}
+
+.stats h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #7E2AD1, #3AC6D6);
+  box-shadow: 0 0 10px rgba(126,42,209,0.4);
+}
+
+.regulation h2 {
+  font-size: 1.5em;
+  margin-bottom: 25px;
+  line-height: 1.4;
+  white-space: nowrap;
+  padding-bottom: 10px;
+}
+
+.regulation h2 .subtitle-small {
+  font-size: 0.87em;
+}
+
+.regulation h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #7E2AD1, #3AC6D6);
+  box-shadow: 0 0 10px rgba(126,42,209,0.4);
+}
+
+h3 {
+  font-size: 1.5em;
+  margin-top: 28px;
+  margin-bottom: 16px;
+  color: var(--text1);
+  padding-bottom: 6px;
+}
+
+h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #7E2AD1, #3AC6D6);
+  box-shadow: 0 0 10px rgba(126,42,209,0.4);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, rgba(74, 0, 128, 0.2), rgba(0, 66, 187, 0.15), rgba(0, 191, 255, 0.1));
+  border-radius: 10px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  transition: all 0.3s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.stat-item.highlight {
+  background: linear-gradient(135deg, rgba(20,138,0,0.15), rgba(20,138,0,0.05));
+  border: 2px solid var(--green);
+  box-shadow: 0 0 15px rgba(20,138,0,0.2);
+}
+
+.stat-label {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.1em;
+  color: #ffffff;
+  font-weight: 400;
+  text-shadow: 0 0 8px rgba(255,255,255,0.3);
+  line-height: 1.2;
+}
+
+.stat-value {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.4em;
+  font-weight: 400;
+  color: #00FF41;
+  text-shadow: 0 0 15px rgba(0,255,65,0.8), 0 0 25px rgba(0,255,65,0.5);
+}
+
+/* Style pour le total annuel */
+.stat-item.total-year-stat .stat-label {
+  font-size: 0.85em;
+}
+
+.stat-item.total-year-stat .stat-value {
+  font-size: 1.5em !important;
+}
+
+.stat-item.highlight .stat-value {
+  font-size: 1.55em;
+  color: #00FF41;
+  text-shadow: 0 0 20px rgba(0,255,65,1), 0 0 30px rgba(0,255,65,0.6);
+}
+
+.cp-details {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: flex-start;
+}
+
+.cp-box {
+  background: linear-gradient(135deg, rgba(74, 0, 128, 0.2), rgba(0, 66, 187, 0.15), rgba(0, 191, 255, 0.1));
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  text-align: center;
+  min-width: 90px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.cp-box.over-limit .cp-box-value {
+  color: #A30000;
+}
+
+.cp-box-label {
+  font-family: 'Black Ops One', cursive;
+  font-size: 0.8em;
+  color: #ffffff;
+  margin-bottom: 3px;
+  font-weight: 400;
+  text-shadow: 0 0 8px rgba(255,255,255,0.3);
+  line-height: 1.2;
+}
+
+.cp-box-value {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.1em;
+  font-weight: 400;
+  color: #90e8ff;
+}
+
+.regulation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.regulation-card {
+  background: var(--bg2);
+  padding: 22px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08), inset 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.regulation-card.active {
+  border-color: var(--orange);
+  background: linear-gradient(135deg, rgba(240,173,78,0.12), rgba(240,173,78,0.04));
+  box-shadow: 0 0 20px rgba(240,173,78,0.25);
+}
+
+.regulation-title {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.5em;
+  font-weight: 400;
+  color: var(--orange);
+  margin-bottom: 16px;
+  text-align: center;
+  letter-spacing: 1px;
+  text-shadow: 0 6px 12px rgba(0, 0, 0, 1);
+}
+
+.regulation-dates {
+  text-align: center;
+  font-size: 1.05em;
+  color: #00d4ff;
+  margin-bottom: 14px;
+  font-family: 'Black Ops One', cursive;
+  font-weight: 400;
+  line-height: 1.5;
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+.regulation-dates span {
+  font-size: 1em;
+  color: #A0F0FF;
+}
+
+.regulation-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.regulation-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(74, 0, 128, 0.2), rgba(0, 66, 187, 0.15), rgba(0, 191, 255, 0.1));
+  border-radius: 8px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  transition: all 0.2s;
+  box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+/* Heures effectuées reste en colonne */
+.regulation-item.hours-done {
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 12px 14px;
+  gap: 0px !important;
+}
+
+.regulation-item.hours-done .regulation-label {
+  margin-bottom: 0px;
+}
+
+.regulation-item.hours-done .regulation-value {
+  color: #ffb870 !important;
+  text-shadow: none !important;
+}
+
+/* Bloc-note modal */
+.note-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.note-modal.active {
+  display: flex;
+}
+
+.note-content {
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  border: 2px solid #FFD700;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 90%;
+  width: 400px;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.note-content h3 {
+  font-family: 'Black Ops One', cursive;
+  color: #FFD700;
+  margin: 0 0 15px 0;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+.note-content textarea {
+  width: 100%;
+  min-height: 150px;
+  background: #0a0a0a;
+  border: 1px solid #FFD700;
+  border-radius: 8px;
+  padding: 12px;
+  color: #fff;
+  font-family: 'Black Ops One', cursive;
+  font-size: 0.9em;
+  resize: vertical;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.note-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.note-buttons button {
+  font-family: 'Black Ops One', cursive;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid;
+  cursor: pointer;
+  font-size: 0.8em;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.note-save {
+  background: linear-gradient(135deg, #148A00, #0d6000);
+  border-color: #148A00;
+  color: #fff;
+}
+
+.note-save:hover {
+  box-shadow: 0 0 15px rgba(20, 138, 0, 0.6);
+}
+
+.note-cancel {
+  background: linear-gradient(135deg, #730000, #520000);
+  border-color: #730000;
+  color: #fff;
+}
+
+.note-cancel:hover {
+  box-shadow: 0 0 15px rgba(115, 0, 0, 0.6);
+}
+
+.note-delete {
+  background: linear-gradient(135deg, #3a3a3a, #2a2a2a);
+  border-color: #666;
+  color: #fff;
+  margin-right: auto;
+}
+
+.note-delete:hover {
+  box-shadow: 0 0 15px rgba(102, 102, 102, 0.6);
+}
+
+/* Effet coin plié pour les jours avec note */
+.note-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 16px 16px 0;
+  border-color: transparent #FF3333 transparent transparent;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.note-icon::after {
+  content: '';
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 14px 14px 0;
+  border-color: transparent rgba(0, 0, 0, 0.3) transparent transparent;
+}
+
+.regulation-label {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.15em;
+  color: #ffffff;
+  font-weight: 400;
+  margin-bottom: 4px;
+  text-shadow: 0 0 8px rgba(255,255,255,0.3);
+  line-height: 1.2;
+}
+
+.regulation-value {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.1em;
+  font-weight: 400;
+  color: #00FF41;
+  white-space: normal;
+  text-align: left;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+@media(max-width: 768px) {
+  body {
+    padding: 8px;
+    overflow-x: hidden;
+  }
+  .container {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  h1 {
+    font-size: 1.7em;
+  }
+  .day-cell {
+    min-height: 75px;
+    padding: 12px 8px;
+  }
+  .stats-grid, .regulation-grid {
+    grid-template-columns: 1fr;
+  }
+  #calendar {
+    grid-template-columns: 28px repeat(7, 1fr);
+    width: calc(100vw - 16px);
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .week-number {
+    font-size: 0.7em;
+    padding: 4px 1px;
+  }
+  .day-header {
+    font-size: 0.85em;
+    padding: 12px 4px;
+  }
+  .week-header {
+    font-size: 0.85em;
+    padding: 12px 2px;
+  }
+  .regulation h2 {
+    font-size: 1.5em;
+    line-height: 1.3;
+  }
+  .regulation-value {
+    font-size: 1.5em;
+  }
+  .regulation-label {
+    font-size: 1.15em;
+  }
+  .regulation-value {
+    font-size: 1.3em;
+  }
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .legend-item {
+    padding: 6px 10px;
+    font-size: 0.85em;
+  }
+  .legend-box {
+    width: 24px;
+    height: 18px;
+  }
+}
+
+/* Styles pour la modale de notes */
+.note-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.note-modal-content {
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  margin: 10% auto;
+  padding: 30px;
+  border: 2px solid rgba(0, 191, 255, 0.5);
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.3);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.note-modal-content h3 {
+  font-family: 'Black Ops One', cursive;
+  color: #00d4ff;
+  margin: 0 0 15px 0;
+  font-size: 1.3em;
+  text-align: center;
+}
+
+.note-date {
+  font-family: 'Black Ops One', cursive;
+  color: #FFD700;
+  text-align: center;
+  font-size: 1em;
+  margin-bottom: 15px;
+}
+
+#noteText {
+  width: 100%;
+  padding: 12px;
+  background: #1a1a1a;
+  border: 1px solid rgba(0, 191, 255, 0.3);
+  border-radius: 8px;
+  color: #e8e8e8;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.1em;
+  font-weight: 600;
+  line-height: 1.6;
+  resize: vertical;
+  margin-bottom: 20px;
+}
+
+#noteText:focus {
+  outline: none;
+  border-color: rgba(0, 191, 255, 0.6);
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
+}
+
+.note-modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.note-btn {
+  font-family: 'Black Ops One', cursive;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.3s;
+}
+
+.note-btn-save {
+  background: linear-gradient(135deg, #148A00, #0a5000);
+  color: white;
+}
+
+.note-btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(20, 138, 0, 0.4);
+}
+
+.note-btn-delete {
+  background: linear-gradient(135deg, #730000, #450000);
+  color: white;
+}
+
+.note-btn-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(115, 0, 0, 0.4);
+}
+
+.note-btn-cancel {
+  background: linear-gradient(135deg, #3a3a3a, #2a2a2a);
+  color: white;
+}
+
+.note-btn-cancel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.note-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 1em;
+  opacity: 0.8;
+}
+
+
+/* Styles Modal Bloc-notes */
+.note-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  animation: fadeIn 0.3s;
+}
+
+.note-modal-content {
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  margin: 10% auto;
+  padding: 25px;
+  border: 2px solid #00d4ff;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+}
+
+.note-modal-content h3 {
+  font-family: 'Black Ops One', cursive;
+  color: #00d4ff;
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+}
+
+#noteText {
+  width: 100%;
+  background: #0a0a0a;
+  color: #e8e8e8;
+  border: 1px solid #00d4ff;
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1em;
+  resize: vertical;
+  margin-bottom: 15px;
+}
+
+.note-modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.note-modal-buttons button {
+  font-family: 'Black Ops One', cursive;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.3s;
+}
+
+.note-btn-save {
+  background: linear-gradient(135deg, #148A00, #0d5f00);
+  color: white;
+}
+
+.note-btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(20, 138, 0, 0.5);
+}
+
+.note-btn-delete {
+  background: linear-gradient(135deg, #730000, #4d0000);
+  color: white;
+}
+
+.note-btn-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(115, 0, 0, 0.5);
+}
+
+.note-btn-cancel {
+  background: linear-gradient(135deg, #3a3a3a, #2a2a2a);
+  color: white;
+}
+
+.note-btn-cancel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(58, 58, 58, 0.5);
+}
+
+.note-icon {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 1.2em;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* ========== RADIO PLAYER ========== */
+#radioPlayer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radio-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.radio-container {
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+  border: 2px solid #FFD700;
+  border-radius: 20px;
+  padding: 30px 20px;
+  box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+  z-index: 10001;
+}
+
+.radio-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 0, 0, 0.2);
+  border: 1px solid #ff0000;
+  color: #ff0000;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.radio-close:hover {
+  background: rgba(255, 0, 0, 0.4);
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+
+.radio-carousel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 0 30px 0;
+  gap: 15px;
+}
+
+.radio-nav {
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid #FFD700;
+  color: #FFD700;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.radio-nav:hover {
+  background: rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.radio-stations {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.radio-station {
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.radio-station.radio-current {
+  flex: 1;
+  border-color: #FFD700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  transform: scale(1);
+}
+
+.radio-station.radio-prev,
+.radio-station.radio-next {
+  width: 80px;
+  opacity: 0.3;
+  filter: blur(2px);
+  transform: scale(0.8);
+}
+
+.radio-station-logo {
+  font-size: 3em;
+  margin-bottom: 10px;
+}
+
+.radio-station-name {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.3em;
+  color: #FFD700;
+  margin-bottom: 5px;
+}
+
+.radio-station-genre {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.9em;
+  color: #aaa;
+}
+
+.radio-station-status {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  background: rgba(255, 0, 0, 0.2);
+  border: 1px solid #ff0000;
+  border-radius: 20px;
+  color: #ff0000;
+  font-size: 0.8em;
+  font-family: 'Rajdhani', sans-serif;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.radio-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.radio-play {
+  font-family: 'Black Ops One', cursive;
+  background: linear-gradient(135deg, #148A00, #0d6000);
+  border: 2px solid #148A00;
+  color: #fff;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(20, 138, 0, 0.3);
+}
+
+.radio-play:hover {
+  box-shadow: 0 0 25px rgba(20, 138, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+.radio-play.playing {
+  background: linear-gradient(135deg, #ff6b00, #d85500);
+  border-color: #ff6b00;
+}
+
+.radio-volume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.radio-volume span {
+  font-size: 1.5em;
+}
+
+#radioVolume {
+  flex: 1;
+  height: 8px;
+  border-radius: 10px;
+  background: rgba(255, 215, 0, 0.2);
+  outline: none;
+  appearance: none;
+}
+
+#radioVolume::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #FFD700;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+#radioVolume::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #FFD700;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.radio-indicator {
+  text-align: center;
+  font-family: 'Rajdhani', sans-serif;
+  color: #aaa;
+  font-size: 0.9em;
+  margin-top: 15px;
+}
+
+.radio-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 215, 0, 0.3);
+  transition: all 0.3s;
+}
+
+.radio-dot.active {
+  background: #FFD700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+/* ========== ARCADE ========== */
+.arcade-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10000;display:none;align-items:center;justify-content:center}
+.arcade-container{background:linear-gradient(135deg,#1a1a1a,#0a0a0a);border:3px solid #FFD700;border-radius:20px;padding:30px;max-width:90%;width:500px;max-height:85vh;overflow-y:auto;box-shadow:0 0 50px rgba(255,215,0,0.5)}
+.arcade-close{position:absolute;top:15px;right:15px;background:rgba(255,0,0,0.3);border:2px solid #f00;color:#f00;width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;transition:all 0.3s}
+.arcade-close:hover{background:rgba(255,0,0,0.6);box-shadow:0 0 20px #f00}
+.arcade-title{font-family:'Black Ops One',cursive;color:#FFD700;text-align:center;font-size:2em;margin:0 0 25px}
+.arcade-menu{display:flex;flex-direction:column;gap:15px}
+.arcade-btn{font-family:'Black Ops One',cursive;background:linear-gradient(135deg,#4a0080,#6000a0);border:2px solid #FFD700;color:#fff;padding:18px;border-radius:15px;font-size:1.1em;cursor:pointer;transition:all 0.3s;text-align:center}
+.arcade-btn:hover{transform:translateY(-3px);box-shadow:0 5px 25px rgba(255,215,0,0.6);background:linear-gradient(135deg,#6000a0,#7000b0)}
+.game-screen{display:none}
+.game-title{font-family:'Black Ops One',cursive;color:#FFD700;font-size:1.5em;text-align:center;margin-bottom:20px}
+.game-back{background:linear-gradient(135deg,#3a3a3a,#2a2a2a);border:2px solid #666;color:#fff;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:'Black Ops One',cursive;margin-bottom:15px}
+.game-back:hover{background:linear-gradient(135deg,#4a4a4a,#3a3a3a)}
+.quiz-question{background:rgba(255,215,0,0.1);border:2px solid #FFD700;border-radius:12px;padding:20px;margin-bottom:20px}
+.quiz-q{font-family:'Rajdhani',sans-serif;font-size:1.2em;font-weight:600;color:#fff;margin-bottom:15px}
+.quiz-answers{display:flex;flex-direction:column;gap:10px}
+.quiz-answer{background:rgba(74,0,128,0.3);border:2px solid rgba(255,215,0,0.3);color:#fff;padding:12px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;transition:all 0.3s}
+.quiz-answer:hover{background:rgba(74,0,128,0.5);border-color:#FFD700}
+.quiz-answer.correct{background:linear-gradient(135deg,#148A00,#0d6000);border-color:#0f0;animation:pulse 0.5s}
+.quiz-answer.wrong{background:linear-gradient(135deg,#730000,#520000);border-color:#f00}
+.quiz-score{font-family:'Black Ops One',cursive;color:#FFD700;font-size:1.3em;text-align:center;margin:20px 0}
+.leaderboard{background:rgba(255,215,0,0.05);border:2px solid rgba(255,215,0,0.3);border-radius:12px;padding:15px;margin-top:20px}
+.leaderboard-title{font-family:'Black Ops One',cursive;color:#FFD700;font-size:1.2em;margin-bottom:10px}
+.leaderboard-item{display:flex;justify-content:space-between;padding:8px;background:rgba(0,0,0,0.3);border-radius:6px;margin-bottom:6px;font-family:'Rajdhani',sans-serif;color:#fff}
+.name-input{background:#0a0a0a;border:2px solid #FFD700;border-radius:8px;padding:12px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:1.1em;width:100%;margin:15px 0}
+.sudoku-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:0;width:100%;max-width:360px;margin:0 auto;border:3px solid #FFD700;box-sizing:border-box}
+.sudoku-cell{aspect-ratio:1;border:1px solid rgba(255,215,0,0.3);background:#1a1a1a;color:#fff;font-size:1em;text-align:center;font-family:'Black Ops One',cursive;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none}
+.sudoku-cell:nth-child(3n){border-right:2px solid #FFD700}
+.sudoku-cell:nth-child(n+19):nth-child(-n+27),.sudoku-cell:nth-child(n+46):nth-child(-n+54){border-bottom:2px solid #FFD700}
+.sudoku-cell.fixed{background:#2a2a2a;color:#FFD700}
+.sudoku-cell.selected{background:#4a0080;box-shadow:0 0 10px #FFD700}
+.sudoku-controls{display:flex;justify-content:center;gap:10px;margin:15px 0;flex-wrap:wrap}
+.sudoku-num{background:rgba(74,0,128,0.5);border:2px solid #FFD700;color:#fff;width:40px;height:40px;border-radius:8px;cursor:pointer;font-family:'Black Ops One',cursive;font-size:1.1em}
+.sudoku-num:hover{background:rgba(74,0,128,0.8)}
+
+
+/* ===== BULLETINS DE PAIE ===== */
+.payslips-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.95);
+  z-index: 10000;
+  overflow-y: auto;
+}
+
+.payslips-container {
+  max-width: 600px;
+  margin: 20px auto;
+  background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+  border: 3px solid #00CED1;
+  border-radius: 20px;
+  padding: 30px 20px;
+  position: relative;
+  box-shadow: 0 0 30px rgba(0,206,209,0.5);
+}
+
+.payslips-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: 2px solid #00CED1;
+  color: #00CED1;
+  font-size: 1.5em;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  transition: all 0.3s;
+}
+
+.payslips-close:hover {
+  background: #00CED1;
+  color: #000;
+  transform: rotate(90deg);
+}
+
+.payslip-add-btn {
+  background: linear-gradient(135deg, #00CED1, #00FF41);
+  border: 2px solid #00CED1;
+  color: #000;
+  font-family: 'Black Ops One', cursive;
+  font-size: 1em;
+  padding: 12px 25px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 0 15px rgba(0,206,209,0.5);
+}
+
+.payslip-add-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(0,206,209,0.8);
+}
+
+.payslips-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.payslip-item {
+  background: linear-gradient(135deg, rgba(0,206,209,0.1), rgba(0,255,65,0.05));
+  border: 2px solid rgba(0,206,209,0.3);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+.payslip-item:hover {
+  border-color: #00CED1;
+  box-shadow: 0 0 15px rgba(0,206,209,0.3);
+}
+
+.payslip-name {
+  font-family: 'Black Ops One', cursive;
+  color: #00CED1;
+  font-size: 1.1em;
+}
+
+.payslip-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.payslip-btn {
+  background: rgba(0,206,209,0.2);
+  border: 2px solid #00CED1;
+  color: #00CED1;
+  padding: 8px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.9em;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.payslip-btn:hover {
+  background: #00CED1;
+  color: #000;
+}
+
+.payslip-btn.delete {
+  border-color: #ff4444;
+  color: #ff4444;
+}
+
+.payslip-btn.delete:hover {
+  background: #ff4444;
+  color: #fff;
+}
+
+/* Visionneuse plein écran */
+.payslip-viewer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.98);
+  z-index: 11000;
+  overflow: auto;
+}
+
+.viewer-close {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0,206,209,0.2);
+  border: 2px solid #00CED1;
+  color: #00CED1;
+  font-size: 2em;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 11001;
+  transition: all 0.3s;
+}
+
+.viewer-close:hover {
+  background: #00CED1;
+  color: #000;
+  transform: rotate(90deg);
+}
+
+.viewer-title {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Black Ops One', cursive;
+  color: #00CED1;
+  font-size: 1.5em;
+  z-index: 11001;
+  text-shadow: 0 0 10px rgba(0,206,209,0.8);
+}
+
+.viewer-image {
+  display: block;
+  max-width: 95%;
+  max-height: 90vh;
+  margin: 80px auto 20px;
+  border: 3px solid #00CED1;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(0,206,209,0.5);
+  touch-action: pinch-zoom;
+  cursor: zoom-in;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+</style>
+
+<!-- PWA Configuration -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<meta name="theme-color" content="#8B0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Thyming">
+<meta name="mobile-web-app-capable" content="yes">
+
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<!-- Modal Bloc-note -->
+<div class="note-modal" id="noteModal">
+  <div class="note-content">
+    <h3 id="noteTitle">Note du jour</h3>
+    <textarea id="noteText" placeholder="Écrivez votre note ici..."></textarea>
+    <div class="note-buttons">
+      <button class="note-delete" id="noteDelete">🗑️ Supprimer</button>
+      <button class="note-cancel" id="noteCancel">Annuler</button>
+      <button class="note-save" id="noteSave">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+<header>
+<div class="date-info">
+<div class="current-date" id="currentDate">Chargement...</div>
+<div class="current-time" id="currentTime">--:--</div>
+<div class="current-week" id="currentWeek">Chargement...</div>
+<button class="payslips-btn" id="planningsBtn" title="Mes plannings">📅</button>
+<button class="payslips-btn" id="payslipsBtn" title="Mes bulletins de paie">💰</button>
+</div>
+<h1>Planning de travail</h1>
+<div class="month-selector">
+<button id="prevMonth">◀</button>
+<span id="currentMonth">Chargement...</span>
+<button id="nextMonth">▶</button>
+</div>
+</header>
+
+<div class="legend">
+<div class="legend-item">
+<span class="legend-box" style="background:linear-gradient(135deg,#148A00,#1aa006)"></span>
+<span>Jour</span>
+</div>
+<div class="legend-item">
+<span class="legend-box" style="background:linear-gradient(135deg,#0036A1,#0042bb)"></span>
+<span>Nuit</span>
+</div>
+<div class="legend-item">
+<span class="legend-box" style="background:linear-gradient(135deg,#9C009C,#b000b0)"></span>
+<span>Indispo</span>
+</div>
+<div class="legend-item">
+<span class="legend-box" style="background:linear-gradient(135deg,#207E96,#2894ac)"></span>
+<span>CP</span>
+</div>
+<div class="legend-item">
+<span class="legend-box" style="background:linear-gradient(135deg,#A6A600,#b8b800)"></span>
+<span>Formation</span>
+</div>
+<div class="legend-item">
+<span class="legend-box" style="background:linear-gradient(135deg,#946868,#a47878)"></span>
+<span>Arrêt</span>
+</div>
+</div>
+
+<div class="calendar-wrapper">
+<div id="calendar"></div>
+</div>
+
+<div class="stats">
+<h2>Récapitulatif du mois</h2>
+<div class="stats-grid recap-section">
+<div class="stat-item highlight">
+<span class="stat-label">Total heures :</span>
+<span id="totalHours" class="stat-value">0h</span>
+</div>
+<div class="stat-item highlight">
+<span class="stat-label">Heures dimanche :</span>
+<span id="sundayHours" class="stat-value">0h</span>
+</div>
+</div>
+<div class="stats-grid recap-section" style="margin-top:12px">
+<div class="stat-item highlight">
+<span class="stat-label">Total heures de nuit :</span>
+<span id="totalNightHours" class="stat-value">0h</span>
+</div>
+<div class="stat-item highlight">
+<span class="stat-label">Total heures fériées :</span>
+<span id="totalHolidayHours" class="stat-value">0h</span>
+</div>
+</div>
+<div class="stats-grid recap-section" style="margin-top:12px">
+<div class="stat-item highlight">
+<span class="stat-label">Paniers :</span>
+<span id="totalPaniers" class="stat-value">0</span>
+</div>
+<div class="stat-item highlight">
+<span class="stat-label">Formation :</span>
+<span id="totalFormation" class="stat-value">0h</span>
+</div>
+<div class="stat-item highlight">
+<span class="stat-label">Arrêt :</span>
+<span id="totalArret" class="stat-value">0h</span>
+</div>
+</div>
+
+<h3>Congés payés</h3>
+<div class="stats-grid recap-section" style="margin-bottom:8px">
+<div class="stat-item highlight">
+<span class="stat-label">Total CP du mois :</span>
+<span id="totalCP" class="stat-value">0h</span>
+</div>
+</div>
+<div class="cp-details">
+<div class="cp-box" id="cpDroitsBox">
+<div class="cp-box-label">Droits</div>
+<div class="cp-box-value">30 jrs</div>
+</div>
+<div class="cp-box" id="cpPrisBox">
+<div class="cp-box-label">Pris</div>
+<div class="cp-box-value" id="cpTaken">0 jrs</div>
+</div>
+<div class="cp-box" id="cpRestantBox">
+<div class="cp-box-label">Restant</div>
+<div class="cp-box-value" id="cpRemaining">30 jrs</div>
+</div>
+</div>
+
+<h3>Heure nuit/dimanche</h3>
+<div class="stats-grid night-sunday-section">
+<div class="stat-item">
+<span class="stat-label">Heures de nuit du mois<br>(21h-6h) :</span>
+<span id="nightHours" class="stat-value">0h</span>
+</div>
+<div class="stat-item">
+<span class="stat-label">Heures nuits<br>mois précédent<br>(00h-06h) :</span>
+<span id="carryOverNightHours" class="stat-value">0h</span>
+</div>
+</div>
+<div class="stats-grid night-sunday-section" style="margin-top:12px">
+<div class="stat-item">
+<span class="stat-label">Heures dimanche<br>mois précédent<br>(00h-07h) :</span>
+<span id="carryOverSundayHours" class="stat-value">0h</span>
+</div>
+</div>
+
+<h3>Heures fériées</h3>
+<div class="stats-grid holiday-section">
+<div class="stat-item">
+<span class="stat-label">Heures fériées du mois :</span>
+<span id="holidayHours" class="stat-value">0h</span>
+</div>
+<div class="stat-item">
+<span class="stat-label">Heures fériées<br>mois précédent<br>(00h-07h) :</span>
+<span id="carryOverHolidayHours" class="stat-value">0h</span>
+</div>
+</div>
+</div>
+
+<div class="regulation">
+<h2>Régules annuelles<br><span class="subtitle-small">(595 heures / 17 semaines)</span></h2>
+<div class="regulation-grid">
+<div class="regulation-card" id="regule1">
+<div class="regulation-title">Régule 1</div>
+<div class="regulation-dates">
+S46 (2025) à S10 (2026)<br>
+<span>10 nov 2025 - 8 mars 2026</span>
+</div>
+<div class="regulation-info">
+<div class="regulation-item hours-done">
+<span class="regulation-label">Heures effectuées :</span>
+<span class="regulation-value" id="regule1Hours">0h</span>
+</div>
+<div class="regulation-item light-label remaining-line">
+<span class="regulation-label">Restantes :</span>
+<span class="regulation-value" id="regule1Remaining">595h</span>
+</div>
+<div class="regulation-item light-label">
+<span class="regulation-label">Heures supp :</span>
+<span class="regulation-value" id="regule1SuppValue">0h</span>
+</div>
+</div>
+</div>
+<div class="regulation-card" id="regule2">
+<div class="regulation-title">Régule 2</div>
+<div class="regulation-dates">
+S11 à S27 (2026)<br>
+<span>9 mars - 5 juil 2026</span>
+</div>
+<div class="regulation-info">
+<div class="regulation-item hours-done">
+<span class="regulation-label">Heures effectuées :</span>
+<span class="regulation-value" id="regule2Hours">0h</span>
+</div>
+<div class="regulation-item light-label remaining-line">
+<span class="regulation-label">Restantes :</span>
+<span class="regulation-value" id="regule2Remaining">595h</span>
+</div>
+<div class="regulation-item light-label">
+<span class="regulation-label">Heures supp :</span>
+<span class="regulation-value" id="regule2SuppValue">0h</span>
+</div>
+</div>
+</div>
+<div class="regulation-card" id="regule3">
+<div class="regulation-title">Régule 3</div>
+<div class="regulation-dates">
+S28 à S44 (2026)<br>
+<span>6 juil - 1 nov 2026</span>
+</div>
+<div class="regulation-info">
+<div class="regulation-item hours-done">
+<span class="regulation-label">Heures effectuées :</span>
+<span class="regulation-value" id="regule3Hours">0h</span>
+</div>
+<div class="regulation-item light-label remaining-line">
+<span class="regulation-label">Restantes :</span>
+<span class="regulation-value" id="regule3Remaining">595h</span>
+</div>
+<div class="regulation-item light-label">
+<span class="regulation-label">Heures supp :</span>
+<span class="regulation-value" id="regule3SuppValue">0h</span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="stat-item highlight total-year-stat" style="margin-top:20px">
+<span class="stat-label" style="font-size:1.3em;font-weight:700;color:#00CED1 !important">Total heures<br>sur l'année :</span>
+<span id="totalYearHours" class="stat-value">0h</span>
+</div>
+</div>
+
+<!-- Modale pour les notes -->
+<div id="noteModal" class="note-modal">
+  <div class="note-modal-content">
+    <h3>📝 Note du jour</h3>
+    <div id="noteDate" class="note-date"></div>
+    <textarea id="noteText" placeholder="Écrivez votre note ici..." rows="6"></textarea>
+    <div class="note-modal-buttons">
+      <button onclick="saveNote()" class="note-btn note-btn-save">Enregistrer</button>
+      <button onclick="deleteNote()" class="note-btn note-btn-delete">Supprimer</button>
+      <button onclick="closeNoteModal()" class="note-btn note-btn-cancel">Annuler</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+let currentDate = new Date();
+let shifts = {};
+let notes = {};
+let longPressTimer;
+let currentNoteDate = null;
+
+const holidays = {
+  '2025-01-01':'', '2025-04-21':'', '2025-05-01':'', '2025-05-08':'', '2025-05-29':'',
+  '2025-06-09':'', '2025-07-14':'', '2025-08-15':'', '2025-11-01':'', '2025-11-11':'',
+  '2025-12-25':'', '2026-01-01':'', '2026-04-06':'', '2026-05-01':'', '2026-05-08':'',
+  '2026-05-14':'', '2026-05-25':'', '2026-07-14':'', '2026-08-15':'', '2026-11-01':'',
+  '2026-11-11':'', '2026-12-25':'', '2027-01-01':'', '2027-03-29':'', '2027-05-01':'',
+  '2027-05-08':'', '2027-05-13':'', '2027-05-24':'', '2027-07-14':'', '2027-08-15':'',
+  '2027-11-01':'', '2027-11-11':'', '2027-12-25':'', '2028-01-01':'', '2028-04-17':'',
+  '2028-05-01':'', '2028-05-08':'', '2028-05-25':'', '2028-06-05':'', '2028-07-14':'',
+  '2028-08-15':'', '2028-11-01':'', '2028-11-11':'', '2028-12-25':'', '2029-01-01':'',
+  '2029-04-02':'', '2029-05-01':'', '2029-05-08':'', '2029-05-10':'', '2029-05-21':'',
+  '2029-07-14':'', '2029-08-15':'', '2029-11-01':'', '2029-11-11':'', '2029-12-25':'',
+  '2030-01-01':'', '2030-04-22':'', '2030-05-01':'', '2030-05-08':'', '2030-05-30':'',
+  '2030-06-10':'', '2030-07-14':'', '2030-08-15':'', '2030-11-01':'', '2030-11-11':'',
+  '2030-12-25':'', '2031-01-01':'', '2031-04-14':'', '2031-05-01':'', '2031-05-08':'',
+  '2031-05-22':'', '2031-06-02':'', '2031-07-14':'', '2031-08-15':'', '2031-11-01':'',
+  '2031-11-11':'', '2031-12-25':'', '2032-01-01':'', '2032-03-29':'', '2032-05-01':'',
+  '2032-05-08':'', '2032-05-13':'', '2032-05-24':'', '2032-07-14':'', '2032-08-15':'',
+  '2032-11-01':'', '2032-11-11':'', '2032-12-25':'', '2033-01-01':'', '2033-04-18':'',
+  '2033-05-01':'', '2033-05-08':'', '2033-05-26':'', '2033-06-06':'', '2033-07-14':'',
+  '2033-08-15':'', '2033-11-01':'', '2033-11-11':'', '2033-12-25':'', '2034-01-01':'',
+  '2034-04-10':'', '2034-05-01':'', '2034-05-08':'', '2034-05-18':'', '2034-05-29':'',
+  '2034-07-14':'', '2034-08-15':'', '2034-11-01':'', '2034-11-11':'', '2034-12-25':'',
+  '2035-01-01':'', '2035-03-26':'', '2035-05-01':'', '2035-05-08':'', '2035-05-10':'',
+  '2035-05-21':'', '2035-07-14':'', '2035-08-15':'', '2035-11-01':'', '2035-11-11':'',
+  '2035-12-25':''
+};
+
+const regules = [
+  { start: new Date(2025, 10, 10), end: new Date(2026, 2, 8) },
+  { start: new Date(2026, 2, 9), end: new Date(2026, 6, 5) },
+  { start: new Date(2026, 6, 6), end: new Date(2026, 10, 1) }
+];
+
+function formatDate(d) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+  return weekNo;
+}
+
+function updateCurrentDateAndWeek() {
+  const now = new Date();
+  const daysShort = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  const monthsShort = ['jan', 'fév', 'mar', 'avr', 'mai', 'juin', 'juil', 'août', 'sep', 'oct', 'nov', 'déc'];
+  
+  const dayName = daysShort[now.getDay()];
+  const day = now.getDate();
+  const month = monthsShort[now.getMonth()];
+  const weekNum = getWeekNumber(now);
+  
+  document.getElementById('currentDate').textContent = `${dayName} ${day} ${month}`;
+  document.getElementById('currentWeek').textContent = `S${weekNum}`;
+  
+  // Mettre à jour l'heure
+  updateTime();
+}
+
+function updateTime() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('currentTime').textContent = `${hours}:${minutes}`;
+}
+
+// Mettre à jour l'heure toutes les secondes
+setInterval(updateTime, 1000);
+
+function isHoliday(dateStr) {
+  return holidays.hasOwnProperty(dateStr);
+}
+
+function isWeekend(date) {
+  return date.getDay() === 0 || date.getDay() === 6;
+}
+
+function renderCalendar() {
+  const calendar = document.getElementById('calendar');
+  const monthYear = currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  document.getElementById('currentMonth').textContent = monthYear.charAt(0).toUpperCase() + monthYear.slice(1);
+  
+  calendar.innerHTML = '';
+  
+  const weekHeader = document.createElement('div');
+  weekHeader.className = 'week-header';
+  weekHeader.id = 'weekHeaderS';
+  weekHeader.textContent = 'S';
+  calendar.appendChild(weekHeader);
+  
+  const dayNames = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  dayNames.forEach(name => {
+    const header = document.createElement('div');
+    header.className = 'day-header';
+    header.textContent = name;
+    calendar.appendChild(header);
+  });
+  
+  const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  
+  let startDay = firstDay.getDay();
+  startDay = startDay === 0 ? 6 : startDay - 1;
+  
+  const prevMonthLastDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+  let weekCells = [];
+  
+  for (let i = startDay - 1; i >= 0; i--) {
+    const day = prevMonthLastDay.getDate() - i;
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, day);
+    weekCells.push({ date: date, otherMonth: true });
+  }
+  
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    weekCells.push({ date: date, otherMonth: false });
+  }
+  
+  const totalCells = weekCells.length;
+  const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
+  
+  for (let day = 1; day <= remainingCells; day++) {
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, day);
+    weekCells.push({ date: date, otherMonth: true });
+  }
+  
+  for (let i = 0; i < weekCells.length; i += 7) {
+    const weekNum = document.createElement('div');
+    weekNum.className = 'week-number';
+    weekNum.textContent = getWeekNumber(weekCells[i].date);
+    calendar.appendChild(weekNum);
+    
+    for (let j = 0; j < 7; j++) {
+      if (weekCells[i + j]) {
+        createDayCell(weekCells[i + j].date, weekCells[i + j].otherMonth);
+      }
+    }
+  }
+}
+
+function createDayCell(date, otherMonth) {
+  const cell = document.createElement('div');
+  const dateStr = formatDate(date);
+  const shift = shifts[dateStr];
+  const isSunday = date.getDay() === 0;
+  const isHol = isHoliday(dateStr);
+  
+  cell.className = 'day-cell';
+  
+  if (otherMonth) cell.classList.add('other-month');
+  if (isWeekend(date)) cell.classList.add('weekend');
+  if (isHol) cell.classList.add('holiday');
+  
+  if (shift === 'day') cell.classList.add('day-shift');
+  else if (shift === 'night') cell.classList.add('night-shift');
+  else if (shift === 'indispo') cell.classList.add('indispo-shift');
+  else if (shift === 'cp') cell.classList.add('cp-shift');
+  else if (shift === 'formation') cell.classList.add('formation-shift');
+  else if (shift === 'arret') cell.classList.add('arret-shift');
+  
+  const dayNumber = document.createElement('div');
+  dayNumber.className = 'day-number';
+  dayNumber.textContent = date.getDate();
+  cell.appendChild(dayNumber);
+  
+  // Icône de note si une note existe
+  if (notes[dateStr]) {
+    const noteIcon = document.createElement('div');
+    noteIcon.className = 'note-icon';
+    cell.appendChild(noteIcon);
+  }
+  
+  if (shift) {
+    const shiftTime = document.createElement('div');
+    shiftTime.className = 'shift-time';
+    
+    if (shift === 'cp' && (isSunday || isHol)) {
+      shiftTime.textContent = 'CP';
+    } else if (shift === 'day') {
+      shiftTime.textContent = '7h-19h';
+    } else if (shift === 'night') {
+      shiftTime.textContent = '19h-7h';
+    } else if (shift === 'cp') {
+      shiftTime.textContent = 'CP 5.83h';
+    } else if (shift === 'indispo') {
+      shiftTime.textContent = 'Indisp';
+    } else if (shift === 'formation') {
+      shiftTime.textContent = 'Form 7h';
+    } else if (shift === 'arret') {
+      if (isWeekend(date)) {
+        shiftTime.textContent = 'Arrêt';
+      } else {
+        shiftTime.textContent = 'Arrêt 7h';
+      }
+    }
+    
+    cell.appendChild(shiftTime);
+  }
+  
+  // Ajouter l'icône de note si une note existe
+  if (notes[dateStr]) {
+    const noteIcon = document.createElement('div');
+    noteIcon.className = 'note-icon';
+    cell.appendChild(noteIcon);
+  }
+  
+  // Gestion de l'appui long pour ouvrir les notes
+  cell.addEventListener('touchstart', (e) => {
+    if (!otherMonth) {
+      longPressTimer = setTimeout(() => {
+        openNoteModal(dateStr);
+        e.preventDefault();
+      }, 800);
+    }
+  });
+  
+  cell.addEventListener('touchend', () => {
+    clearTimeout(longPressTimer);
+  });
+  
+  cell.addEventListener('touchmove', () => {
+    clearTimeout(longPressTimer);
+  });
+  
+  // Pour desktop: clic droit
+  cell.addEventListener('contextmenu', (e) => {
+    if (!otherMonth) {
+      e.preventDefault();
+      openNoteModal(dateStr);
+    }
+  });
+  
+  cell.addEventListener('click', () => {
+    if (!otherMonth) {
+      if (!shifts[dateStr]) {
+        shifts[dateStr] = 'day';
+      } else if (shifts[dateStr] === 'day') {
+        shifts[dateStr] = 'night';
+      } else if (shifts[dateStr] === 'night') {
+        shifts[dateStr] = 'indispo';
+      } else if (shifts[dateStr] === 'indispo') {
+        shifts[dateStr] = 'cp';
+      } else if (shifts[dateStr] === 'cp') {
+        shifts[dateStr] = 'formation';
+      } else if (shifts[dateStr] === 'formation') {
+        shifts[dateStr] = 'arret';
+      } else {
+        delete shifts[dateStr];
+      }
+      saveToStorage();
+      renderCalendar();
+      updateStats();
+      updateRegulations();
+    }
+  });
+  
+  document.getElementById('calendar').appendChild(cell);
+}
+
+function updateStats() {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  let nightHours = 0;
+  let sundayHours = 0;
+  let holidayHours = 0;
+  let totalHours = 0;
+  let paniers = 0;
+  let carryOverNight = 0;
+  let carryOverHoliday = 0;
+  let carryOverSunday = 0;
+  let totalCP = 0;
+  let totalFormation = 0;
+  let totalArret = 0;
+  let cpDays = 0;
+  
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const lastDayPrevMonth = new Date(year, month, 0);
+  const lastDayPrevMonthStr = formatDate(lastDayPrevMonth);
+  
+  if (shifts[lastDayPrevMonthStr] === 'night') {
+    const firstDayThisMonth = new Date(year, month, 1);
+    const firstDayThisMonthStr = formatDate(firstDayThisMonth);
+    carryOverNight = 6;
+    if (isHoliday(firstDayThisMonthStr)) {
+      carryOverHoliday = 7;
+    }
+    if (firstDayThisMonth.getDay() === 0) {
+      sundayHours += 7;
+      carryOverSunday = 7;
+    }
+  }
+  
+  Object.keys(shifts).forEach(dateStr => {
+    const parts = dateStr.split('-');
+    const y = parseInt(parts[0]);
+    const m = parseInt(parts[1]) - 1;
+    const d = parseInt(parts[2]);
+    
+    if (y !== year || m !== month) return;
+    
+    const shift = shifts[dateStr];
+    const date = new Date(y, m, d);
+    const isSunday = date.getDay() === 0;
+    const isSaturday = date.getDay() === 6;
+    const isHol = isHoliday(dateStr);
+    
+    if (shift === 'indispo') return;
+    
+    if (shift === 'arret') {
+      if (!isSunday && !isSaturday) {
+        totalArret += 7;
+      }
+      return;
+    }
+    
+    if (shift === 'cp') {
+      if (!isSunday && !isHol) {
+        totalCP += 5.83;
+        totalHours += 5.83;
+      }
+      return;
+    }
+    
+    if (shift === 'formation') {
+      totalFormation += 7;
+      totalHours += 7;
+      return;
+    }
+    
+    if (shift === 'day') {
+      paniers++;
+      totalHours += 12;
+      if (isSunday) sundayHours += 12;
+      if (isHol) holidayHours += 12;
+      return;
+    }
+    
+    if (shift === 'night') {
+      paniers++;
+      totalHours += 12;
+      
+      if (d === daysInMonth) {
+        nightHours += 3;
+        if (isSunday) sundayHours += 5;
+        if (isHol) holidayHours += 5;
+      } else {
+        nightHours += 9;
+        const nextDay = new Date(y, m, d + 1);
+        const nextDayStr = formatDate(nextDay);
+        if (nextDay.getDay() === 0) sundayHours += 7;
+        if (isSunday) sundayHours += 5;
+        if (isHol) holidayHours += 5;
+        if (isHoliday(nextDayStr) && nextDay.getDate() !== 1) {
+          holidayHours += 7;
+        }
+      }
+      return;
+    }
+  });
+  
+  const cpStart = new Date(2026, 5, 1);
+  const cpEnd = new Date(2027, 4, 31);
+  
+  Object.keys(shifts).forEach(dateStr => {
+    const parts = dateStr.split('-');
+    const shiftDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    const isSunday = shiftDate.getDay() === 0;
+    const isHol = isHoliday(dateStr);
+    
+    if (shifts[dateStr] === 'cp' && shiftDate >= cpStart && shiftDate <= cpEnd && !isSunday && !isHol) {
+      cpDays++;
+    }
+  });
+  
+  document.getElementById('totalHours').textContent = totalHours.toFixed(2) + 'h';
+  document.getElementById('nightHours').textContent = nightHours + 'h';
+  document.getElementById('sundayHours').textContent = sundayHours + 'h';
+  document.getElementById('holidayHours').textContent = holidayHours + 'h';
+  document.getElementById('totalPaniers').textContent = paniers;
+  document.getElementById('carryOverNightHours').textContent = carryOverNight + 'h';
+  document.getElementById('carryOverHolidayHours').textContent = carryOverHoliday + 'h';
+  document.getElementById('carryOverSundayHours').textContent = carryOverSunday + 'h';
+  document.getElementById('totalNightHours').textContent = (nightHours + carryOverNight) + 'h';
+  document.getElementById('totalHolidayHours').textContent = (holidayHours + carryOverHoliday) + 'h';
+  document.getElementById('totalCP').textContent = totalCP.toFixed(2) + 'h';
+  document.getElementById('totalFormation').textContent = totalFormation + 'h';
+  document.getElementById('totalArret').textContent = totalArret + 'h';
+  document.getElementById('cpTaken').textContent = cpDays + ' jrs';
+  document.getElementById('cpRemaining').textContent = Math.max(0, 30 - cpDays) + ' jrs';
+  
+  if (cpDays > 30) {
+    document.getElementById('cpPrisBox').classList.add('over-limit');
+  } else {
+    document.getElementById('cpPrisBox').classList.remove('over-limit');
+  }
+}
+
+function updateRegulations() {
+  let totalYearHours = 0;
+  
+  regules.forEach((regule, index) => {
+    let reguleHours = 0;
+    let arretHours = 0;
+    
+    Object.keys(shifts).forEach(dateStr => {
+      const parts = dateStr.split('-');
+      const shiftDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      const isHol = isHoliday(dateStr);
+      
+      if (shiftDate >= regule.start && shiftDate <= regule.end) {
+        const shift = shifts[dateStr];
+        
+        if (shift === 'day' || shift === 'night') {
+          reguleHours += 12;
+        }
+        if (shift === 'cp' && shiftDate.getDay() !== 0 && !isHol) {
+          reguleHours += 5.83;
+        }
+        if (shift === 'formation') {
+          reguleHours += 7;
+        }
+        if (shift === 'arret' && shiftDate.getDay() !== 0 && shiftDate.getDay() !== 6) {
+          arretHours += 7;
+        }
+      }
+    });
+    
+    const totalHours = reguleHours + arretHours;
+    const quota = 595;
+    const remaining = Math.max(0, quota - totalHours);
+    const supp = Math.max(0, reguleHours - quota);
+    
+    const hoursElem = document.getElementById(`regule${index + 1}Hours`);
+    const remainingElem = document.getElementById(`regule${index + 1}Remaining`);
+    const suppValue = document.getElementById(`regule${index + 1}SuppValue`);
+    const card = document.getElementById(`regule${index + 1}`);
+    
+    if (hoursElem) {
+      let displayText = `${totalHours.toFixed(2)}h sur ${quota}h`;
+      if (arretHours > 0) {
+        displayText += ` (${arretHours.toFixed(0)}h arrêts)`;
+      }
+      hoursElem.textContent = displayText;
+    }
+    if (remainingElem) remainingElem.textContent = remaining.toFixed(2) + 'h';
+    
+    if (suppValue) {
+      if (supp > 0) {
+        suppValue.textContent = '+' + supp.toFixed(2) + 'h';
+        suppValue.style.color = '';
+        suppValue.style.textShadow = '';
+      } else {
+        suppValue.textContent = '0h';
+        suppValue.style.color = '#ffb870';
+        suppValue.style.textShadow = '';
+      }
+    }
+    
+    const now = new Date();
+    if (card) {
+      if (now >= regule.start && now <= regule.end) {
+        card.classList.add('active');
+      } else {
+        card.classList.remove('active');
+      }
+    }
+  });
+  
+  const yearStart = new Date(2026, 0, 1);
+  const yearEnd = new Date(2026, 11, 31);
+  
+  Object.keys(shifts).forEach(dateStr => {
+    const parts = dateStr.split('-');
+    const shiftDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    const isHol = isHoliday(dateStr);
+    
+    if (shiftDate >= yearStart && shiftDate <= yearEnd) {
+      const shift = shifts[dateStr];
+      
+      if (shift === 'day' || shift === 'night') {
+        totalYearHours += 12;
+      }
+      if (shift === 'cp' && shiftDate.getDay() !== 0 && !isHol) {
+        totalYearHours += 5.83;
+      }
+      if (shift === 'formation') {
+        totalYearHours += 7;
+      }
+    }
+  });
+  
+  const totalYearElem = document.getElementById('totalYearHours');
+  if (totalYearElem) totalYearElem.textContent = totalYearHours.toFixed(2) + 'h';
+}
+
+function saveToStorage() {
+  localStorage.setItem('planning_shifts', JSON.stringify(shifts));
+  localStorage.setItem('planning_version', '2.0');
+}
+
+function openNoteModal(dateKey) {
+  currentNoteDate = dateKey;
+  const modal = document.getElementById('noteModal');
+  const noteText = document.getElementById('noteText');
+  const noteTitle = document.getElementById('noteTitle');
+  
+  // Formater la date pour l'affichage
+  const [year, month, day] = dateKey.split('-');
+  const date = new Date(year, month - 1, day);
+  const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  noteTitle.textContent = `Note - ${days[date.getDay()]} ${day} ${months[date.getMonth()]} ${year}`;
+  
+  // Charger la note existante
+  noteText.value = notes[dateKey] || '';
+  modal.classList.add('active');
+}
+
+function closeNoteModal() {
+  document.getElementById('noteModal').classList.remove('active');
+  currentNoteDate = null;
+}
+
+function saveNote() {
+  const noteText = document.getElementById('noteText').value.trim();
+  if (noteText) {
+    notes[currentNoteDate] = noteText;
+  } else {
+    delete notes[currentNoteDate];
+  }
+  saveToStorage();
+  renderCalendar();
+  closeNoteModal();
+}
+
+function deleteNote() {
+  delete notes[currentNoteDate];
+  saveToStorage();
+  renderCalendar();
+  closeNoteModal();
+}
+
+function loadFromStorage() {
+  const savedShifts = localStorage.getItem('planning_shifts');
+  if (savedShifts) {
+    shifts = JSON.parse(savedShifts);
+  }
+  const savedNotes = localStorage.getItem('planning_notes');
+  if (savedNotes) {
+    notes = JSON.parse(savedNotes);
+  }
+}
+
+function saveToStorage() {
+  localStorage.setItem('planning_shifts', JSON.stringify(shifts));
+  localStorage.setItem('planning_notes', JSON.stringify(notes));
+}
+
+// Variable globale pour la couleur des particules
+window.particlesColor = 'rgb(255, 255, 255)';
+
+function initParticles() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  
+  // Définir la taille du canvas
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  // Tableau de particules
+  const particles = [];
+  const particleCount = 80; // Nombre de particules
+  
+  // Classe Particule
+  class Particle {
+    constructor() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * 2 + 0.5;
+      this.speedX = (Math.random() - 0.5) * 0.3;
+      this.speedY = (Math.random() - 0.5) * 0.3;
+      this.opacity = Math.random() * 0.5 + 0.4;
+      this.twinkleSpeed = Math.random() * 0.02 + 0.01;
+      this.twinkleDirection = Math.random() > 0.5 ? 1 : -1;
+    }
+    
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      
+      // Réapparition des particules
+      if (this.x > canvas.width) this.x = 0;
+      if (this.x < 0) this.x = canvas.width;
+      if (this.y > canvas.height) this.y = 0;
+      if (this.y < 0) this.y = canvas.height;
+      
+      // Effet de scintillement
+      this.opacity += this.twinkleSpeed * this.twinkleDirection;
+      if (this.opacity <= 0.1 || this.opacity >= 0.8) {
+        this.twinkleDirection *= -1;
+      }
+    }
+    
+    draw() {
+      // Utiliser la couleur du thème
+      const color = window.particlesColor || 'rgb(255, 255, 255)';
+      const rgb = color.match(/\d+/g);
+      ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${this.opacity + 0.3})`;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  
+  // Créer les particules
+  for (let i = 0; i < particleCount; i++) {
+    particles.push(new Particle());
+  }
+  
+  // Animation
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    particles.forEach(particle => {
+      particle.update();
+      particle.draw();
+    });
+    
+    requestAnimationFrame(animate);
+  }
+  
+  animate();
+  
+  // Redimensionnement du canvas
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+}
+
+// Fermer le modal en cliquant à l'extérieur
+window.onclick = function(event) {
+  const modal = document.getElementById('noteModal');
+  if (event.target === modal) {
+    closeNoteModal();
+  }
+}
+
+// Système de thèmes
+const themes = {
+  cyberpunk: {
+    name: 'Cyberpunk',
+    titleGradient: 'linear-gradient(90deg, #FF00FF, #00FFFF, #FF00FF)',
+    accent: '#FFD700',
+    lightAccent: '#FFF4AA',
+    particles: 'rgb(255, 255, 255)',
+    borderColor: '#FFD700'
+  },
+  neonTokyo: {
+    name: 'Néon Tokyo',
+    titleGradient: 'linear-gradient(90deg, #FF1493, #00FFFF, #FFD700, #FF1493)',
+    accent: '#FF1493',
+    lightAccent: '#FF9FD5',
+    particles: 'rgb(255, 20, 147)',
+    borderColor: '#FF1493'
+  },
+  ocean: {
+    name: 'Ocean',
+    titleGradient: 'linear-gradient(90deg, #1E90FF, #00CED1, #1E90FF)',
+    accent: '#00CED1',
+    lightAccent: '#7FFFF4',
+    particles: 'rgb(30, 144, 255)',
+    borderColor: '#00CED1'
+  },
+  sunset: {
+    name: 'Sunset',
+    titleGradient: 'linear-gradient(90deg, #FF6347, #FF1493, #9370DB, #FF6347)',
+    accent: '#FF6347',
+    lightAccent: '#FFB3A0',
+    particles: 'rgb(255, 99, 71)',
+    borderColor: '#FF6347'
+  },
+  forest: {
+    name: 'Forest',
+    titleGradient: 'linear-gradient(90deg, #228B22, #32CD32, #228B22)',
+    accent: '#32CD32',
+    lightAccent: '#98FB98',
+    particles: 'rgb(50, 205, 50)',
+    borderColor: '#32CD32'
+  },
+  matrix: {
+    name: 'Matrix',
+    titleGradient: 'linear-gradient(90deg, #00FF00, #00FF00)',
+    accent: '#00FF00',
+    lightAccent: '#99FF99',
+    particles: 'rgb(0, 255, 0)',
+    borderColor: '#00FF00'
+  },
+  fire: {
+    name: 'Fire',
+    titleGradient: 'linear-gradient(90deg, #FF4500, #FF8C00, #FFD700, #FF4500)',
+    accent: '#FF4500',
+    lightAccent: '#FFB380',
+    particles: 'rgb(255, 69, 0)',
+    borderColor: '#FF4500'
+  }
+};
+
+let currentTheme = 'cyberpunk';
+
+function applyTheme(themeName) {
+  const theme = themes[themeName];
+  if (!theme) return;
+  
+  currentTheme = themeName;
+  
+  // 1. Changer le titre principal
+  const h1 = document.querySelector('h1');
+  if (h1) {
+    h1.style.fontFamily = "'Black Ops One', cursive";
+    h1.style.background = theme.titleGradient;
+    h1.style.backgroundClip = 'text';
+    h1.style.webkitBackgroundClip = 'text';
+    h1.style.webkitTextFillColor = 'transparent';
+    h1.style.backgroundSize = '200% auto';
+    h1.style.animation = 'shimmer 3s linear infinite';
+  }
+  
+  // 2. Nom du mois (Janvier 2026)
+  const monthName = document.getElementById('currentMonth');
+  if (monthName) {
+    monthName.style.borderColor = theme.accent;
+    monthName.style.boxShadow = 'none';
+    monthName.style.color = theme.accent;
+  }
+  
+  // 3. Jours de la semaine (L M M J V S D)
+  document.querySelectorAll('.day-header').forEach(el => {
+    el.style.borderColor = theme.accent;
+    el.style.boxShadow = 'none';
+  });
+  
+  // 4. Date/Heure/Semaine en haut
+  document.querySelectorAll('.current-date, .current-time, .current-week').forEach(el => {
+    el.style.borderColor = theme.accent;
+    el.style.color = theme.accent;
+  });
+  
+  // 5. Numéros de semaine (colonne gauche)
+  document.querySelectorAll('.week-number, .week-header').forEach(el => {
+    el.style.borderColor = theme.accent;
+    el.style.color = theme.accent;
+  });
+  
+  // 6. Flèches navigation
+  document.querySelectorAll('.month-selector button').forEach(el => {
+    el.style.borderColor = theme.accent;
+    el.style.color = theme.accent;
+    el.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+  });
+  
+  // 7. Week-ends
+  document.querySelectorAll('.day-cell.weekend').forEach(el => {
+    el.style.borderColor = theme.accent;
+  });
+  
+  // 8. Titres des sections (Récapitulatif, Régules, CP, Heures nuit, etc.)
+  document.querySelectorAll('.stats h2, .regulation h2, h3').forEach(el => {
+    el.style.color = theme.accent;
+  });
+  
+  // 9. Titres Régule 1/2/3
+  document.querySelectorAll('.regulation-title').forEach(el => {
+    el.style.color = theme.accent;
+  });
+  
+  // 10. Labels de la légende
+  document.querySelectorAll('.legend-label').forEach(el => {
+    el.style.color = theme.accent;
+  });
+  
+  // 11. Traits décoratifs sous les titres + styles CSS dynamiques
+  const style = document.createElement('style');
+  style.id = 'theme-dynamic-styles';
+  const existingStyle = document.getElementById('theme-dynamic-styles');
+  if (existingStyle) existingStyle.remove();
+  
+  style.textContent = `
+    /* Enlever TOUS les glows sauf exceptions */
+    #currentMonth,
+    .current-date, .current-time, .current-week,
+    .week-number, .week-header,
+    .month-selector button,
+    .stats, .regulation,
+    .legend, .legend-item,
+    .regulation-item {
+      box-shadow: none !important;
+    }
+    
+    .stats h2::after, .regulation h2::after, h3::after {
+      background: ${theme.titleGradient} !important;
+      box-shadow: none !important;
+    }
+    
+    .note-icon {
+      border-color: transparent ${theme.accent} transparent transparent !important;
+    }
+    
+    .legend {
+      border: none !important;
+    }
+    
+    .legend-item {
+      border: 1px solid ${theme.accent}30 !important;
+    }
+    
+    .stats, .regulation {
+      border-left: 4px solid ${theme.accent} !important;
+    }
+    
+    .regulation-title {
+      text-shadow: none !important;
+    }
+    
+    /* GARDER le glow uniquement pour LMMJVSD */
+    .day-header {
+      text-shadow: 0 0 15px ${theme.accent}ff, 0 0 25px ${theme.accent}80, 0 2px 4px rgba(0,0,0,0.5) !important;
+    }
+    
+    .stats h2, .regulation h2, h3 {
+      text-shadow: none !important;
+    }
+    
+    .stat-label {
+      color: ${theme.accent}dd !important;
+    }
+    
+    /* Labels plus clairs pour sections Récapitulatif, Heure nuit/dimanche et Heures fériées */
+    .recap-section .stat-item .stat-label,
+    .recap-section .stat-item.highlight .stat-label,
+    .night-sunday-section .stat-label,
+    .holiday-section .stat-label {
+      color: ${theme.lightAccent} !important;
+    }
+    
+    .regulation-label {
+      color: ${theme.accent}dd !important;
+      text-shadow: none !important;
+    }
+    
+    /* Labels plus clairs pour Restantes et Heures supp dans les Régules */
+    .regulation-item.light-label .regulation-label {
+      color: ${theme.lightAccent} !important;
+    }
+    
+    /* Valeurs (chiffres) de Restantes UNIQUEMENT avec la même couleur que le label */
+    .regulation-item.remaining-line .regulation-value {
+      color: ${theme.lightAccent} !important;
+      text-shadow: 0 0 10px ${theme.lightAccent}80 !important;
+    }
+    
+    /* GARDER le glow uniquement pour les numéros de week-end */
+    .day-cell.weekend .day-number {
+      text-shadow: 0 0 6px ${theme.accent}66 !important;
+    }
+    
+    /* Adaptation thèmes pour modals Bulletins/Plannings */
+    .modal-title {
+      color: ${theme.accent} !important;
+    }
+    
+    .payslips-container {
+      border-color: ${theme.accent} !important;
+      box-shadow: 0 0 30px ${theme.accent}80 !important;
+    }
+    
+    .payslips-close {
+      border-color: ${theme.accent} !important;
+      color: ${theme.accent} !important;
+    }
+    
+    .payslips-close:hover {
+      background: ${theme.accent} !important;
+    }
+    
+    .payslip-add-btn {
+      background: linear-gradient(135deg, ${theme.accent}, ${theme.lightAccent}) !important;
+      border-color: ${theme.accent} !important;
+      box-shadow: 0 0 15px ${theme.accent}80 !important;
+    }
+    
+    .payslip-add-btn:hover {
+      box-shadow: 0 0 25px ${theme.accent} !important;
+    }
+    
+    .payslip-item {
+      background: linear-gradient(135deg, ${theme.accent}15, ${theme.lightAccent}08) !important;
+      border-color: ${theme.accent}50 !important;
+    }
+    
+    .payslip-item:hover {
+      border-color: ${theme.accent} !important;
+      box-shadow: 0 0 15px ${theme.accent}50 !important;
+    }
+    
+    .payslip-name {
+      color: ${theme.accent} !important;
+    }
+    
+    .payslip-btn {
+      background: ${theme.accent}30 !important;
+      border-color: ${theme.accent} !important;
+      color: ${theme.accent} !important;
+    }
+    
+    .payslip-btn:hover {
+      background: ${theme.accent} !important;
+    }
+    
+    .viewer-close {
+      background: ${theme.accent}30 !important;
+      border-color: ${theme.accent} !important;
+      color: ${theme.accent} !important;
+    }
+    
+    .viewer-close:hover {
+      background: ${theme.accent} !important;
+    }
+    
+    .viewer-title {
+      color: ${theme.accent} !important;
+      text-shadow: 0 0 10px ${theme.accent} !important;
+    }
+    
+    .viewer-image {
+      border-color: ${theme.accent} !important;
+      box-shadow: 0 0 30px ${theme.accent}80 !important;
+    }
+    
+    .payslips-btn {
+      background: linear-gradient(135deg, ${theme.accent}30, ${theme.lightAccent}20) !important;
+      border-color: ${theme.accent} !important;
+      color: ${theme.accent} !important;
+      box-shadow: 0 0 10px ${theme.accent}50 !important;
+    }
+    
+    .payslips-btn:hover {
+      background: linear-gradient(135deg, ${theme.accent}50, ${theme.lightAccent}30) !important;
+      box-shadow: 0 0 20px ${theme.accent} !important;
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // 12. Changer les particules
+  if (window.particlesColor) {
+    window.particlesColor = theme.particles;
+  }
+  
+  // 13. Sauvegarder le thème
+  localStorage.setItem('selectedTheme', themeName);
+  
+  console.log(`Thème changé: ${theme.name}`);
+}
+
+// Détection de secousse
+let lastShake = 0;
+const shakeThreshold = 25; // Augmenté de 15 à 25 = moins sensible
+const shakeDelay = 1000;
+
+if (window.DeviceMotionEvent) {
+  window.addEventListener('devicemotion', (e) => {
+    const acc = e.accelerationIncludingGravity;
+    if (!acc) return;
+    
+    const now = Date.now();
+    
+    if (now - lastShake < shakeDelay) return;
+    
+    const x = Math.abs(acc.x || 0);
+    const y = Math.abs(acc.y || 0);
+    const z = Math.abs(acc.z || 0);
+    
+    if (x > shakeThreshold || y > shakeThreshold || z > shakeThreshold) {
+      lastShake = now;
+      
+      // Choisir un thème aléatoire différent de l'actuel
+      const themeNames = Object.keys(themes).filter(t => t !== currentTheme);
+      const randomTheme = themeNames[Math.floor(Math.random() * themeNames.length)];
+      
+      applyTheme(randomTheme);
+      
+      // Afficher le nom du thème temporairement
+      const indicator = document.createElement('div');
+      indicator.textContent = `🎨 ${themes[randomTheme].name}`;
+      indicator.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: ${themes[randomTheme].accent};
+        padding: 20px 40px;
+        border-radius: 15px;
+        font-family: 'Black Ops One', cursive;
+        font-size: 1.5em;
+        z-index: 10000;
+        border: 2px solid ${themes[randomTheme].accent};
+        box-shadow: 0 0 30px ${themes[randomTheme].accent};
+        animation: fadeInOut 1.5s ease;
+      `;
+      document.body.appendChild(indicator);
+      
+      setTimeout(() => {
+        indicator.remove();
+      }, 1500);
+      
+      // Animation visuelle
+      document.body.style.transition = 'all 0.5s ease';
+      setTimeout(() => {
+        document.body.style.transition = '';
+      }, 500);
+    }
+  });
+} else {
+  console.log('DeviceMotion non supporté');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Enregistrer le Service Worker pour PWA (mode hors ligne)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {
+      // Service worker optionnel, pas grave s'il échoue
+    });
+  }
+  
+  // Initialisation des particules
+  initParticles();
+  
+  // Charger le thème sauvegardé (cyberpunk par défaut)
+  const savedTheme = localStorage.getItem('selectedTheme') || 'cyberpunk';
+  applyTheme(savedTheme);
+  
+  loadFromStorage();
+  updateCurrentDateAndWeek();
+  renderCalendar();
+  updateStats();
+  updateRegulations();
+  
+  // Appui long sur "S" pour ouvrir YouTube Music (APRÈS renderCalendar)
+  const weekS = document.getElementById('weekHeaderS');
+  if (weekS) {
+    weekS.addEventListener('touchstart', (e) => {
+      longPressTimer = setTimeout(() => {
+        openYouTubePlayer();
+      }, 800);
+    });
+    
+    weekS.addEventListener('touchend', () => {
+      clearTimeout(longPressTimer);
+    });
+    
+    weekS.addEventListener('touchmove', () => {
+      clearTimeout(longPressTimer);
+    });
+    
+    // Desktop : clic droit
+    weekS.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      openYouTubePlayer();
+    });
+  }
+  
+  // Event listeners pour la modal de notes
+  document.getElementById('noteSave').addEventListener('click', saveNote);
+  document.getElementById('noteCancel').addEventListener('click', closeNoteModal);
+  document.getElementById('noteDelete').addEventListener('click', deleteNote);
+  
+  // Fermer la modal en cliquant en dehors
+  document.getElementById('noteModal').addEventListener('click', (e) => {
+    if (e.target.id === 'noteModal') {
+      closeNoteModal();
+    }
+  });
+  
+  const prevBtn = document.getElementById('prevMonth');
+  const nextBtn = document.getElementById('nextMonth');
+  
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      const calendar = document.getElementById('calendar');
+      calendar.classList.add('cube-right');
+      
+      setTimeout(() => {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+        renderCalendar();
+        updateStats();
+        updateRegulations();
+        calendar.classList.remove('cube-right');
+      }, 500);
+    });
+  }
+  
+  // Appui long sur "Total heures sur l'année" pour ouvrir l'arcade
+  const totalYearElem=document.getElementById('totalYearHours');
+  if(totalYearElem && totalYearElem.parentElement){
+    const container=totalYearElem.parentElement;
+    let arcadeLongPress;
+    container.addEventListener('touchstart',()=>{
+      arcadeLongPress=setTimeout(()=>openArcade(),1000);
+    });
+    container.addEventListener('touchend',()=>clearTimeout(arcadeLongPress));
+    container.addEventListener('touchmove',()=>clearTimeout(arcadeLongPress));
+    container.addEventListener('contextmenu',(e)=>{
+      e.preventDefault();
+      openArcade();
+    });
+  }
+  
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      const calendar = document.getElementById('calendar');
+      calendar.classList.add('cube-left');
+      
+      setTimeout(() => {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+        renderCalendar();
+        updateStats();
+        updateRegulations();
+        calendar.classList.remove('cube-left');
+      }, 500);
+    });
+  }
+  
+  // Gestion des swipes pour mobile
+  let touchStartX = 0;
+  let touchEndX = 0;
+  const minSwipeDistance = 50;
+  
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  
+  document.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  }, { passive: true });
+  
+  function handleSwipe() {
+    const swipeDistance = touchEndX - touchStartX;
+    const calendar = document.getElementById('calendar');
+    
+    // Swipe vers la droite (mois précédent)
+    if (swipeDistance > minSwipeDistance) {
+      calendar.classList.add('cube-right');
+      setTimeout(() => {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+        renderCalendar();
+        updateStats();
+        updateRegulations();
+        calendar.classList.remove('cube-right');
+      }, 500);
+    }
+    
+    // Swipe vers la gauche (mois suivant)
+    if (swipeDistance < -minSwipeDistance) {
+      calendar.classList.add('cube-left');
+      setTimeout(() => {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+        renderCalendar();
+        updateStats();
+        updateRegulations();
+        calendar.classList.remove('cube-left');
+      }, 500);
+    }
+  }
+});
+
+// ========== YOUTUBE MUSIC PLAYER ==========
+const YT_API_KEY = 'AIzaSyDHpB8xQty-vVF5WvKEU9rF_PZzG3Xz7hQ'; // Clé API publique YouTube
+let ytPlayer = null;
+let ytPlayerReady = false;
+let ytHistory = JSON.parse(localStorage.getItem('ytHistory') || '[]');
+
+// Initialiser le lecteur YouTube (appelé automatiquement par l'API)
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('ytPlayerEmbed', {
+    height: '0',
+    width: '0',
+    playerVars: {
+      autoplay: 0,
+      controls: 0
+    },
+    events: {
+      onReady: () => { ytPlayerReady = true; },
+      onStateChange: onYtPlayerStateChange
+    }
+  });
+}
+
+function onYtPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.PLAYING) {
+    document.getElementById('ytPlayBtn').textContent = '⏸';
+  } else {
+    document.getElementById('ytPlayBtn').textContent = '▶';
+  }
+}
+
+function openYouTubePlayer() {
+  document.getElementById('youtubePlayer').style.display = 'flex';
+  loadYtHistory();
+}
+
+function closeYouTubePlayer() {
+  document.getElementById('youtubePlayer').style.display = 'none';
+  if (ytPlayer && ytPlayerReady) {
+    ytPlayer.pauseVideo();
+  }
+}
+
+async function searchYouTube() {
+  const query = document.getElementById('ytSearchInput').value.trim();
+  if (!query) return;
+  
+  const resultsDiv = document.getElementById('ytResults');
+  resultsDiv.innerHTML = '<div class="yt-loading">🔍 Recherche en cours...</div>';
+  
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&videoCategoryId=10&maxResults=8&key=${YT_API_KEY}`
+    );
+    const data = await response.json();
+    
+    if (data.items && data.items.length > 0) {
+      resultsDiv.innerHTML = '';
+      data.items.forEach(item => {
+        const resultCard = document.createElement('div');
+        resultCard.className = 'yt-result-card';
+        resultCard.innerHTML = `
+          <img src="${item.snippet.thumbnails.default.url}" class="yt-result-thumb" />
+          <div class="yt-result-info">
+            <div class="yt-result-title">${item.snippet.title}</div>
+            <div class="yt-result-channel">${item.snippet.channelTitle}</div>
+          </div>
+        `;
+        resultCard.onclick = () => playYouTubeVideo(item.id.videoId, item.snippet.title, item.snippet.thumbnails.medium.url);
+        resultsDiv.appendChild(resultCard);
+      });
+    } else {
+      resultsDiv.innerHTML = '<div class="yt-no-results">Aucun résultat trouvé</div>';
+    }
+  } catch (error) {
+    resultsDiv.innerHTML = '<div class="yt-error">Erreur de recherche. Réessayez.</div>';
+    console.error('Erreur YouTube API:', error);
+  }
+}
+
+function playYouTubeVideo(videoId, title, thumbnail) {
+  if (!ytPlayerReady) {
+    alert('Lecteur en chargement, veuillez patienter...');
+    return;
+  }
+  
+  ytPlayer.loadVideoById(videoId);
+  ytPlayer.setVolume(document.getElementById('ytVolume').value);
+  
+  document.getElementById('ytTrackTitle').textContent = title;
+  document.getElementById('ytThumbnail').style.backgroundImage = `url(${thumbnail})`;
+  document.getElementById('ytControls').style.display = 'block';
+  document.getElementById('ytResults').style.display = 'none';
+  
+  // Sauvegarder dans l'historique
+  addToYtHistory({ videoId, title, thumbnail });
+}
+
+function ytPlayPause() {
+  if (!ytPlayerReady) return;
+  
+  const state = ytPlayer.getPlayerState();
+  if (state === YT.PlayerState.PLAYING) {
+    ytPlayer.pauseVideo();
+  } else {
+    ytPlayer.playVideo();
+  }
+}
+
+document.getElementById('ytVolume')?.addEventListener('input', (e) => {
+  if (ytPlayer && ytPlayerReady) {
+    ytPlayer.setVolume(e.target.value);
+  }
+});
+
+function addToYtHistory(video) {
+  ytHistory = ytHistory.filter(v => v.videoId !== video.videoId);
+  ytHistory.unshift(video);
+  ytHistory = ytHistory.slice(0, 5);
+  localStorage.setItem('ytHistory', JSON.stringify(ytHistory));
+  loadYtHistory();
+}
+
+function loadYtHistory() {
+  const historyDiv = document.getElementById('ytHistory');
+  if (ytHistory.length === 0) {
+    historyDiv.innerHTML = '';
+    return;
+  }
+  
+  historyDiv.innerHTML = '<div class="yt-history-title">📚 Récemment écouté</div>';
+  ytHistory.forEach(video => {
+    const histCard = document.createElement('div');
+    histCard.className = 'yt-history-card';
+    histCard.innerHTML = `
+      <img src="${video.thumbnail}" />
+      <span>${video.title}</span>
+    `;
+    histCard.onclick = () => playYouTubeVideo(video.videoId, video.title, video.thumbnail);
+    historyDiv.appendChild(histCard);
+  });
+}
+
+// Recherche avec Entrée
+document.getElementById('ytSearchInput')?.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') searchYouTube();
+});
+
+// ========== ARCADE SYSTEM ==========
+const quizQuestions=[{q:"Quelle est la capitale de la France?",a:["Paris","Lyon","Marseille","Bordeaux"],c:0},{q:"Combien font 15 x 8?",a:["110","120","130","140"],c:1},{q:"Qui a peint la Joconde?",a:["Van Gogh","Picasso","De Vinci","Monet"],c:2},{q:"Quel est le plus grand océan?",a:["Atlantique","Indien","Arctique","Pacifique"],c:3},{q:"Combien de continents existe-t-il?",a:["5","6","7","8"],c:2},{q:"En quelle année a eu lieu la Révolution française?",a:["1789","1799","1889","1989"],c:0},{q:"Quelle planète est surnommée la planète rouge?",a:["Vénus","Jupiter","Mars","Saturne"],c:2},{q:"Qui a écrit 'Les Misérables'?",a:["Zola","Balzac","Hugo","Dumas"],c:2},{q:"Combien de joueurs dans une équipe de foot?",a:["9","10","11","12"],c:2},{q:"Quelle est la capitale de l'Italie?",a:["Milan","Rome","Venise","Florence"],c:1}];
+
+let arcadeScores=JSON.parse(localStorage.getItem('arcadeScores')||'{}');
+let currentQuizScore=0,currentQuizIndex=0;
+
+function openArcade(){
+  document.getElementById('arcadeModal').style.display='flex';
+  showMenu();
+}
+
+function closeArcade(){
+  document.getElementById('arcadeModal').style.display='none';
+  showMenu();
+}
+
+function showMenu(){
+  document.querySelectorAll('.game-screen').forEach(s=>s.style.display='none');
+  document.getElementById('arcadeMenu').style.display='block';
+}
+
+function startQuiz(){
+  document.getElementById('arcadeMenu').style.display='none';
+  const screen=document.getElementById('quizGame');
+  screen.style.display='block';
+  currentQuizScore=0;
+  currentQuizIndex=0;
+  const shuffled=[...quizQuestions].sort(()=>Math.random()-0.5).slice(0,10);
+  screen.innerHTML=`<button class="game-back" onclick="showMenu()">← Retour</button><div class="game-title">🧠 Culture Générale</div><div class="quiz-score">Score: <span id="quizScore">0</span>/10</div><div id="quizContent"></div>`;
+  showQuizQuestion(shuffled,0);
+}
+
+function showQuizQuestion(questions,idx){
+  if(idx>=questions.length){
+    finishQuiz();return;
+  }
+  const q=questions[idx];
+  document.getElementById('quizContent').innerHTML=`<div class="quiz-question"><div class="quiz-q">${idx+1}. ${q.q}</div><div class="quiz-answers">${q.a.map((ans,i)=>`<button class="quiz-answer" onclick="answerQuiz(${i},${q.c},${idx})">${ans}</button>`).join('')}</div></div>`;
+  window.currentQuizQuestions=questions;
+}
+
+function answerQuiz(selected,correct,idx){
+  const btns=document.querySelectorAll('.quiz-answer');
+  btns[selected].classList.add(selected===correct?'correct':'wrong');
+  btns[correct].classList.add('correct');
+  if(selected===correct)currentQuizScore++;
+  document.getElementById('quizScore').textContent=currentQuizScore;
+  setTimeout(()=>showQuizQuestion(window.currentQuizQuestions,idx+1),1000);
+}
+
+function finishQuiz(){
+  const name=prompt(`Bravo! Score: ${currentQuizScore}/10\nEntrez votre nom:`);
+  if(name){
+    if(!arcadeScores.quiz)arcadeScores.quiz=[];
+    arcadeScores.quiz.push({name,score:currentQuizScore,date:new Date().toLocaleDateString()});
+    arcadeScores.quiz.sort((a,b)=>b.score-a.score);
+    arcadeScores.quiz=arcadeScores.quiz.slice(0,10);
+    localStorage.setItem('arcadeScores',JSON.stringify(arcadeScores));
+  }
+  showMenu();
+}
+
+// SUDOKU
+let sudokuGrid=[],sudokuSolution=[],sudokuSelected=null,sudokuPaused=false,sudokuStartTime=0,sudokuElapsedTime=0,sudokuTimer,sudokuDifficulty='moyen';
+function startSudoku(){
+  document.getElementById('arcadeMenu').style.display='none';
+  const screen=document.getElementById('sudokuGame');
+  screen.style.display='block';
+  document.querySelector('.arcade-container').style.padding='10px 5px';
+  screen.innerHTML=`<button class="game-back" onclick="document.querySelector('.arcade-container').style.padding='30px';clearInterval(sudokuTimer);showMenu()">← Retour</button><div class="game-title" style="font-size:1.3em;margin-bottom:10px">🔢 Sudoku</div><div style="text-align:center;margin-bottom:10px"><button onclick="newSudoku('facile')" style="background:#148A00;border:2px solid #FFD700;color:#fff;padding:8px 15px;border-radius:8px;margin:0 4px;font-family:Rajdhani,sans-serif;font-size:0.9em;cursor:pointer;font-weight:600">Facile</button><button onclick="newSudoku('moyen')" style="background:#FF8C00;border:2px solid #FFD700;color:#fff;padding:8px 15px;border-radius:8px;margin:0 4px;font-family:Rajdhani,sans-serif;font-size:0.9em;cursor:pointer;font-weight:600">Moyen</button><button onclick="newSudoku('expert')" style="background:#DC143C;border:2px solid #FFD700;color:#fff;padding:8px 15px;border-radius:8px;margin:0 4px;font-family:Rajdhani,sans-serif;font-size:0.9em;cursor:pointer;font-weight:600">Expert</button></div><div style="text-align:center;color:#FFD700;font-size:1.1em;margin-bottom:8px">Temps: <span id="sudokuTime">0:00</span></div><div class="sudoku-grid" id="sudokuGrid" style="width:calc(100vw - 30px);max-width:360px;margin:0 auto"></div><div class="sudoku-controls" style="margin-top:10px">${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="sudoku-num" onclick="sudokuInput(${n})">${n}</button>`).join('')}<button class="sudoku-num" onclick="sudokuInput(0)">✕</button></div><div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><button onclick="toggleSudokuPause()" id="sudokuPauseBtn" style="background:#4a0080;border:2px solid #FFD700;color:#fff;padding:10px 20px;border-radius:10px;font-family:'Black Ops One',cursive;font-size:0.9em;cursor:pointer">⏸ Pause</button><button onclick="checkSudoku()" style="background:linear-gradient(135deg,#148A00,#0d6000);border:2px solid #FFD700;color:#fff;padding:10px 20px;border-radius:10px;font-family:'Black Ops One',cursive;font-size:0.9em;cursor:pointer">✓ Vérifier</button></div>`;
+  newSudoku('moyen');
+}
+function newSudoku(difficulty){
+  sudokuDifficulty=difficulty;
+  const emptyCells={facile:35,moyen:45,expert:55}[difficulty];
+  generateSudoku(emptyCells);
+  renderSudoku();
+  sudokuElapsedTime=0;
+  sudokuPaused=false;
+  document.getElementById('sudokuPauseBtn').textContent='⏸ Pause';
+  startSudokuTimer();
+}
+function generateSudoku(emptyCells){
+  sudokuSolution=[[5,3,4,6,7,8,9,1,2],[6,7,2,1,9,5,3,4,8],[1,9,8,3,4,2,5,6,7],[8,5,9,7,6,1,4,2,3],[4,2,6,8,5,3,7,9,1],[7,1,3,9,2,4,8,5,6],[9,6,1,5,3,7,2,8,4],[2,8,7,4,1,9,6,3,5],[3,4,5,2,8,6,1,7,9]];
+  for(let i=0;i<3;i++){
+    const cols=[i*3,i*3+1,i*3+2];
+    for(let j=cols.length-1;j>0;j--){const k=Math.floor(Math.random()*(j+1));[cols[j],cols[k]]=[cols[k],cols[j]];}
+    for(let row=0;row<9;row++){
+      const temp=[sudokuSolution[row][i*3],sudokuSolution[row][i*3+1],sudokuSolution[row][i*3+2]];
+      sudokuSolution[row][i*3]=temp[cols[0]%3];sudokuSolution[row][i*3+1]=temp[cols[1]%3];sudokuSolution[row][i*3+2]=temp[cols[2]%3];
+    }
+  }
+  for(let i=0;i<3;i++){
+    const rows=[i*3,i*3+1,i*3+2];
+    for(let j=rows.length-1;j>0;j--){const k=Math.floor(Math.random()*(j+1));[sudokuSolution[rows[j]],sudokuSolution[rows[k]]]=[sudokuSolution[rows[k]],sudokuSolution[rows[j]]];}
+  }
+  sudokuGrid=sudokuSolution.map(row=>[...row]);
+  let removed=0;
+  while(removed<emptyCells){
+    const r=Math.floor(Math.random()*9),c=Math.floor(Math.random()*9);
+    if(sudokuGrid[r][c]!==0){sudokuGrid[r][c]=0;removed++;}
+  }
+  sudokuSelected=null;
+}
+function startSudokuTimer(){
+  sudokuStartTime=Date.now();
+  clearInterval(sudokuTimer);
+  sudokuTimer=setInterval(()=>{
+    if(!sudokuPaused){
+      sudokuElapsedTime=Math.floor((Date.now()-sudokuStartTime)/1000);
+      const mins=Math.floor(sudokuElapsedTime/60);
+      const secs=sudokuElapsedTime%60;
+      const timeEl=document.getElementById('sudokuTime');
+      if(timeEl)timeEl.textContent=`${mins}:${secs.toString().padStart(2,'0')}`;
+    }
+  },1000);
+}
+function toggleSudokuPause(){
+  sudokuPaused=!sudokuPaused;
+  const btn=document.getElementById('sudokuPauseBtn');
+  const grid=document.getElementById('sudokuGrid');
+  if(sudokuPaused){
+    btn.textContent='▶ Reprendre';
+    grid.style.filter='blur(10px)';
+    grid.style.pointerEvents='none';
+  }else{
+    btn.textContent='⏸ Pause';
+    grid.style.filter='none';
+    grid.style.pointerEvents='auto';
+    sudokuStartTime=Date.now()-sudokuElapsedTime*1000;
+  }
+}
+function renderSudoku(){
+  const grid=document.getElementById('sudokuGrid');
+  grid.innerHTML=sudokuSolution.flat().map((solVal,i)=>{
+    const row=Math.floor(i/9),col=i%9;
+    const gridVal=sudokuGrid[row][col];
+    const isFixed=sudokuGrid[row][col]===sudokuSolution[row][col]&&sudokuGrid[row][col]!==0;
+    return `<div class="sudoku-cell ${isFixed?'fixed':''} ${sudokuSelected===i?'selected':''}" onclick="selectSudokuCell(${i})" id="sc${i}">${gridVal||''}</div>`;
+  }).join('');
+}
+function selectSudokuCell(idx){
+  if(sudokuPaused)return;
+  const row=Math.floor(idx/9),col=idx%9;
+  const cell=document.getElementById('sc'+idx);
+  if(cell.classList.contains('fixed'))return;
+  document.querySelectorAll('.sudoku-cell').forEach(c=>c.classList.remove('selected'));
+  cell.classList.add('selected');
+  sudokuSelected=idx;
+}
+function sudokuInput(num){
+  if(sudokuSelected===null||sudokuPaused)return;
+  const row=Math.floor(sudokuSelected/9),col=sudokuSelected%9;
+  const cell=document.getElementById('sc'+sudokuSelected);
+  if(cell.classList.contains('fixed'))return;
+  sudokuGrid[row][col]=num;
+  cell.textContent=num||'';
+  if(num!==0&&num!==sudokuSolution[row][col]){
+    cell.style.color='#ff6b6b';
+  }else{
+    cell.style.color='#fff';
+  }
+}
+function checkSudoku(){
+  clearInterval(sudokuTimer);
+  let correct=true;
+  sudokuGrid.forEach((row,i)=>row.forEach((v,j)=>{if(v!==sudokuSolution[i][j])correct=false}));
+  if(correct){
+    const mins=Math.floor(sudokuElapsedTime/60);
+    const secs=sudokuElapsedTime%60;
+    const timeStr=`${mins}:${secs.toString().padStart(2,'0')}`;
+    const name=prompt(`🎉 Bravo! (${sudokuDifficulty})\nTemps: ${timeStr}\nEntrez votre nom:`);
+    if(name){
+      if(!arcadeScores.sudoku)arcadeScores.sudoku=[];
+      arcadeScores.sudoku.push({name,score:timeStr,time:sudokuElapsedTime,difficulty:sudokuDifficulty,date:new Date().toLocaleDateString()});
+      arcadeScores.sudoku.sort((a,b)=>a.time-b.time);
+      arcadeScores.sudoku=arcadeScores.sudoku.slice(0,10);
+      localStorage.setItem('arcadeScores',JSON.stringify(arcadeScores));
+    }
+    showMenu();
+  }else{
+    alert('❌ Il y a des erreurs! Vérifiez les cases en rouge.');
+    startSudokuTimer();
+  }
+}
+
+// TETRIS
+let tetrisGrid,tetrisPiece,tetrisX,tetrisY,tetrisScore,tetrisInterval,tetrisNextPiece,tetrisSpeed;
+const TETRIS_PIECES=[[[1,1,1,1]],[[1,1],[1,1]],[[1,1,1],[0,1,0]],[[1,1,1],[1,0,0]],[[1,1,1],[0,0,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]]];
+function startTetris(){
+  document.getElementById('arcadeMenu').style.display='none';
+  const screen=document.getElementById('tetrisGame');
+  screen.style.display='block';
+  tetrisGrid=Array(20).fill().map(()=>Array(10).fill(0));
+  tetrisScore=0;
+  tetrisSpeed=800;
+  tetrisNextPiece=TETRIS_PIECES[Math.floor(Math.random()*TETRIS_PIECES.length)];
+  screen.innerHTML=`<button class="game-back" onclick="stopTetris();showMenu()">← Retour</button><div class="game-title" style="font-size:1.3em;margin-bottom:8px">🟦 Tetris</div><div style="display:flex;justify-content:space-around;align-items:center;margin:8px 0"><div style="text-align:center;color:#FFD700;font-size:1em">Score: <span id="tetrisScore">0</span></div><div style="text-align:center"><div style="color:#aaa;font-size:0.75em;margin-bottom:3px">Suivant:</div><canvas id="tetrisNext" width="50" height="50" style="border:2px solid #FFD700;background:#000"></canvas></div></div><canvas id="tetrisCanvas" width="180" height="360" style="border:3px solid #FFD700;display:block;margin:0 auto 8px;background:#000"></canvas><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:220px;margin:0 auto"><button onclick="moveTetrisLeft()" style="grid-column:1;background:#4a0080;border:2px solid #FFD700;color:#fff;padding:10px;border-radius:8px;font-size:1.2em;cursor:pointer">←</button><button onclick="rotateTetris()" style="grid-column:2;background:#4a0080;border:2px solid #FFD700;color:#fff;padding:10px;border-radius:8px;font-size:1.2em;cursor:pointer">↻</button><button onclick="moveTetrisRight()" style="grid-column:3;background:#4a0080;border:2px solid #FFD700;color:#fff;padding:10px;border-radius:8px;font-size:1.2em;cursor:pointer">→</button><button onclick="dropTetris()" style="grid-column:4;background:#4a0080;border:2px solid #FFD700;color:#fff;padding:10px;border-radius:8px;font-size:1.2em;cursor:pointer">↓</button></div>`;
+  spawnTetrisPiece();
+  tetrisInterval=setInterval(tetrisLoop,tetrisSpeed);
+  document.addEventListener('keydown',tetrisControl);
+}
+function stopTetris(){
+  clearInterval(tetrisInterval);
+  document.removeEventListener('keydown',tetrisControl);
+}
+function spawnTetrisPiece(){
+  tetrisPiece=tetrisNextPiece;
+  tetrisNextPiece=TETRIS_PIECES[Math.floor(Math.random()*TETRIS_PIECES.length)];
+  drawNextPiece();
+  tetrisX=4;tetrisY=0;
+  if(checkTetrisCollision()){
+    stopTetris();
+    const name=prompt(`Game Over! Score: ${tetrisScore}\nEntrez votre nom:`);
+    if(name){
+      if(!arcadeScores.tetris)arcadeScores.tetris=[];
+      arcadeScores.tetris.push({name,score:tetrisScore,date:new Date().toLocaleDateString()});
+      arcadeScores.tetris.sort((a,b)=>b.score-a.score);
+      arcadeScores.tetris=arcadeScores.tetris.slice(0,10);
+      localStorage.setItem('arcadeScores',JSON.stringify(arcadeScores));
+    }
+    showMenu();
+  }
+}
+function drawNextPiece(){
+  const canvas=document.getElementById('tetrisNext');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#000';
+  ctx.fillRect(0,0,50,50);
+  const offsetX=(4-tetrisNextPiece[0].length)*6;
+  const offsetY=(4-tetrisNextPiece.length)*6;
+  tetrisNextPiece.forEach((row,y)=>row.forEach((v,x)=>{
+    if(v){
+      ctx.fillStyle='#00FFFF';
+      ctx.fillRect(offsetX+x*12,offsetY+y*12,11,11);
+    }
+  }));
+}
+function tetrisLoop(){
+  tetrisY++;
+  if(checkTetrisCollision()){
+    tetrisY--;
+    mergeTetrisPiece();
+    clearTetrisLines();
+    spawnTetrisPiece();
+  }
+  drawTetris();
+}
+function checkTetrisCollision(){
+  for(let y=0;y<tetrisPiece.length;y++){
+    for(let x=0;x<tetrisPiece[y].length;x++){
+      if(tetrisPiece[y][x]){
+        const newY=tetrisY+y,newX=tetrisX+x;
+        if(newY>=20||newX<0||newX>=10||tetrisGrid[newY]?.[newX])return true;
+      }
+    }
+  }
+  return false;
+}
+function mergeTetrisPiece(){
+  tetrisPiece.forEach((row,y)=>row.forEach((v,x)=>{
+    if(v)tetrisGrid[tetrisY+y][tetrisX+x]=1;
+  }));
+}
+function clearTetrisLines(){
+  let cleared=0;
+  for(let y=19;y>=0;y--){
+    if(tetrisGrid[y].every(c=>c===1)){
+      tetrisGrid.splice(y,1);
+      tetrisGrid.unshift(Array(10).fill(0));
+      cleared++;
+      y++;
+    }
+  }
+  if(cleared){
+    tetrisScore+=cleared*100;
+    document.getElementById('tetrisScore').textContent=tetrisScore;
+    // Accélérer tous les 500 points
+    if(tetrisScore>0&&tetrisScore%500===0&&tetrisSpeed>150){
+      tetrisSpeed=Math.max(150,tetrisSpeed-75);
+      clearInterval(tetrisInterval);
+      tetrisInterval=setInterval(tetrisLoop,tetrisSpeed);
+    }
+  }
+}
+function drawTetris(){
+  const canvas=document.getElementById('tetrisCanvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#000';
+  ctx.fillRect(0,0,180,360);
+  tetrisGrid.forEach((row,y)=>row.forEach((v,x)=>{
+    if(v){
+      ctx.fillStyle='#FFD700';
+      ctx.fillRect(x*18,y*18,16,16);
+    }
+  }));
+  tetrisPiece.forEach((row,y)=>row.forEach((v,x)=>{
+    if(v){
+      ctx.fillStyle='#00FFFF';
+      ctx.fillRect((tetrisX+x)*18,(tetrisY+y)*18,16,16);
+    }
+  }));
+}
+function moveTetrisLeft(){tetrisX--;if(checkTetrisCollision())tetrisX++;drawTetris();}
+function moveTetrisRight(){tetrisX++;if(checkTetrisCollision())tetrisX--;drawTetris();}
+function dropTetris(){tetrisY++;if(checkTetrisCollision())tetrisY--;drawTetris();}
+function rotateTetris(){
+  const old=tetrisPiece;
+  tetrisPiece=tetrisPiece[0].map((_,i)=>tetrisPiece.map(row=>row[i]).reverse());
+  if(checkTetrisCollision())tetrisPiece=old;
+  drawTetris();
+}
+function tetrisControl(e){
+  if(e.key==='ArrowLeft')moveTetrisLeft();
+  if(e.key==='ArrowRight')moveTetrisRight();
+  if(e.key==='ArrowDown')dropTetris();
+  if(e.key==='ArrowUp')rotateTetris();
+}
+
+// MEMORY
+let memoryCards=[],memoryFlipped=[],memoryMatched=[],memoryMoves,memoryTimer;
+function startMemory(){
+  document.getElementById('arcadeMenu').style.display='none';
+  const screen=document.getElementById('memoryGame');
+  screen.style.display='block';
+  const emojis=['🎮','🎯','🎲','🎪','🎨','🎭','🎬','🎤'];
+  memoryCards=[...emojis,...emojis].sort(()=>Math.random()-0.5);
+  memoryFlipped=[];memoryMatched=[];memoryMoves=0;
+  const start=Date.now();
+  screen.innerHTML=`<button class="game-back" onclick="showMenu()">← Retour</button><div class="game-title">🃏 Memory</div><div style="text-align:center;color:#FFD700;font-size:1.1em;margin:15px 0">Coups: <span id="memoryMoves">0</span></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:400px;margin:0 auto">${memoryCards.map((c,i)=>`<div class="memory-card" onclick="flipMemory(${i},${start})" style="aspect-ratio:1;background:linear-gradient(135deg,#4a0080,#6000a0);border:2px solid #FFD700;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:2.5em;cursor:pointer" id="mem${i}">?</div>`).join('')}</div>`;
+}
+function flipMemory(idx,startTime){
+  if(memoryFlipped.length===2||memoryMatched.includes(idx)||memoryFlipped.includes(idx))return;
+  document.getElementById('mem'+idx).textContent=memoryCards[idx];
+  memoryFlipped.push(idx);
+  if(memoryFlipped.length===2){
+    memoryMoves++;
+    document.getElementById('memoryMoves').textContent=memoryMoves;
+    const[a,b]=memoryFlipped;
+    if(memoryCards[a]===memoryCards[b]){
+      memoryMatched.push(a,b);
+      memoryFlipped=[];
+      if(memoryMatched.length===16){
+        const elapsed=Math.floor((Date.now()-startTime)/1000);
+        setTimeout(()=>{
+          const name=prompt(`Bravo! ${memoryMoves} coups en ${elapsed}s\nEntrez votre nom:`);
+          if(name){
+            if(!arcadeScores.memory)arcadeScores.memory=[];
+            arcadeScores.memory.push({name,score:`${memoryMoves}c/${elapsed}s`,date:new Date().toLocaleDateString()});
+            localStorage.setItem('arcadeScores',JSON.stringify(arcadeScores));
+          }
+          showMenu();
+        },500);
+      }
+    }else{
+      setTimeout(()=>{
+        document.getElementById('mem'+a).textContent='?';
+        document.getElementById('mem'+b).textContent='?';
+        memoryFlipped=[];
+      },1000);
+    }
+  }
+}
+
+function showLeaderboard(){
+  document.getElementById('arcadeMenu').style.display='none';
+  const screen=document.getElementById('leaderboardScreen');
+  screen.style.display='block';
+  let html='<button class="game-back" onclick="showMenu()">← Retour</button><div class="game-title">🏆 RECORDS</div>';
+  ['quiz','sudoku','tetris','memory'].forEach(game=>{
+    const scores=arcadeScores[game]||[];
+    const names={'quiz':'🧠 Culture G','sudoku':'🔢 Sudoku','tetris':'🟦 Tetris','memory':'🃏 Memory'};
+    html+=`<div class="leaderboard"><div class="leaderboard-title">${names[game]}</div>`;
+    if(scores.length===0)html+='<div style="text-align:center;color:#666;padding:10px">Aucun score</div>';
+    else scores.slice(0,5).forEach((s,i)=>html+=`<div class="leaderboard-item"><span>${i+1}. ${s.name}</span><span>${s.score}</span></div>`);
+    html+='</div>';
+  });
+  screen.innerHTML=html;
+}
+
+// ===== GESTION BULLETINS DE PAIE =====
+let payslipsDB;
+
+// Initialiser IndexedDB
+function initPayslipsDB() {
+  const request = indexedDB.open('PayslipsDB', 1);
+  
+  request.onerror = () => console.error('Erreur IndexedDB');
+  
+  request.onsuccess = (e) => {
+    payslipsDB = e.target.result;
+    loadPayslips();
+  };
+  
+  request.onupgradeneeded = (e) => {
+    const db = e.target.result;
+    if (!db.objectStoreNames.contains('payslips')) {
+      const store = db.createObjectStore('payslips', { keyPath: 'id', autoIncrement: true });
+      store.createIndex('name', 'name', { unique: false });
+      store.createIndex('date', 'date', { unique: false });
+    }
+  };
+}
+
+// Ouvrir modal bulletins
+document.getElementById('payslipsBtn').addEventListener('click', () => {
+  document.getElementById('payslipsModal').style.display = 'block';
+  loadPayslips();
+});
+
+// Fermer modal bulletins
+function closePayslips() {
+  document.getElementById('payslipsModal').style.display = 'none';
+}
+
+// Gérer l'upload d'un bulletin
+function handlePayslipUpload(event) {
+  const file = event.target.files[0];
+  if (!file || !file.type.startsWith('image/')) {
+    alert('Veuillez sélectionner une image');
+    return;
+  }
+  
+  const name = prompt('Nom du bulletin (ex: Janvier 2026)');
+  if (!name) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const imageData = e.target.result;
+    savePayslip(name, imageData);
+  };
+  reader.readAsDataURL(file);
+  
+  // Reset input
+  event.target.value = '';
+}
+
+// Sauvegarder un bulletin dans IndexedDB
+function savePayslip(name, imageData) {
+  if (!payslipsDB) {
+    alert('Base de données non initialisée');
+    return;
+  }
+  
+  const transaction = payslipsDB.transaction(['payslips'], 'readwrite');
+  const store = transaction.objectStore('payslips');
+  
+  const payslip = {
+    name: name,
+    image: imageData,
+    date: new Date().toISOString()
+  };
+  
+  const request = store.add(payslip);
+  
+  request.onsuccess = () => {
+    loadPayslips();
+    alert('✅ Bulletin ajouté avec succès');
+  };
+  
+  request.onerror = () => {
+    alert('❌ Erreur lors de l\'ajout du bulletin');
+  };
+}
+
+// Charger et afficher tous les bulletins
+function loadPayslips() {
+  if (!payslipsDB) return;
+  
+  const transaction = payslipsDB.transaction(['payslips'], 'readonly');
+  const store = transaction.objectStore('payslips');
+  const request = store.getAll();
+  
+  request.onsuccess = (e) => {
+    const payslips = e.target.result;
+    displayPayslips(payslips);
+  };
+}
+
+// Afficher la liste des bulletins
+function displayPayslips(payslips) {
+  const listEl = document.getElementById('payslipsList');
+  
+  if (payslips.length === 0) {
+    listEl.innerHTML = '<p style="text-align:center;color:#888;padding:40px 20px">Aucun bulletin enregistré</p>';
+    return;
+  }
+  
+  // Trier par date décroissante (plus récent en premier)
+  payslips.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  // Limiter à 24 bulletins
+  if (payslips.length > 24) {
+    const toDelete = payslips.slice(24);
+    toDelete.forEach(p => deletePayslip(p.id, false));
+    payslips = payslips.slice(0, 24);
+  }
+  
+  listEl.innerHTML = payslips.map(p => `
+    <div class="payslip-item">
+      <span class="payslip-name">📄 ${p.name}</span>
+      <div class="payslip-actions">
+        <button class="payslip-btn" onclick="viewPayslip(${p.id})">Voir</button>
+        <button class="payslip-btn delete" onclick="deletePayslip(${p.id})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Voir un bulletin en plein écran
+function viewPayslip(id) {
+  if (!payslipsDB) return;
+  
+  const transaction = payslipsDB.transaction(['payslips'], 'readonly');
+  const store = transaction.objectStore('payslips');
+  const request = store.get(id);
+  
+  request.onsuccess = (e) => {
+    const payslip = e.target.result;
+    if (payslip) {
+      document.getElementById('viewerTitle').textContent = payslip.name;
+      const img = document.getElementById('viewerImage');
+      img.src = payslip.image;
+      document.getElementById('payslipViewer').style.display = 'block';
+      
+      // Activer le zoom sur l'image
+      enableImageZoom(img);
+    }
+  };
+}
+
+// Système de zoom pour l'image
+function enableImageZoom(img) {
+  let scale = 1;
+  let translateX = 0;
+  let translateY = 0;
+  let initialDistance = 0;
+  let lastTap = 0;
+  let startX = 0;
+  let startY = 0;
+  let isDragging = false;
+  
+  // Réinitialiser
+  img.style.transform = 'scale(1) translate(0, 0)';
+  img.style.transition = '';
+  
+  // Double tap pour zoom x2
+  img.addEventListener('touchstart', (e) => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTap;
+    
+    if (tapLength < 300 && tapLength > 0 && e.touches.length === 1) {
+      e.preventDefault();
+      img.style.transition = 'transform 0.3s ease';
+      if (scale === 1) {
+        scale = 2;
+      } else {
+        scale = 1;
+        translateX = 0;
+        translateY = 0;
+      }
+      img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+      setTimeout(() => img.style.transition = '', 300);
+    }
+    lastTap = currentTime;
+  });
+  
+  // Pinch zoom
+  let pinchStartScale = 1;
+  img.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      pinchStartScale = scale;
+      initialDistance = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+    } else if (e.touches.length === 1 && scale > 1) {
+      isDragging = true;
+      startX = e.touches[0].pageX - translateX;
+      startY = e.touches[0].pageY - translateY;
+    }
+  });
+  
+  img.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const currentDistance = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+      
+      scale = Math.min(Math.max(pinchStartScale * (currentDistance / initialDistance), 1), 4);
+      img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    } else if (e.touches.length === 1 && scale > 1 && isDragging) {
+      e.preventDefault();
+      translateX = e.touches[0].pageX - startX;
+      translateY = e.touches[0].pageY - startY;
+      img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }
+  });
+  
+  img.addEventListener('touchend', (e) => {
+    isDragging = false;
+    if (e.touches.length < 2) {
+      initialDistance = 0;
+    }
+    // Si zoom = 1, reset position
+    if (scale <= 1.05) {
+      scale = 1;
+      translateX = 0;
+      translateY = 0;
+      img.style.transition = 'transform 0.3s ease';
+      img.style.transform = 'translate(0, 0) scale(1)';
+      setTimeout(() => img.style.transition = '', 300);
+    }
+  });
+}
+
+// Fermer la visionneuse
+function closeViewer() {
+  document.getElementById('payslipViewer').style.display = 'none';
+}
+
+// Supprimer un bulletin
+function deletePayslip(id, confirm = true) {
+  if (confirm && !window.confirm('Supprimer ce bulletin ?')) return;
+  
+  if (!payslipsDB) return;
+  
+  const transaction = payslipsDB.transaction(['payslips'], 'readwrite');
+  const store = transaction.objectStore('payslips');
+  const request = store.delete(id);
+  
+  request.onsuccess = () => {
+    if (confirm) {
+      loadPayslips();
+      alert('✅ Bulletin supprimé');
+    }
+  };
+}
+
+// Initialiser au chargement
+initPayslipsDB();
+
+// ===== GESTION PLANNINGS =====
+let planningsDB;
+
+// Initialiser IndexedDB pour les plannings
+function initPlanningsDB() {
+  const request = indexedDB.open('PlanningsDB', 1);
+  
+  request.onerror = () => console.error('Erreur IndexedDB Plannings');
+  
+  request.onsuccess = (e) => {
+    planningsDB = e.target.result;
+    loadPlannings();
+  };
+  
+  request.onupgradeneeded = (e) => {
+    const db = e.target.result;
+    if (!db.objectStoreNames.contains('plannings')) {
+      const store = db.createObjectStore('plannings', { keyPath: 'id', autoIncrement: true });
+      store.createIndex('name', 'name', { unique: false });
+      store.createIndex('date', 'date', { unique: false });
+    }
+  };
+}
+
+// Ouvrir modal plannings
+document.getElementById('planningsBtn').addEventListener('click', () => {
+  document.getElementById('planningsModal').style.display = 'block';
+  loadPlannings();
+});
+
+// Fermer modal plannings
+function closePlannings() {
+  document.getElementById('planningsModal').style.display = 'none';
+}
+
+// Gérer l'upload d'un planning
+function handlePlanningUpload(event) {
+  const file = event.target.files[0];
+  if (!file || !file.type.startsWith('image/')) {
+    alert('Veuillez sélectionner une image');
+    return;
+  }
+  
+  const name = prompt('Nom du planning (ex: Planning Janvier 2026)');
+  if (!name) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const imageData = e.target.result;
+    savePlanning(name, imageData);
+  };
+  reader.readAsDataURL(file);
+  
+  event.target.value = '';
+}
+
+// Sauvegarder un planning dans IndexedDB
+function savePlanning(name, imageData) {
+  if (!planningsDB) {
+    alert('Base de données non initialisée');
+    return;
+  }
+  
+  const transaction = planningsDB.transaction(['plannings'], 'readwrite');
+  const store = transaction.objectStore('plannings');
+  
+  const planning = {
+    name: name,
+    image: imageData,
+    date: new Date().toISOString()
+  };
+  
+  const request = store.add(planning);
+  
+  request.onsuccess = () => {
+    loadPlannings();
+    alert('✅ Planning ajouté avec succès');
+  };
+  
+  request.onerror = () => {
+    alert('❌ Erreur lors de l\'ajout du planning');
+  };
+}
+
+// Charger et afficher tous les plannings
+function loadPlannings() {
+  if (!planningsDB) return;
+  
+  const transaction = planningsDB.transaction(['plannings'], 'readonly');
+  const store = transaction.objectStore('plannings');
+  const request = store.getAll();
+  
+  request.onsuccess = (e) => {
+    const plannings = e.target.result;
+    displayPlannings(plannings);
+  };
+}
+
+// Afficher la liste des plannings
+function displayPlannings(plannings) {
+  const listEl = document.getElementById('planningsList');
+  
+  if (plannings.length === 0) {
+    listEl.innerHTML = '<p style="text-align:center;color:#888;padding:40px 20px">Aucun planning enregistré</p>';
+    return;
+  }
+  
+  plannings.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  if (plannings.length > 24) {
+    const toDelete = plannings.slice(24);
+    toDelete.forEach(p => deletePlanning(p.id, false));
+    plannings = plannings.slice(0, 24);
+  }
+  
+  listEl.innerHTML = plannings.map(p => `
+    <div class="payslip-item">
+      <span class="payslip-name">📅 ${p.name}</span>
+      <div class="payslip-actions">
+        <button class="payslip-btn" onclick="viewPlanning(${p.id})">Voir</button>
+        <button class="payslip-btn delete" onclick="deletePlanning(${p.id})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Voir un planning en plein écran
+function viewPlanning(id) {
+  if (!planningsDB) return;
+  
+  const transaction = planningsDB.transaction(['plannings'], 'readonly');
+  const store = transaction.objectStore('plannings');
+  const request = store.get(id);
+  
+  request.onsuccess = (e) => {
+    const planning = e.target.result;
+    if (planning) {
+      document.getElementById('planningViewerTitle').textContent = planning.name;
+      const img = document.getElementById('planningViewerImage');
+      img.src = planning.image;
+      document.getElementById('planningViewer').style.display = 'block';
+      
+      enableImageZoom(img);
+    }
+  };
+}
+
+// Fermer la visionneuse planning
+function closePlanningViewer() {
+  document.getElementById('planningViewer').style.display = 'none';
+}
+
+// Supprimer un planning
+function deletePlanning(id, confirm = true) {
+  if (confirm && !window.confirm('Supprimer ce planning ?')) return;
+  
+  if (!planningsDB) return;
+  
+  const transaction = planningsDB.transaction(['plannings'], 'readwrite');
+  const store = transaction.objectStore('plannings');
+  const request = store.delete(id);
+  
+  request.onsuccess = () => {
+    if (confirm) {
+      loadPlannings();
+      alert('✅ Planning supprimé');
+    }
+  };
+}
+
+// Initialiser au chargement
+initPlanningsDB();
+
+</script>
+<!-- YouTube Music Player -->
+<div id="youtubePlayer" style="display:none;">
+  <div class="yt-overlay"></div>
+  <div class="yt-container">
+    <button class="yt-close" onclick="closeYouTubePlayer()">✕</button>
+    
+    <h2 class="yt-title">🎵 YouTube Music</h2>
+    
+    <!-- Barre de recherche -->
+    <div class="yt-search-box">
+      <input type="text" id="ytSearchInput" placeholder="Rechercher un artiste, titre, playlist..." />
+      <button onclick="searchYouTube()" class="yt-search-btn">🔍</button>
+    </div>
+    
+    <!-- Résultats de recherche -->
+    <div id="ytResults" class="yt-results"></div>
+    
+    <!-- Lecteur YouTube (caché visuellement, audio seulement) -->
+    <div id="ytPlayerEmbed" style="display:none;"></div>
+    
+    <!-- Contrôles -->
+    <div class="yt-controls" id="ytControls" style="display:none;">
+      <div class="yt-now-playing">
+        <div class="yt-thumbnail" id="ytThumbnail"></div>
+        <div class="yt-info">
+          <div class="yt-track-title" id="ytTrackTitle">Aucun titre en cours</div>
+          <div class="yt-track-artist" id="ytTrackArtist"></div>
+        </div>
+      </div>
+      
+      <div class="yt-player-controls">
+        <button onclick="ytPlayPause()" id="ytPlayBtn" class="yt-play-btn">▶</button>
+        <div class="yt-volume-control">
+          <span>🔊</span>
+          <input type="range" id="ytVolume" min="0" max="100" value="50" />
+        </div>
+      </div>
+    </div>
+    
+    <!-- Historique -->
+    <div class="yt-history" id="ytHistory"></div>
+  </div>
+</div>
+
+<!-- API YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<div id="arcadeModal" class="arcade-modal">
+  <div class="arcade-container">
+    <button class="arcade-close" onclick="closeArcade()">✕</button>
+    
+    <div id="arcadeMenu">
+      <h2 class="arcade-title">🎮 ARCADE</h2>
+      <div class="arcade-menu">
+        <button class="arcade-btn" onclick="startQuiz()">🧠 Culture Générale</button>
+        <button class="arcade-btn" onclick="startSudoku()">🔢 Sudoku</button>
+        <button class="arcade-btn" onclick="startTetris()">🟦 Tetris</button>
+        <button class="arcade-btn" onclick="startMemory()">🃏 Memory</button>
+        <button class="arcade-btn" onclick="showLeaderboard()">🏆 Records</button>
+      </div>
+    </div>
+    
+    <div id="quizGame" class="game-screen"></div>
+    <div id="sudokuGame" class="game-screen"></div>
+    <div id="tetrisGame" class="game-screen"></div>
+    <div id="memoryGame" class="game-screen"></div>
+    <div id="leaderboardScreen" class="game-screen"></div>
+  </div>
+</div>
+
+<!-- Modal Plannings -->
+<div id="planningsModal" class="payslips-modal">
+  <div class="payslips-container">
+    <button class="payslips-close" onclick="closePlannings()">✕</button>
+    <h2 class="modal-title" style="text-align:center;font-family:'Black Ops One',cursive;margin-bottom:20px">📅 Mes Plannings</h2>
+    
+    <div style="text-align:center;margin-bottom:25px">
+      <input type="file" id="planningFileInput" accept="image/*" style="display:none" onchange="handlePlanningUpload(event)">
+      <button class="payslip-add-btn" onclick="document.getElementById('planningFileInput').click()">
+        📂 Importer un planning
+      </button>
+    </div>
+    
+    <div id="planningsList" class="payslips-list">
+      <p style="text-align:center;color:#888;padding:40px 20px">Aucun planning enregistré</p>
+    </div>
+  </div>
+</div>
+
+<!-- Visionneuse de planning plein écran -->
+<div id="planningViewer" class="payslip-viewer">
+  <button class="viewer-close" onclick="closePlanningViewer()">✕</button>
+  <div class="viewer-title" id="planningViewerTitle"></div>
+  <img id="planningViewerImage" class="viewer-image" alt="Planning">
+</div>
+
+<!-- Modal Bulletins de Paie -->
+<div id="payslipsModal" class="payslips-modal">
+  <div class="payslips-container">
+    <button class="payslips-close" onclick="closePayslips()">✕</button>
+    <h2 class="modal-title" style="text-align:center;font-family:'Black Ops One',cursive;margin-bottom:20px">💰 Mes Bulletins de Paie</h2>
+    
+    <div style="text-align:center;margin-bottom:25px">
+      <input type="file" id="payslipFileInput" accept="image/*" style="display:none" onchange="handlePayslipUpload(event)">
+      <button class="payslip-add-btn" onclick="document.getElementById('payslipFileInput').click()">
+        📂 Importer un bulletin
+      </button>
+    </div>
+    
+    <div id="payslipsList" class="payslips-list">
+      <p style="text-align:center;color:#888;padding:40px 20px">Aucun bulletin enregistré</p>
+    </div>
+  </div>
+</div>
+
+<!-- Visionneuse de bulletin plein écran -->
+<div id="payslipViewer" class="payslip-viewer">
+  <button class="viewer-close" onclick="closeViewer()">✕</button>
+  <div class="viewer-title" id="viewerTitle"></div>
+  <img id="viewerImage" class="viewer-image" alt="Bulletin">
+</div>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "Thyming",
+  "short_name": "Thyming",
+  "description": "Application de planning et gestion du temps pour SSIAP, rondiers et opérateurs",
+  "start_url": "./planning_arcade.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#8B0000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
