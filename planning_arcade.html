@@ -10,6 +10,11 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 :root {
@@ -103,7 +108,7 @@ header {
 
 .current-date, .current-time, .current-week {
   font-family: 'Black Ops One', cursive;
-  font-size: 0.85em;
+  font-size: 1em;
   font-weight: 400;
   color: #00FFB3;
   text-shadow: 0 0 15px rgba(0,255,179,0.9), 0 0 25px rgba(0,255,179,0.6), 0 2px 4px rgba(0,0,0,0.5);
@@ -526,7 +531,10 @@ body.light-mode .day-cell:not(.weekend) .day-number {
   padding: 30px;
   border-radius: 14px;
   margin-bottom: 25px;
-  border: 1px solid rgba(0, 191, 255, 0.2);
+  border-top: 2px solid rgba(0, 191, 255, 0.4);
+  border-right: 2px solid rgba(0, 191, 255, 0.4);
+  border-bottom: 2px solid rgba(0, 191, 255, 0.4);
+  border-left: none;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
   backdrop-filter: blur(10px);
   position: relative;
@@ -681,7 +689,8 @@ h3::after {
   display: flex;
   gap: 8px;
   margin-top: 8px;
-  justify-content: flex-start;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .cp-box {
@@ -690,7 +699,7 @@ h3::after {
   border-radius: 8px;
   border: 1px solid rgba(255, 215, 0, 0.3);
   text-align: center;
-  min-width: 90px;
+  flex: 1;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 0 10px rgba(255, 215, 0, 0.1);
 }
 
@@ -799,6 +808,7 @@ h3::after {
 .regulation-item.hours-done .regulation-value {
   color: #ffb870 !important;
   text-shadow: none !important;
+  white-space: pre-line;
 }
 
 /* Bloc-note modal */
@@ -1181,8 +1191,8 @@ h3::after {
   border: 1px solid #00d4ff;
   border-radius: 8px;
   padding: 12px;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1em;
+  font-family: 'Black Ops One', cursive;
+  font-size: 0.9em;
   resize: vertical;
   margin-bottom: 15px;
 }
@@ -1855,7 +1865,7 @@ h3::after {
 </div>
 </div>
 
-<h3>Heure nuit/dimanche</h3>
+<h3>Heures nuit/dimanche</h3>
 <div class="stats-grid night-sunday-section">
 <div class="stat-item">
 <span class="stat-label">Heures de nuit du mois<br>(21h-6h) :</span>
@@ -2303,6 +2313,7 @@ function updateStats() {
     if (shift === 'arret') {
       if (!isSunday && !isSaturday) {
         totalArret += 7;
+        totalHours += 7;
       }
       return;
     }
@@ -2432,7 +2443,7 @@ function updateRegulations() {
     if (hoursElem) {
       let displayText = `${totalHours.toFixed(2)}h sur ${quota}h`;
       if (arretHours > 0) {
-        displayText += ` (${arretHours.toFixed(0)}h arrêts)`;
+        displayText += `\n(${arretHours.toFixed(0)}h arrêts/Compl.)`;
       }
       hoursElem.textContent = displayText;
     }
@@ -2478,6 +2489,9 @@ function updateRegulations() {
         totalYearHours += 5.83;
       }
       if (shift === 'formation') {
+        totalYearHours += 7;
+      }
+      if (shift === 'arret' && shiftDate.getDay() !== 0 && shiftDate.getDay() !== 6) {
         totalYearHours += 7;
       }
     }
@@ -2813,6 +2827,9 @@ function applyTheme(themeName) {
     
     .stats, .regulation {
       border-left: 4px solid ${theme.accent} !important;
+      border-top: 2px solid ${theme.accent}66 !important;
+      border-right: 2px solid ${theme.accent}66 !important;
+      border-bottom: 2px solid ${theme.accent}66 !important;
     }
     
     .regulation-title {
@@ -2980,15 +2997,16 @@ if (window.DeviceMotionEvent) {
     if (x > shakeThreshold || y > shakeThreshold || z > shakeThreshold) {
       lastShake = now;
       
-      // Choisir un thème aléatoire différent de l'actuel
-      const themeNames = Object.keys(themes).filter(t => t !== currentTheme);
-      const randomTheme = themeNames[Math.floor(Math.random() * themeNames.length)];
+      // Ordre fixe des thèmes
+      const themeOrder = ['cyberpunk', 'neonTokyo', 'ocean', 'sunset', 'forest', 'matrix', 'fire'];
+      const currentIndex = themeOrder.indexOf(currentTheme);
+      const nextTheme = themeOrder[(currentIndex + 1) % themeOrder.length];
       
-      applyTheme(randomTheme);
+      applyTheme(nextTheme);
       
       // Afficher le nom du thème temporairement
       const indicator = document.createElement('div');
-      indicator.textContent = `🎨 ${themes[randomTheme].name}`;
+      indicator.textContent = `🎨 ${themes[nextTheme].name}`;
       indicator.style.cssText = `
         position: fixed;
         top: 50%;
@@ -3023,6 +3041,15 @@ if (window.DeviceMotionEvent) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Bloquer complètement la sélection de texte et les bulles
+  document.addEventListener('selectstart', (e) => e.preventDefault());
+  document.addEventListener('contextmenu', (e) => {
+    // Autoriser contextmenu uniquement sur les cellules du calendrier pour les notes
+    if (!e.target.closest('.day-cell')) {
+      e.preventDefault();
+    }
+  });
+  
   // Enregistrer le Service Worker pour PWA (mode hors ligne)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {
