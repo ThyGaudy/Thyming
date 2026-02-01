@@ -1,7 +1,6 @@
 // Service Worker pour Thyming PWA
 const CACHE_NAME = 'thyming-v1';
 const urlsToCache = [
-  './planning_arcade.html',
   './manifest.json',
   './icon-512.png'
 ];
@@ -19,15 +18,20 @@ self.addEventListener('install', event => {
 
 // Récupération des ressources
 self.addEventListener('fetch', event => {
+  const requestUrl = new URL(event.request.url);
+
+  // On ne met PAS en cache le HTML pour qu'il se mette à jour
+  if (requestUrl.pathname.endsWith('planning_arcade.html')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
-        // Retourne le cache si disponible, sinon fetch
-        return response || fetch(event.request);
-      })
+      .then(response => response || fetch(event.request))
       .catch(() => {
         // En cas d'erreur, retourne l'app
-        return caches.match('./planning_arcade.html');
+        return fetch('./planning_arcade.html');
       })
   );
 });
