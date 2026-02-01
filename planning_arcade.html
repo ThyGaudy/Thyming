@@ -87,22 +87,30 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 18px;
   padding: 0 5px;
   margin-top: 0;
   gap: 6px;
+}
+
+.date-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
 }
 
 .current-date, .current-time, .current-week {
   font-family: 'Black Ops One', cursive;
   font-size: 0.85em;
   font-weight: 400;
-  color: #00FF00;
-  text-shadow: 0 0 15px rgba(0,255,0,0.8), 0 0 25px rgba(0,255,0,0.5), 0 2px 4px rgba(0,0,0,0.5);
+  color: #00FFB3;
+  text-shadow: 0 0 15px rgba(0,255,179,0.9), 0 0 25px rgba(0,255,179,0.6), 0 2px 4px rgba(0,0,0,0.5);
   padding: 4px 8px;
-  background: linear-gradient(135deg, rgba(74, 0, 128, 0.2), rgba(0, 66, 187, 0.15), rgba(0, 191, 255, 0.1));
+  background: linear-gradient(135deg, rgba(0, 255, 179, 0.2), rgba(0, 206, 209, 0.15), rgba(0, 255, 127, 0.1));
   border-radius: 10px;
-  border: 0.5px solid #FFD700;
+  border: 0.5px solid #00FFB3;
 }
 
 .payslips-btn {
@@ -132,9 +140,10 @@ header {
 
 h1 {
   font-family: 'Black Ops One', cursive !important;
-  font-size: 3.8em !important;
+  font-size: 5.5em !important;
   font-weight: 400 !important;
-  margin-bottom: 12px;
+  margin-top: 0;
+  margin-bottom: 5px;
   background: linear-gradient(90deg, #FF00FF, #00FFFF, #FF00FF) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
@@ -163,7 +172,8 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 15px;
-  margin-bottom: 8px;
+  margin-bottom: 25px;
+  margin-top: 22px;
 }
 
 .month-selector button {
@@ -239,7 +249,7 @@ h1 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
@@ -250,11 +260,11 @@ h1 {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
-  background: linear-gradient(135deg, rgba(74, 0, 128, 0.2), rgba(0, 66, 187, 0.15), rgba(0, 191, 255, 0.1));
-  padding: 10px 14px;
-  border-radius: 20px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
   border: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 0 10px rgba(255, 215, 0, 0.1);
+  box-shadow: none;
   font-family: 'Black Ops One', cursive;
   font-size: 0.85em;
   color: #ffffff;
@@ -265,8 +275,8 @@ h1 {
   width: 28px;
   height: 20px;
   border-radius: 5px;
-  border: 2px solid rgba(255,255,255,0.3);
-  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  border: none;
+  box-shadow: none;
 }
 
 /* Container pour l'effet 3D */
@@ -947,7 +957,7 @@ h3::after {
     overflow-x: hidden;
   }
   h1 {
-    font-size: 1.7em;
+    font-size: 2em;
   }
   .day-cell {
     min-height: 75px;
@@ -995,7 +1005,7 @@ h3::after {
     gap: 8px;
   }
   .legend-item {
-    padding: 6px 10px;
+    padding: 0;
     font-size: 0.85em;
   }
   .legend-box {
@@ -1551,9 +1561,9 @@ h3::after {
   background: transparent;
   border: 2px solid #00CED1;
   color: #00CED1;
-  font-size: 1.5em;
-  width: 40px;
-  height: 40px;
+  font-size: 1.2em;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   cursor: pointer;
   font-family: Arial, sans-serif;
@@ -1739,11 +1749,13 @@ h3::after {
 <div class="container">
 <header>
 <div class="date-info">
+<button class="payslips-btn" id="payslipsBtn" title="Mes bulletins de paie">💰</button>
+<div class="date-group">
 <div class="current-date" id="currentDate">Chargement...</div>
 <div class="current-time" id="currentTime">--:--</div>
 <div class="current-week" id="currentWeek">Chargement...</div>
+</div>
 <button class="payslips-btn" id="planningsBtn" title="Mes plannings">📅</button>
-<button class="payslips-btn" id="payslipsBtn" title="Mes bulletins de paie">💰</button>
 </div>
 <h1>Planning de travail</h1>
 <div class="month-selector">
@@ -2032,7 +2044,7 @@ function updateCurrentDateAndWeek() {
   const weekNum = getWeekNumber(now);
   
   document.getElementById('currentDate').textContent = `${dayName} ${day} ${month}`;
-  document.getElementById('currentWeek').textContent = `S${weekNum}`;
+  document.getElementById('currentWeek').textContent = `Sem ${weekNum}`;
   
   // Mettre à jour l'heure
   updateTime();
@@ -2636,7 +2648,8 @@ const themes = {
     accent: '#FFD700',
     lightAccent: '#FFF4AA',
     particles: 'rgb(255, 255, 255)',
-    borderColor: '#FFD700'
+    borderColor: '#FFD700',
+    dateColor: '#00FFB3'
   },
   neonTokyo: {
     name: 'Néon Tokyo',
@@ -2722,10 +2735,12 @@ function applyTheme(themeName) {
     el.style.boxShadow = 'none';
   });
   
-  // 4. Date/Heure/Semaine en haut
+  // 4. Date/Heure/Semaine en haut - BLEU-VERT CYBERPUNK
+  const dateColor = theme.dateColor || theme.accent;
   document.querySelectorAll('.current-date, .current-time, .current-week').forEach(el => {
-    el.style.borderColor = theme.accent;
-    el.style.color = theme.accent;
+    el.style.borderColor = dateColor;
+    el.style.color = dateColor;
+    el.style.textShadow = `0 0 15px ${dateColor}cc, 0 0 25px ${dateColor}80, 0 2px 4px rgba(0,0,0,0.5)`;
   });
   
   // 5. Numéros de semaine (colonne gauche)
@@ -2793,7 +2808,7 @@ function applyTheme(themeName) {
     }
     
     .legend-item {
-      border: 1px solid ${theme.accent}30 !important;
+      border: none !important;
     }
     
     .stats, .regulation {
@@ -3305,10 +3320,9 @@ document.getElementById('ytSearchInput')?.addEventListener('keypress', (e) => {
 });
 
 // ========== ARCADE SYSTEM ==========
-const quizQuestions=[{q:"Quelle est la capitale de la France?",a:["Paris","Lyon","Marseille","Bordeaux"],c:0},{q:"Combien font 15 x 8?",a:["110","120","130","140"],c:1},{q:"Qui a peint la Joconde?",a:["Van Gogh","Picasso","De Vinci","Monet"],c:2},{q:"Quel est le plus grand océan?",a:["Atlantique","Indien","Arctique","Pacifique"],c:3},{q:"Combien de continents existe-t-il?",a:["5","6","7","8"],c:2},{q:"En quelle année a eu lieu la Révolution française?",a:["1789","1799","1889","1989"],c:0},{q:"Quelle planète est surnommée la planète rouge?",a:["Vénus","Jupiter","Mars","Saturne"],c:2},{q:"Qui a écrit 'Les Misérables'?",a:["Zola","Balzac","Hugo","Dumas"],c:2},{q:"Combien de joueurs dans une équipe de foot?",a:["9","10","11","12"],c:2},{q:"Quelle est la capitale de l'Italie?",a:["Milan","Rome","Venise","Florence"],c:1}];
 
 let arcadeScores=JSON.parse(localStorage.getItem('arcadeScores')||'{}');
-let currentQuizScore=0,currentQuizIndex=0;
+
 
 function openArcade(){
   document.getElementById('arcadeModal').style.display='flex';
@@ -3323,47 +3337,6 @@ function closeArcade(){
 function showMenu(){
   document.querySelectorAll('.game-screen').forEach(s=>s.style.display='none');
   document.getElementById('arcadeMenu').style.display='block';
-}
-
-function startQuiz(){
-  document.getElementById('arcadeMenu').style.display='none';
-  const screen=document.getElementById('quizGame');
-  screen.style.display='block';
-  currentQuizScore=0;
-  currentQuizIndex=0;
-  const shuffled=[...quizQuestions].sort(()=>Math.random()-0.5).slice(0,10);
-  screen.innerHTML=`<button class="game-back" onclick="showMenu()">← Retour</button><div class="game-title">🧠 Culture Générale</div><div class="quiz-score">Score: <span id="quizScore">0</span>/10</div><div id="quizContent"></div>`;
-  showQuizQuestion(shuffled,0);
-}
-
-function showQuizQuestion(questions,idx){
-  if(idx>=questions.length){
-    finishQuiz();return;
-  }
-  const q=questions[idx];
-  document.getElementById('quizContent').innerHTML=`<div class="quiz-question"><div class="quiz-q">${idx+1}. ${q.q}</div><div class="quiz-answers">${q.a.map((ans,i)=>`<button class="quiz-answer" onclick="answerQuiz(${i},${q.c},${idx})">${ans}</button>`).join('')}</div></div>`;
-  window.currentQuizQuestions=questions;
-}
-
-function answerQuiz(selected,correct,idx){
-  const btns=document.querySelectorAll('.quiz-answer');
-  btns[selected].classList.add(selected===correct?'correct':'wrong');
-  btns[correct].classList.add('correct');
-  if(selected===correct)currentQuizScore++;
-  document.getElementById('quizScore').textContent=currentQuizScore;
-  setTimeout(()=>showQuizQuestion(window.currentQuizQuestions,idx+1),1000);
-}
-
-function finishQuiz(){
-  const name=prompt(`Bravo! Score: ${currentQuizScore}/10\nEntrez votre nom:`);
-  if(name){
-    if(!arcadeScores.quiz)arcadeScores.quiz=[];
-    arcadeScores.quiz.push({name,score:currentQuizScore,date:new Date().toLocaleDateString()});
-    arcadeScores.quiz.sort((a,b)=>b.score-a.score);
-    arcadeScores.quiz=arcadeScores.quiz.slice(0,10);
-    localStorage.setItem('arcadeScores',JSON.stringify(arcadeScores));
-  }
-  showMenu();
 }
 
 // SUDOKU
@@ -4179,7 +4152,6 @@ initPlanningsDB();
     <div id="arcadeMenu">
       <h2 class="arcade-title">🎮 ARCADE</h2>
       <div class="arcade-menu">
-        <button class="arcade-btn" onclick="startQuiz()">🧠 Culture Générale</button>
         <button class="arcade-btn" onclick="startSudoku()">🔢 Sudoku</button>
         <button class="arcade-btn" onclick="startTetris()">🟦 Tetris</button>
         <button class="arcade-btn" onclick="startMemory()">🃏 Memory</button>
@@ -4187,7 +4159,6 @@ initPlanningsDB();
       </div>
     </div>
     
-    <div id="quizGame" class="game-screen"></div>
     <div id="sudokuGame" class="game-screen"></div>
     <div id="tetrisGame" class="game-screen"></div>
     <div id="memoryGame" class="game-screen"></div>
