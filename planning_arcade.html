@@ -3817,8 +3817,8 @@ function displayPayslips(payslips) {
     return year * 100 + month;
   };
   
-  // Trier par mois/année détecté
-  payslips.sort((a, b) => getMonthYear(a.name) - getMonthYear(b.name));
+  // Trier par mois/année détecté (plus récent en haut)
+  payslips.sort((a, b) => getMonthYear(b.name) - getMonthYear(a.name));
   
   // Limiter à 24 bulletins
   if (payslips.length > 24) {
@@ -4100,8 +4100,8 @@ function displayPlannings(plannings) {
     return year * 100 + month;
   };
   
-  // Trier par mois/année détecté
-  plannings.sort((a, b) => getMonthYear(a.name) - getMonthYear(b.name));
+  // Trier par mois/année détecté (plus récent en haut)
+  plannings.sort((a, b) => getMonthYear(b.name) - getMonthYear(a.name));
   
   if (plannings.length > 24) {
     const toDelete = plannings.slice(24);
