@@ -2917,6 +2917,10 @@ function applyTheme(themeName) {
       box-shadow: 0 0 15px ${theme.accent}50 !important;
     }
     
+    #planningsMax, #payslipsMax {
+      color: ${theme.accent} !important;
+    }
+    
     .payslip-name {
       color: ${theme.accent} !important;
     }
@@ -3794,8 +3798,27 @@ function displayPayslips(payslips) {
     return;
   }
   
-  // Trier par date décroissante (plus récent en premier)
-  payslips.sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Fonction pour extraire mois et année du nom
+  const getMonthYear = (name) => {
+    const mois = {
+      'janvier': 1, 'février': 2, 'fevrier': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
+      'juillet': 7, 'août': 8, 'aout': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12, 'decembre': 12
+    };
+    const lower = name.toLowerCase();
+    let month = 0, year = 0;
+    
+    for (let [m, n] of Object.entries(mois)) {
+      if (lower.includes(m)) { month = n; break; }
+    }
+    
+    const yearMatch = lower.match(/20\d{2}/);
+    if (yearMatch) year = parseInt(yearMatch[0]);
+    
+    return year * 100 + month;
+  };
+  
+  // Trier par mois/année détecté
+  payslips.sort((a, b) => getMonthYear(a.name) - getMonthYear(b.name));
   
   // Limiter à 24 bulletins
   if (payslips.length > 24) {
@@ -4058,7 +4081,27 @@ function displayPlannings(plannings) {
     return;
   }
   
-  plannings.sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Fonction pour extraire mois et année du nom
+  const getMonthYear = (name) => {
+    const mois = {
+      'janvier': 1, 'février': 2, 'fevrier': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
+      'juillet': 7, 'août': 8, 'aout': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12, 'decembre': 12
+    };
+    const lower = name.toLowerCase();
+    let month = 0, year = 0;
+    
+    for (let [m, n] of Object.entries(mois)) {
+      if (lower.includes(m)) { month = n; break; }
+    }
+    
+    const yearMatch = lower.match(/20\d{2}/);
+    if (yearMatch) year = parseInt(yearMatch[0]);
+    
+    return year * 100 + month;
+  };
+  
+  // Trier par mois/année détecté
+  plannings.sort((a, b) => getMonthYear(a.name) - getMonthYear(b.name));
   
   if (plannings.length > 24) {
     const toDelete = plannings.slice(24);
@@ -4197,12 +4240,13 @@ initPlanningsDB();
 <div id="planningsModal" class="payslips-modal">
   <div class="payslips-container">
     <button class="payslips-close" onclick="closePlannings()">✕</button>
-    <h2 class="modal-title" style="text-align:center;font-family:'Black Ops One',cursive;margin-bottom:20px">📅 Mes Plannings</h2>
+    <h2 class="modal-title" style="text-align:center;font-family:'Black Ops One',cursive;margin-bottom:5px">📅 Mes Plannings</h2>
+    <p id="planningsMax" style="text-align:center;color:#FFD700;font-size:0.9em;margin-bottom:20px;font-family:'Black Ops One',cursive">(24 max)</p>
     
     <div style="text-align:center;margin-bottom:25px">
       <input type="file" id="planningFileInput" accept="image/*" style="display:none" onchange="handlePlanningUpload(event)">
       <button class="payslip-add-btn" onclick="document.getElementById('planningFileInput').click()">
-        📂 Importer un planning
+        📂 Importer un screen
       </button>
     </div>
     
@@ -4223,12 +4267,13 @@ initPlanningsDB();
 <div id="payslipsModal" class="payslips-modal">
   <div class="payslips-container">
     <button class="payslips-close" onclick="closePayslips()">✕</button>
-    <h2 class="modal-title" style="text-align:center;font-family:'Black Ops One',cursive;margin-bottom:20px">💰 Mes Bulletins de Paie</h2>
+    <h2 class="modal-title" style="text-align:center;font-family:'Black Ops One',cursive;margin-bottom:5px">💰 Mes Bulletins</h2>
+    <p id="payslipsMax" style="text-align:center;color:#FFD700;font-size:0.9em;margin-bottom:20px;font-family:'Black Ops One',cursive">(24 max)</p>
     
     <div style="text-align:center;margin-bottom:25px">
       <input type="file" id="payslipFileInput" accept="image/*" style="display:none" onchange="handlePayslipUpload(event)">
       <button class="payslip-add-btn" onclick="document.getElementById('payslipFileInput').click()">
-        📂 Importer un bulletin
+        📂 Importer un screen
       </button>
     </div>
     
