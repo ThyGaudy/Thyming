@@ -1741,6 +1741,18 @@ h3::after {
 
 </head>
 <body>
+<!-- Splash Screen -->
+<div id="splashScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999">
+  <img src="icon-512.png" alt="Thyming" style="width:200px;height:200px;animation:pulse 1.5s infinite">
+  <h1 style="font-family:'Black Ops One',cursive;font-size:2.5em;margin-top:30px;background:linear-gradient(90deg,#FF00FF,#00FFFF,#FF00FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Thyming</h1>
+</div>
+<style>
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+</style>
+
 <canvas id="particles"></canvas>
 
 <!-- Modal Bloc-note -->
@@ -3045,6 +3057,16 @@ if (window.DeviceMotionEvent) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Masquer le splash screen après 2 secondes
+  setTimeout(() => {
+    const splash = document.getElementById('splashScreen');
+    if (splash) {
+      splash.style.opacity = '0';
+      splash.style.transition = 'opacity 0.5s';
+      setTimeout(() => splash.remove(), 500);
+    }
+  }, 2000);
+  
   // Bloquer complètement la sélection de texte et les bulles
   document.addEventListener('selectstart', (e) => e.preventDefault());
   document.addEventListener('contextmenu', (e) => {
