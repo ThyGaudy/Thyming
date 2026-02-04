@@ -1747,41 +1747,25 @@ h3::after {
 </head>
 <body>
 <!-- Splash Screen -->
-<div id="splashScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999">
+<div id="splashScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;overflow:hidden">
   <img src="icon-512.png" alt="Thyming" style="width:280px;height:280px;animation:pulse 1.5s infinite;position:relative;z-index:100001">
-  <div id="splashTitle" style="font-family:'Black Ops One',cursive;font-size:2.8em;font-weight:400;margin-top:30px;letter-spacing:6px;display:flex;gap:4px;position:relative;z-index:100001"></div>
+  <h1 id="splashTitle" style="font-family:'Exo 2',sans-serif;font-size:3.5em;font-weight:300;font-style:italic;margin-top:30px;letter-spacing:8px;background:linear-gradient(90deg,#8B0000,#DC143C,#FF4500,#FFA500,#FFD700);background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 3s ease infinite,slideFromRight 1s ease-out;position:relative;z-index:100001;text-shadow:0 0 20px rgba(255,215,0,0.4)">THYMING</h1>
 </div>
 <style>
 @keyframes pulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.05); opacity: 0.85; }
 }
-@keyframes slideIn {
-  from { transform: translateX(100vw); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes slideFromRight {
+  0% { transform: translateX(100vw); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
 }
 </style>
-<script>
-// Animation lettres qui arrivent de droite
-const titleContainer = document.getElementById('splashTitle');
-const text = 'THYMING';
-const colors = ['#8B0000', '#B22222', '#DC143C', '#FF4500', '#FF8C00', '#FFA500', '#FFD700'];
-
-text.split('').forEach((letter, i) => {
-  const span = document.createElement('span');
-  span.textContent = letter;
-  span.style.cssText = `
-    color: ${colors[i]};
-    display: inline-block;
-    animation: slideIn 0.5s ease-out forwards;
-    animation-delay: ${i * 0.1}s;
-    opacity: 0;
-    text-shadow: 0 0 15px ${colors[i]}, 0 2px 4px rgba(0,0,0,0.8);
-    filter: drop-shadow(0 0 5px ${colors[i]});
-  `;
-  titleContainer.appendChild(span);
-});
-</script>
 
 <canvas id="particles"></canvas>
 
