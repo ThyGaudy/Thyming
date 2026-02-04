@@ -427,6 +427,11 @@ h1 {
   box-shadow: inset 0 0 10px rgba(0, 191, 255, 0.1);
 }
 
+.day-cell.today {
+  border: 1px solid #00FFB3 !important;
+  box-shadow: 0 0 8px rgba(0, 255, 179, 0.3);
+}
+
 .day-cell.weekend .day-number {
   color: #FFD700;
   font-weight: 900;
@@ -2160,11 +2165,18 @@ function createDayCell(date, otherMonth) {
   const isSunday = date.getDay() === 0;
   const isHol = isHoliday(dateStr);
   
+  // Vérifier si c'est aujourd'hui
+  const today = new Date();
+  const isToday = date.getDate() === today.getDate() && 
+                  date.getMonth() === today.getMonth() && 
+                  date.getFullYear() === today.getFullYear();
+  
   cell.className = 'day-cell';
   
   if (otherMonth) cell.classList.add('other-month');
   if (isWeekend(date)) cell.classList.add('weekend');
   if (isHol) cell.classList.add('holiday');
+  if (isToday) cell.classList.add('today');
   
   if (shift === 'day') cell.classList.add('day-shift');
   else if (shift === 'night') cell.classList.add('night-shift');
