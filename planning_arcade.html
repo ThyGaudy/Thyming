@@ -143,7 +143,7 @@ header {
   text-overflow: ellipsis;
 }
 
-h1 {
+#mainTitle {
   font-family: 'Black Ops One', cursive !important;
   font-size: 5.5em !important;
   font-weight: 400 !important;
@@ -971,7 +971,7 @@ h3::after {
     max-width: 100%;
     overflow-x: hidden;
   }
-  h1 {
+  #mainTitle {
     font-size: 2em;
   }
   .day-cell {
@@ -1793,7 +1793,7 @@ h3::after {
 </div>
 <button class="payslips-btn" id="planningsBtn" title="Mes plannings">📅</button>
 </div>
-<h1>Planning de travail</h1>
+<h1 id="mainTitle">Planning de travail</h1>
 <div class="month-selector">
 <button id="prevMonth">◀</button>
 <span id="currentMonth">Chargement...</span>
@@ -2757,7 +2757,7 @@ function applyTheme(themeName) {
   currentTheme = themeName;
   
   // 1. Changer le titre principal
-  const h1 = document.querySelector('h1');
+  const h1 = document.getElementById('mainTitle');
   if (h1) {
     h1.style.fontFamily = "'Black Ops One', cursive";
     h1.style.background = theme.titleGradient;
