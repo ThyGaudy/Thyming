@@ -427,6 +427,11 @@ h1 {
   box-shadow: inset 0 0 10px rgba(0, 191, 255, 0.1);
 }
 
+.day-cell.today {
+  border: 1px solid #00FFB3 !important;
+  box-shadow: 0 0 8px rgba(0, 255, 179, 0.3);
+}
+
 .day-cell.weekend .day-number {
   color: #FFD700;
   font-weight: 900;
@@ -1741,6 +1746,27 @@ h3::after {
 
 </head>
 <body>
+<!-- Splash Screen -->
+<div id="splashScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;overflow:hidden">
+  <img src="icon-512.png" alt="Thyming" style="width:280px;height:280px;animation:pulse 1.5s infinite;position:relative;z-index:100001">
+  <h1 id="splashTitle" style="font-family:'Exo 2',sans-serif;font-size:2.2em;font-weight:300;font-style:italic;margin-top:30px;letter-spacing:8px;background:linear-gradient(90deg,#8B0000 0%,#B22222 15%,#DC143C 30%,#FF4500 45%,#FF8C00 60%,#FFA500 75%,#FFD700 90%);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 4s ease-in-out infinite,slideFromRight 1.2s ease-out;position:relative;z-index:100001;filter:drop-shadow(0 0 15px rgba(255,140,0,0.6))">THYMING</h1>
+</div>
+<style>
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.85; }
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes slideFromRight {
+  0% { transform: translateX(100vw); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+</style>
+
 <canvas id="particles"></canvas>
 
 <!-- Modal Bloc-note -->
@@ -2148,11 +2174,18 @@ function createDayCell(date, otherMonth) {
   const isSunday = date.getDay() === 0;
   const isHol = isHoliday(dateStr);
   
+  // Vérifier si c'est aujourd'hui
+  const today = new Date();
+  const isToday = date.getDate() === today.getDate() && 
+                  date.getMonth() === today.getMonth() && 
+                  date.getFullYear() === today.getFullYear();
+  
   cell.className = 'day-cell';
   
   if (otherMonth) cell.classList.add('other-month');
   if (isWeekend(date)) cell.classList.add('weekend');
   if (isHol) cell.classList.add('holiday');
+  if (isToday) cell.classList.add('today');
   
   if (shift === 'day') cell.classList.add('day-shift');
   else if (shift === 'night') cell.classList.add('night-shift');
@@ -2917,6 +2950,10 @@ function applyTheme(themeName) {
       box-shadow: 0 0 15px ${theme.accent}50 !important;
     }
     
+    #planningsMax, #payslipsMax {
+      color: ${theme.accent} !important;
+    }
+    
     .payslip-name {
       color: ${theme.accent} !important;
     }
@@ -3041,6 +3078,61 @@ if (window.DeviceMotionEvent) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Masquer le splash screen après 2 secondes
+  // Créer des feux d'artifice dorés
+  const fireworks = document.createElement('canvas');
+  fireworks.id = 'fireworksCanvas';
+  fireworks.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100000';
+  document.body.appendChild(fireworks);
+  
+  const ctx = fireworks.getContext('2d');
+  fireworks.width = window.innerWidth;
+  fireworks.height = window.innerHeight;
+  
+  const particles = [];
+  for (let i = 0; i < 50; i++) {
+    particles.push({
+      x: fireworks.width / 2,
+      y: fireworks.height / 2,
+      vx: (Math.random() - 0.5) * 8,
+      vy: (Math.random() - 0.5) * 8 - 2,
+      life: 100,
+      color: `hsl(${40 + Math.random() * 20}, 100%, ${50 + Math.random() * 30}%)`
+    });
+  }
+  
+  function animateFireworks() {
+    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+    ctx.fillRect(0, 0, fireworks.width, fireworks.height);
+    
+    particles.forEach((p, i) => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.1;
+      p.life -= 1;
+      
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.life / 100;
+      ctx.fillRect(p.x, p.y, 3, 3);
+      
+      if (p.life <= 0) particles.splice(i, 1);
+    });
+    
+    if (particles.length > 0) requestAnimationFrame(animateFireworks);
+    else fireworks.remove();
+  }
+  
+  animateFireworks();
+  
+  setTimeout(() => {
+    const splash = document.getElementById('splashScreen');
+    if (splash) {
+      splash.style.opacity = '0';
+      splash.style.transition = 'opacity 0.5s';
+      setTimeout(() => splash.remove(), 500);
+    }
+  }, 5000);
+  
   // Bloquer complètement la sélection de texte et les bulles
   document.addEventListener('selectstart', (e) => e.preventDefault());
   document.addEventListener('contextmenu', (e) => {
@@ -3794,8 +3886,27 @@ function displayPayslips(payslips) {
     return;
   }
   
-  // Trier par date décroissante (plus récent en premier)
-  payslips.sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Fonction pour extraire mois et année du nom
+  const getMonthYear = (name) => {
+    const mois = {
+      'janvier': 1, 'février': 2, 'fevrier': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
+      'juillet': 7, 'août': 8, 'aout': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12, 'decembre': 12
+    };
+    const lower = name.toLowerCase();
+    let month = 0, year = 0;
+    
+    for (let [m, n] of Object.entries(mois)) {
+      if (lower.includes(m)) { month = n; break; }
+    }
+    
+    const yearMatch = lower.match(/20\d{2}/);
+    if (yearMatch) year = parseInt(yearMatch[0]);
+    
+    return year * 100 + month;
+  };
+  
+  // Trier par mois/année détecté (plus récent en haut)
+  payslips.sort((a, b) => getMonthYear(b.name) - getMonthYear(a.name));
   
   // Limiter à 24 bulletins
   if (payslips.length > 24) {
@@ -4058,7 +4169,27 @@ function displayPlannings(plannings) {
     return;
   }
   
-  plannings.sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Fonction pour extraire mois et année du nom
+  const getMonthYear = (name) => {
+    const mois = {
+      'janvier': 1, 'février': 2, 'fevrier': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
+      'juillet': 7, 'août': 8, 'aout': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12, 'decembre': 12
+    };
+    const lower = name.toLowerCase();
+    let month = 0, year = 0;
+    
+    for (let [m, n] of Object.entries(mois)) {
+      if (lower.includes(m)) { month = n; break; }
+    }
+    
+    const yearMatch = lower.match(/20\d{2}/);
+    if (yearMatch) year = parseInt(yearMatch[0]);
+    
+    return year * 100 + month;
+  };
+  
+  // Trier par mois/année détecté (plus récent en haut)
+  plannings.sort((a, b) => getMonthYear(b.name) - getMonthYear(a.name));
   
   if (plannings.length > 24) {
     const toDelete = plannings.slice(24);
@@ -4197,12 +4328,13 @@ initPlanningsDB();
 <div id="planningsModal" class="payslips-modal">
   <div class="payslips-container">
     <button class="payslips-close" onclick="closePlannings()">✕</button>
-    <h2 class="modal-title" style="text-align:center;font-family:'Black Ops One',cursive;margin-bottom:20px">📅 Mes Plannings</h2>
+    <h2 class="modal-title" style="text-align:center;font-family:'Black Ops One',cursive;margin-bottom:5px">📅 Mes Plannings</h2>
+    <p id="planningsMax" style="text-align:center;color:#FFD700;font-size:0.9em;margin-bottom:20px;font-family:'Black Ops One',cursive">(24 max)</p>
     
     <div style="text-align:center;margin-bottom:25px">
       <input type="file" id="planningFileInput" accept="image/*" style="display:none" onchange="handlePlanningUpload(event)">
       <button class="payslip-add-btn" onclick="document.getElementById('planningFileInput').click()">
-        📂 Importer un planning
+        📂 Importer un screen
       </button>
     </div>
     
@@ -4223,12 +4355,13 @@ initPlanningsDB();
 <div id="payslipsModal" class="payslips-modal">
   <div class="payslips-container">
     <button class="payslips-close" onclick="closePayslips()">✕</button>
-    <h2 class="modal-title" style="text-align:center;font-family:'Black Ops One',cursive;margin-bottom:20px">💰 Mes Bulletins de Paie</h2>
+    <h2 class="modal-title" style="text-align:center;font-family:'Black Ops One',cursive;margin-bottom:5px">💰 Mes Bulletins</h2>
+    <p id="payslipsMax" style="text-align:center;color:#FFD700;font-size:0.9em;margin-bottom:20px;font-family:'Black Ops One',cursive">(24 max)</p>
     
     <div style="text-align:center;margin-bottom:25px">
       <input type="file" id="payslipFileInput" accept="image/*" style="display:none" onchange="handlePayslipUpload(event)">
       <button class="payslip-add-btn" onclick="document.getElementById('payslipFileInput').click()">
-        📂 Importer un bulletin
+        📂 Importer un screen
       </button>
     </div>
     
