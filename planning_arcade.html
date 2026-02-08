@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Planning de travail</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@400;500;600;700;800;900&family=Black+Ops+One&family=Pinyon+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@400;500;600;700;800;900&family=Black+Ops+One&family=Pinyon+Script&family=VT323&family=Special+Elite&family=Cinzel:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 * {
   margin: 0;
@@ -2755,6 +2755,43 @@ const themes = {
     lightAccent: '#FFB380',
     particles: 'rgb(255, 69, 0)',
     borderColor: '#FF4500'
+  },
+  retroArcade: {
+    name: 'Rétro Arcade',
+    titleGradient: 'linear-gradient(90deg, #FF6B35, #F7931E, #FDC830, #FF6B35)',
+    accent: '#F7931E',
+    lightAccent: '#FDC830',
+    particles: 'rgb(247, 147, 30)',
+    borderColor: '#F7931E',
+    dateColor: '#FDC830',
+    mainFont: "'VT323', monospace",
+    titleFont: "'VT323', monospace"
+  },
+  steampunk: {
+    name: 'Steampunk',
+    titleGradient: 'linear-gradient(90deg, #B87333, #CD7F32, #C9AE5D, #B87333)',
+    accent: '#CD7F32',
+    lightAccent: '#E5C29F',
+    particles: 'rgb(205, 127, 50)',
+    borderColor: '#CD7F32',
+    dateColor: '#C9AE5D',
+    backgroundColor: '#1a1410',
+    cardBackground: 'rgba(42, 35, 28, 0.4)',
+    textColor: '#D4C5B0'
+  },
+  goldLuxury: {
+    name: 'Gold Luxury',
+    titleGradient: 'linear-gradient(90deg, #FFD700, #FFA500, #FFDF00, #FFD700)',
+    accent: '#FFD700',
+    lightAccent: '#FFEC8B',
+    particles: 'rgb(255, 215, 0)',
+    borderColor: '#FFD700',
+    dateColor: '#FFA500',
+    backgroundColor: '#0a0a0a',
+    cardBackground: 'rgba(26, 26, 26, 0.8)',
+    textColor: '#FFD700',
+    mainFont: "'Cinzel', serif",
+    titleFont: "'Cinzel', serif"
   }
 };
 
@@ -2766,10 +2803,23 @@ function applyTheme(themeName) {
   
   currentTheme = themeName;
   
+  // Appliquer les couleurs de fond et texte si présentes
+  if (theme.backgroundColor) {
+    document.body.style.backgroundColor = theme.backgroundColor;
+  } else {
+    document.body.style.backgroundColor = '#000000';
+  }
+  
+  if (theme.textColor) {
+    document.body.style.color = theme.textColor;
+  } else {
+    document.body.style.color = '#e8e8e8';
+  }
+  
   // 1. Changer le titre principal
   const h1 = document.getElementById('mainTitle');
   if (h1) {
-    h1.style.fontFamily = "'Black Ops One', cursive";
+    h1.style.fontFamily = theme.titleFont || "'Black Ops One', cursive";
     h1.style.background = theme.titleGradient;
     h1.style.backgroundClip = 'text';
     h1.style.webkitBackgroundClip = 'text';
@@ -2850,6 +2900,89 @@ function applyTheme(themeName) {
     .regulation-item {
       box-shadow: none !important;
     }
+    
+    /* Appliquer les fonds de cartes si présents */
+    ${theme.cardBackground ? `
+    .stats, .regulation, .stat-item, .regulation-card, .regulation-item, 
+    .cp-box, #calendar, .day-cell {
+      background: ${theme.cardBackground} !important;
+    }
+    
+    .day-cell.day-shift {
+      background: linear-gradient(135deg, rgba(20, 138, 0, 0.6), rgba(26, 160, 6, 0.6)) !important;
+    }
+    
+    .day-cell.night-shift {
+      background: linear-gradient(135deg, rgba(0, 54, 161, 0.6), rgba(0, 66, 187, 0.6)) !important;
+    }
+    
+    .day-cell.cp-shift {
+      background: linear-gradient(135deg, rgba(32, 126, 150, 0.6), rgba(40, 148, 172, 0.6)) !important;
+    }
+    
+    .day-cell.formation-shift {
+      background: linear-gradient(135deg, rgba(166, 166, 0, 0.6), rgba(184, 184, 0, 0.6)) !important;
+    }
+    
+    .day-cell.indispo-shift {
+      background: linear-gradient(135deg, rgba(156, 0, 156, 0.6), rgba(176, 0, 176, 0.6)) !important;
+    }
+    
+    .day-cell.arret-shift {
+      background: linear-gradient(135deg, rgba(148, 104, 104, 0.6), rgba(164, 120, 120, 0.6)) !important;
+    }
+    ` : ''}
+    
+    /* Appliquer les styles de bordures - version fine */
+    .stats, .regulation, #calendar {
+      border-left: 2px solid ${theme.accent} !important;
+    }
+    
+    /* Changer la police globale si thème rétro arcade ou gold luxury */
+    ${theme.mainFont && (themeName === 'retroArcade' || themeName === 'goldLuxury') ? `
+    body, .stat-label, .stat-value, .regulation-label, .regulation-value, 
+    .regulation-title, .regulation-dates, .cp-box-label, .cp-box-value,
+    .legend-item, .day-number, .shift-time, .stats h2, .regulation h2, h3 {
+      font-family: ${theme.mainFont} !important;
+    }
+    
+    .stats h2, .regulation h2 {
+      font-size: 1.8em !important;
+    }
+    
+    .regulation-title {
+      font-size: 1.6em !important;
+    }
+    
+    .stat-value, .regulation-value {
+      font-size: 1.5em !important;
+    }
+    
+    .stat-label, .regulation-label {
+      font-size: 1.2em !important;
+    }
+    
+    .day-header {
+      font-size: 1.1em !important;
+      padding: 10px 4px !important;
+    }
+    
+    .current-date, .current-time, .current-week {
+      font-size: 1.1em !important;
+    }
+    
+    #currentMonth {
+      font-size: 1.4em !important;
+    }
+    
+    .day-number {
+      font-size: 1.3em !important;
+    }
+    
+    .shift-time {
+      font-size: 0.9em !important;
+    }
+    ` : ''}
     
     .stats h2::after, .regulation h2::after, h3::after {
       background: ${theme.titleGradient} !important;
@@ -3045,7 +3178,7 @@ if (window.DeviceMotionEvent) {
       lastShake = now;
       
       // Ordre fixe des thèmes
-      const themeOrder = ['cyberpunk', 'neonTokyo', 'ocean', 'sunset', 'forest', 'matrix', 'fire'];
+      const themeOrder = ['cyberpunk', 'neonTokyo', 'ocean', 'sunset', 'matrix', 'fire', 'retroArcade', 'goldLuxury'];
       const currentIndex = themeOrder.indexOf(currentTheme);
       const nextTheme = themeOrder[(currentIndex + 1) % themeOrder.length];
       
