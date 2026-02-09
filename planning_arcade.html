@@ -2447,7 +2447,8 @@ function updateStats() {
   let totalFormation = 0;
   let totalArret = 0;
   let cpDays = 0;
-  let depannageHours = 0;  // Nouveau compteur
+  let depannageHours = 0;
+  let carryOverDepannage = 0;  // Report dépannages nuit du mois précédent
   
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const lastDayPrevMonth = new Date(year, month, 0);
@@ -2457,6 +2458,27 @@ function updateStats() {
     const firstDayThisMonth = new Date(year, month, 1);
     const firstDayThisMonthStr = formatDate(firstDayThisMonth);
     carryOverNight = 6;
+    if (isHoliday(firstDayThisMonthStr)) {
+      carryOverHoliday = 7;
+    }
+    if (firstDayThisMonth.getDay() === 0) {
+      sundayHours += 7;
+      carryOverSunday = 7;
+    }
+  }
+  
+  // Report dépannage nuit du mois précédent (00h-07h)
+  if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
+    carryOverDepannage = 7;  // 00h-07h du 1er jour
+    totalHours += 7;
+    depannageHours += 7;
+    
+    const firstDayThisMonth = new Date(year, month, 1);
+    const firstDayThisMonthStr = formatDate(firstDayThisMonth);
+    
+    // Compter aussi les heures de nuit (00h-06h = 6h)
+    carryOverNight = 6;
+    
     if (isHoliday(firstDayThisMonthStr)) {
       carryOverHoliday = 7;
     }
@@ -2515,14 +2537,18 @@ function updateStats() {
     
     if (shift === 'depannage_night') {
       paniers++;
-      totalHours += 12;
-      depannageHours += 12;
       
       if (d === daysInMonth) {
-        nightHours += 3;
+        // Dernier jour du mois : seulement 19h-00h (5h) sur ce mois
+        totalHours += 5;
+        depannageHours += 5;
+        nightHours += 3;  // 21h-00h
         if (isSunday) sundayHours += 5;
         if (isHol) holidayHours += 5;
       } else {
+        // Jour normal : 12h complètes
+        totalHours += 12;
+        depannageHours += 12;
         nightHours += 9;
         const nextDay = new Date(y, m, d + 1);
         const nextDayStr = formatDate(nextDay);
