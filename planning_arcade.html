@@ -3001,6 +3001,22 @@ function applyTheme(themeName) {
     .day-cell.arret-shift {
       background: linear-gradient(135deg, rgba(148, 104, 104, 0.6), rgba(164, 120, 120, 0.6)) !important;
     }
+    
+    /* Cases hors mois - grisées comme les autres thèmes */
+    .day-cell.other-month {
+      background: #8a8a8a !important;
+      opacity: 0.8 !important;
+      pointer-events: none !important;
+      border: 1px solid rgba(0, 191, 255, 0.3) !important;
+      box-shadow: inset 0 0 10px rgba(0, 191, 255, 0.1) !important;
+    }
+    
+    .day-cell.other-month.weekend {
+      background: #6a6a6a !important;
+      opacity: 0.8 !important;
+      border: 1px solid rgba(0, 191, 255, 0.3) !important;
+      box-shadow: inset 0 0 10px rgba(0, 191, 255, 0.1) !important;
+    }
     ` : ''}
     
     /* Appliquer les styles de bordures - version fine */
