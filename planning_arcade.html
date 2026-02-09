@@ -274,6 +274,22 @@ header {
   font-size: 0.85em;
   color: #ffffff;
   text-shadow: 0 0 8px rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.legend-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.legend-item.selected {
+  background: rgba(0, 255, 255, 0.2);
+  border: 2px solid #00FFFF;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), inset 0 0 10px rgba(0, 255, 255, 0.3);
+  transform: scale(1.08);
 }
 
 .legend-box {
@@ -480,7 +496,11 @@ header {
 }
 
 .day-cell.depannage_night-shift {
-  background: linear-gradient(135deg, #CC5500, #DD6600) !important;
+  background: linear-gradient(135deg, #B35E00, #C86F00) !important;
+}
+
+.day-cell.rc-shift {
+  background: linear-gradient(135deg, #00CBF0, #00E0FF) !important;
 }
 
 .day-cell.other-month.day-shift {
@@ -519,7 +539,12 @@ header {
 }
 
 .day-cell.other-month.depannage_night-shift {
-  background: linear-gradient(135deg, #DD8855, #EE9966) !important;
+  background: linear-gradient(135deg, #CC8855, #DD9966) !important;
+  opacity: 1 !important;
+}
+
+.day-cell.other-month.rc-shift {
+  background: linear-gradient(135deg, #66E0FF, #99F0FF) !important;
   opacity: 1 !important;
 }
 
@@ -1900,37 +1925,41 @@ h3::after {
 </header>
 
 <div class="legend">
-<div class="legend-item">
+<div class="legend-item" data-shift-type="day">
 <span class="legend-box" style="background:linear-gradient(135deg,#148A00,#1aa006)"></span>
 <span>Jour</span>
 </div>
-<div class="legend-item">
+<div class="legend-item" data-shift-type="night">
 <span class="legend-box" style="background:linear-gradient(135deg,#0036A1,#0042bb)"></span>
 <span>Nuit</span>
 </div>
-<div class="legend-item">
+<div class="legend-item" data-shift-type="indispo">
 <span class="legend-box" style="background:linear-gradient(135deg,#9C009C,#b000b0)"></span>
 <span>Indispo</span>
 </div>
-<div class="legend-item">
+<div class="legend-item" data-shift-type="cp">
 <span class="legend-box" style="background:linear-gradient(135deg,#207E96,#2894ac)"></span>
 <span>CP</span>
 </div>
-<div class="legend-item">
+<div class="legend-item" data-shift-type="formation">
 <span class="legend-box" style="background:linear-gradient(135deg,#A6A600,#b8b800)"></span>
 <span>Formation</span>
 </div>
-<div class="legend-item">
+<div class="legend-item" data-shift-type="arret">
 <span class="legend-box" style="background:linear-gradient(135deg,#946868,#a47878)"></span>
 <span>Arrêt</span>
 </div>
-<div class="legend-item">
+<div class="legend-item" data-shift-type="depannage_day">
 <span class="legend-box" style="background:linear-gradient(135deg,#FF6B00,#FF8C00)"></span>
 <span>Dép Jour</span>
 </div>
-<div class="legend-item">
-<span class="legend-box" style="background:linear-gradient(135deg,#CC5500,#DD6600)"></span>
+<div class="legend-item" data-shift-type="depannage_night">
+<span class="legend-box" style="background:linear-gradient(135deg,#B35E00,#C86F00)"></span>
 <span>Dép Nuit</span>
+</div>
+<div class="legend-item" data-shift-type="rc">
+<span class="legend-box" style="background:linear-gradient(135deg,#00CBF0,#00E0FF)"></span>
+<span>RC</span>
 </div>
 </div>
 
@@ -2146,6 +2175,7 @@ let shifts = {};
 let notes = {};
 let longPressTimer;
 let currentNoteDate = null;
+let selectedShiftType = null;  // Pour le mode sélection de la légende
 
 const holidays = {
   '2025-01-01':'', '2025-04-21':'', '2025-05-01':'', '2025-05-08':'', '2025-05-29':'',
@@ -2323,6 +2353,7 @@ function createDayCell(date, otherMonth) {
   else if (shift === 'arret') cell.classList.add('arret-shift');
   else if (shift === 'depannage_day') cell.classList.add('depannage_day-shift');
   else if (shift === 'depannage_night') cell.classList.add('depannage_night-shift');
+  else if (shift === 'rc') cell.classList.add('rc-shift');
   
   const dayNumber = document.createElement('div');
   dayNumber.className = 'day-number';
@@ -2362,6 +2393,8 @@ function createDayCell(date, otherMonth) {
       shiftTime.textContent = 'Dép J 7h-19h';
     } else if (shift === 'depannage_night') {
       shiftTime.textContent = 'Dép N 19h-7h';
+    } else if (shift === 'rc') {
+      shiftTime.textContent = 'RC 12h';
     }
     
     cell.appendChild(shiftTime);
@@ -2402,24 +2435,38 @@ function createDayCell(date, otherMonth) {
   
   cell.addEventListener('click', () => {
     if (!otherMonth) {
-      if (!shifts[dateStr]) {
-        shifts[dateStr] = 'day';
-      } else if (shifts[dateStr] === 'day') {
-        shifts[dateStr] = 'night';
-      } else if (shifts[dateStr] === 'night') {
-        shifts[dateStr] = 'indispo';
-      } else if (shifts[dateStr] === 'indispo') {
-        shifts[dateStr] = 'cp';
-      } else if (shifts[dateStr] === 'cp') {
-        shifts[dateStr] = 'formation';
-      } else if (shifts[dateStr] === 'formation') {
-        shifts[dateStr] = 'arret';
-      } else if (shifts[dateStr] === 'arret') {
-        shifts[dateStr] = 'depannage_day';
-      } else if (shifts[dateStr] === 'depannage_day') {
-        shifts[dateStr] = 'depannage_night';
+      // Mode sélection activé
+      if (selectedShiftType) {
+        if (shifts[dateStr] === selectedShiftType) {
+          // Si déjà le même type, on efface
+          delete shifts[dateStr];
+        } else {
+          // Sinon on met le type sélectionné
+          shifts[dateStr] = selectedShiftType;
+        }
       } else {
-        delete shifts[dateStr];
+        // Mode cycle normal
+        if (!shifts[dateStr]) {
+          shifts[dateStr] = 'day';
+        } else if (shifts[dateStr] === 'day') {
+          shifts[dateStr] = 'night';
+        } else if (shifts[dateStr] === 'night') {
+          shifts[dateStr] = 'indispo';
+        } else if (shifts[dateStr] === 'indispo') {
+          shifts[dateStr] = 'cp';
+        } else if (shifts[dateStr] === 'cp') {
+          shifts[dateStr] = 'formation';
+        } else if (shifts[dateStr] === 'formation') {
+          shifts[dateStr] = 'arret';
+        } else if (shifts[dateStr] === 'arret') {
+          shifts[dateStr] = 'depannage_day';
+        } else if (shifts[dateStr] === 'depannage_day') {
+          shifts[dateStr] = 'depannage_night';
+        } else if (shifts[dateStr] === 'depannage_night') {
+          shifts[dateStr] = 'rc';
+        } else {
+          delete shifts[dateStr];
+        }
       }
       saveToStorage();
       renderCalendar();
@@ -2523,6 +2570,12 @@ function updateStats() {
     if (shift === 'formation') {
       totalFormation += 7;
       totalHours += 7;
+      return;
+    }
+    
+    if (shift === 'rc') {
+      // RC = Repos Compensateur : 12h (calcul spécifique à définir plus tard)
+      totalHours += 12;
       return;
     }
     
@@ -2773,6 +2826,9 @@ function updateRegulations() {
         totalYearHours += 7;
       }
       if (shift === 'depannage_day' || shift === 'depannage_night') {
+        totalYearHours += 12;
+      }
+      if (shift === 'rc') {
         totalYearHours += 12;
       }
     }
@@ -3507,6 +3563,24 @@ window.addEventListener('DOMContentLoaded', () => {
   renderCalendar();
   updateStats();
   updateRegulations();
+  
+  // Initialiser les clicks sur les legend-items pour le mode sélection
+  document.querySelectorAll('.legend-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const shiftType = item.getAttribute('data-shift-type');
+      
+      // Si on clique sur le même item, on désélectionne
+      if (selectedShiftType === shiftType) {
+        selectedShiftType = null;
+        document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('selected'));
+      } else {
+        // Sinon on sélectionne le nouveau
+        selectedShiftType = shiftType;
+        document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+      }
+    });
+  });
   
   // Appui long sur "S" pour ouvrir YouTube Music (APRÈS renderCalendar)
   const weekS = document.getElementById('weekHeaderS');
