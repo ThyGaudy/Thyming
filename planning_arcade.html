@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -2702,6 +2703,9 @@ function updateRegulations() {
   let totalYearOver162 = 0;
   let totalYearDepannage = 0;
   
+  // Stocker les valeurs numériques brutes pour la correction des nuits
+  const reguleRawHours = [];
+  
   regules.forEach((regule, index) => {
     let reguleHours = 0;
     let arretHours = 0;
@@ -2725,7 +2729,14 @@ function updateRegulations() {
         const shift = shifts[dateStr];
         
         if (shift === 'day' || shift === 'night') {
-          monthsInRegule[monthKey].total += 12;
+          let hoursToAdd = 12;
+          
+          // Si nuit le dernier jour de régule, compter seulement 5h (19h-00h)
+          if (shift === 'night' && shiftDate.getTime() === regule.end.getTime()) {
+            hoursToAdd = 5;
+          }
+          
+          monthsInRegule[monthKey].total += hoursToAdd;
         }
         if (shift === 'cp' && shiftDate.getDay() !== 0 && !isHol) {
           monthsInRegule[monthKey].total += 5.83;
@@ -2735,14 +2746,49 @@ function updateRegulations() {
         }
         if (shift === 'arret' && shiftDate.getDay() !== 0 && shiftDate.getDay() !== 6) {
           arretHours += 7;
-          // Les arrêts ne vont PAS dans le total mensuel pour éviter double comptage
         }
         if (shift === 'depannage_day' || shift === 'depannage_night') {
-          monthsInRegule[monthKey].total += 12;
-          monthsInRegule[monthKey].depannage += 12;
+          let depHoursToAdd = 12;
+          
+          // Même chose pour dépannage nuit
+          if (shift === 'depannage_night' && shiftDate.getTime() === regule.end.getTime()) {
+            depHoursToAdd = 5;
+          }
+          
+          monthsInRegule[monthKey].total += depHoursToAdd;
+          monthsInRegule[monthKey].depannage += depHoursToAdd;
         }
       }
     });
+    
+    // Report des 7h de la nuit de la régule précédente (00h-07h)
+if (index > 0) {
+  const prevRegule = regules[index - 1];
+  const lastDayPrev = new Date(prevRegule.end);
+  const lastDayPrevStr = `${lastDayPrev.getFullYear()}-${String(lastDayPrev.getMonth() + 1).padStart(2, '0')}-${String(lastDayPrev.getDate()).padStart(2, '0')}`;
+  
+ 
+  
+  if (shifts[lastDayPrevStr] === 'night' || shifts[lastDayPrevStr] === 'depannage_night') {
+    
+    
+    const firstDay = new Date(regule.start);
+    const monthKey = `${firstDay.getFullYear()}-${firstDay.getMonth()}`;
+    
+    
+    
+    if (!monthsInRegule[monthKey]) {
+      monthsInRegule[monthKey] = { total: 0, depannage: 0 };
+    }
+    
+    monthsInRegule[monthKey].total += 7;
+    
+    
+    if (shifts[lastDayPrevStr] === 'depannage_night') {
+      monthsInRegule[monthKey].depannage += 7;
+    }
+  }
+}
     
     // Calculer les heures >162h et dépannages pour chaque mois
     Object.values(monthsInRegule).forEach(month => {
@@ -2750,13 +2796,13 @@ function updateRegulations() {
       hoursOver162InRegule += over162;
       depannageHoursInRegule += month.depannage;
       
-      // Pour la régule, on enlève le >162h et les dépannages
       const monthForRegule = month.total - over162 - month.depannage;
       reguleHours += monthForRegule;
     });
     
-    // Ajouter les arrêts (ils sont déjà dans le calcul)
     const totalHours = reguleHours + arretHours;
+    reguleRawHours[index] = totalHours; // Stocker pour référence
+    
     const quota = 595;
     const remaining = Math.max(0, quota - totalHours);
     const supp = Math.max(0, reguleHours - quota);
