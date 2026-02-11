@@ -2359,7 +2359,7 @@ function renderCalendar() {
       }
     }
     weekNum.className = 'week-number';
-    weekNum.innerHTML = `<div style="font-size: 1.2em; font-weight: bold;">${getWeekNumber(weekCells[i].date)}</div><div style="font-size: 0.85em; position: absolute; bottom: 5px; color: ${weekHours > 48 ? '#ff0000' : '#00ff00'};">${weekHours.toFixed(0)}h</div>`;
+    weekNum.innerHTML = `<div style="font-size: 1.2em; font-weight: bold; position: absolute; top: 5px;">${getWeekNumber(weekCells[i].date)}</div><div style="font-size: 1.1em; position: absolute; bottom: 5px; color: ${weekHours > 48 ? '#ff0000' : '#00ff00'};">${weekHours.toFixed(0)}h</div>`;
     calendar.appendChild(weekNum);
     
     for (let j = 0; j < 7; j++) {
