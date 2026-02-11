@@ -2806,6 +2806,9 @@ if (index > 0) {
     const totalHours = reguleHours + arretHours;
     reguleRawHours[index] = totalHours; // Stocker pour référence
     
+    // Calculer le total travaillé (avec >162h et dépannages)
+    const totalWorked = totalHours + hoursOver162InRegule + depannageHoursInRegule;
+    
     const quota = 595;
     const remaining = Math.max(0, quota - totalHours);
     const supp = Math.max(0, reguleHours - quota);
@@ -2816,16 +2819,22 @@ if (index > 0) {
     const card = document.getElementById(`regule${index + 1}`);
     
     if (hoursElem) {
-      let displayText = `${totalHours.toFixed(2)}h sur ${quota}h`;
+      let displayText = `${totalWorked.toFixed(2)}h travaillées\n  ↳ ${totalHours.toFixed(2)}h comptées / ${quota}h`;
+      
+      if (hoursOver162InRegule > 0 || depannageHoursInRegule > 0) {
+        displayText += `\n\nPayées hors régule :`;
+        if (hoursOver162InRegule > 0) {
+          displayText += `\n  • ${hoursOver162InRegule.toFixed(2)}h (>162h/mois)`;
+        }
+        if (depannageHoursInRegule > 0) {
+          displayText += `\n  • ${depannageHoursInRegule.toFixed(2)}h (dépannages)`;
+        }
+      }
+      
       if (arretHours > 0) {
-        displayText += `\n(${arretHours.toFixed(0)}h arrêts/Compl.)`;
+        displayText += `\n\n(${arretHours.toFixed(0)}h arrêts/Compl.)`;
       }
-      if (hoursOver162InRegule > 0) {
-        displayText += `\n(-${hoursOver162InRegule.toFixed(2)}h hors régule)`;
-      }
-      if (depannageHoursInRegule > 0) {
-        displayText += `\n(-${depannageHoursInRegule.toFixed(2)}h dépannages)`;
-      }
+      
       hoursElem.textContent = displayText;
     }
     if (remainingElem) remainingElem.textContent = remaining.toFixed(2) + 'h';
