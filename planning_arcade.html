@@ -2790,13 +2790,16 @@ if (index > 0) {
   }
 }
     
-    // Calculer les heures >162h et dépannages pour chaque mois
+  // Calculer les heures >162h et dépannages pour chaque mois
     Object.values(monthsInRegule).forEach(month => {
-      const over162 = Math.max(0, month.total - 162);
+      // D'ABORD enlever les dépannages, PUIS calculer >162h
+      const hoursWithoutDepannage = month.total - month.depannage;
+      const over162 = Math.max(0, hoursWithoutDepannage - 162);
+      
       hoursOver162InRegule += over162;
       depannageHoursInRegule += month.depannage;
       
-      const monthForRegule = month.total - over162 - month.depannage;
+      const monthForRegule = hoursWithoutDepannage - over162;
       reguleHours += monthForRegule;
     });
     
