@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -2327,7 +2328,15 @@ function renderCalendar() {
         const shift = shifts[dateStr];
         
         if (shift === 'day' || shift === 'night' || shift === 'depannage_day' || shift === 'depannage_night' || shift === 'rc') {
-          weekHours += 12;
+  let hours = 12;
+  
+  // Si c'est une nuit de dimanche, on compte que 5h (19h→00h)
+  if ((shift === 'night' || shift === 'depannage_night') && weekCells[i + j].date.getDay() === 0) {
+    hours = 5;
+  }
+  
+  weekHours += hours;
+
         } else if (shift === 'cp') {
           weekHours += 5.83;
         } else if (shift === 'formation' || shift === 'arret') {
@@ -2337,6 +2346,18 @@ function renderCalendar() {
     }
     
     const weekNum = document.createElement('div');
+	    // Report des 7h d'une nuit de dimanche de la semaine précédente
+    if (i > 0) {
+      const prevSunday = weekCells[i - 1];
+      if (prevSunday && prevSunday.date.getDay() === 0) {
+        const prevSundayStr = formatDate(prevSunday.date);
+        const prevShift = shifts[prevSundayStr];
+        
+        if (prevShift === 'night' || prevShift === 'depannage_night') {
+          weekHours += 7;
+        }
+      }
+    }
     weekNum.className = 'week-number';
     weekNum.innerHTML = `<div style="font-size: 1.2em; font-weight: bold;">${getWeekNumber(weekCells[i].date)}</div><div style="font-size: 0.85em; position: absolute; bottom: 5px; color: ${weekHours > 48 ? '#ff0000' : '#00ff00'};">${weekHours.toFixed(0)}h</div>`;
     calendar.appendChild(weekNum);
