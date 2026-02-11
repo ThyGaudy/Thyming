@@ -2819,15 +2819,15 @@ if (index > 0) {
     const card = document.getElementById(`regule${index + 1}`);
     
     if (hoursElem) {
-      let displayText = `${totalWorked.toFixed(2)}h travaillées\n  ↳ ${totalHours.toFixed(2)}h comptées / ${quota}h`;
+      let displayText = `<span style="color: #00ffff;">${totalWorked.toFixed(2)}h</span> travaillées\n  ↳ <span style="color: #00ff00;">${totalHours.toFixed(2)}h</span> comptées / ${quota}h`;
       
       if (hoursOver162InRegule > 0 || depannageHoursInRegule > 0) {
         displayText += `\n\nPayées hors régule :`;
         if (hoursOver162InRegule > 0) {
-          displayText += `\n  • ${hoursOver162InRegule.toFixed(2)}h (>162h/mois)`;
+          displayText += `\n  • <span style="color: #ff00ff;">${hoursOver162InRegule.toFixed(2)}h</span> (>162h/mois)`;
         }
         if (depannageHoursInRegule > 0) {
-          displayText += `\n  • ${depannageHoursInRegule.toFixed(2)}h (dépannages)`;
+          displayText += `\n  • <span style="color: #ff9900;">${depannageHoursInRegule.toFixed(2)}h</span> (dépannages)`;
         }
       }
       
@@ -2835,18 +2835,20 @@ if (index > 0) {
         displayText += `\n\n(${arretHours.toFixed(0)}h arrêts/Compl.)`;
       }
       
-      hoursElem.textContent = displayText;
+      hoursElem.innerHTML = displayText; // ← innerHTML au lieu de textContent
     }
-    if (remainingElem) remainingElem.textContent = remaining.toFixed(2) + 'h';
+    if (remainingElem) {
+      remainingElem.innerHTML = `<span style="color: #ffffff;">${remaining.toFixed(2)}h</span>`;
+    }
     
     if (suppValue) {
       if (supp > 0) {
-        suppValue.textContent = '+' + supp.toFixed(2) + 'h';
+        suppValue.innerHTML = `<span style="color: #00ff00;">+${supp.toFixed(2)}h</span>`;
         suppValue.style.color = '';
         suppValue.style.textShadow = '';
       } else {
-        suppValue.textContent = '0h';
-        suppValue.style.color = '#ffb870';
+        suppValue.innerHTML = `<span style="color: #ffb870;">0h</span>`;
+        suppValue.style.color = '';
         suppValue.style.textShadow = '';
       }
     }
