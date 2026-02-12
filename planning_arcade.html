@@ -2562,18 +2562,39 @@ function updateStats() {
   const lastDayPrevMonth = new Date(year, month, 0);
   const lastDayPrevMonthStr = formatDate(lastDayPrevMonth);
   
-  if (shifts[lastDayPrevMonthStr] === 'night') {
-    const firstDayThisMonth = new Date(year, month, 1);
-    const firstDayThisMonthStr = formatDate(firstDayThisMonth);
-    carryOverNight = 6;
-    if (isHoliday(firstDayThisMonthStr)) {
-      carryOverHoliday = 7;
-    }
-    if (firstDayThisMonth.getDay() === 0) {
-      sundayHours += 7;
-      carryOverSunday = 7;
-    }
+  // Report nuit du mois précédent (00h-07h)
+if (shifts[lastDayPrevMonthStr] === 'night') {
+  totalHours += 7;  // ← AJOUTER CETTE LIGNE
+  const firstDayThisMonth = new Date(year, month, 1);
+  const firstDayThisMonthStr = formatDate(firstDayThisMonth);
+  carryOverNight = 6;
+  if (isHoliday(firstDayThisMonthStr)) {
+    carryOverHoliday = 7;
   }
+  if (firstDayThisMonth.getDay() === 0) {
+    sundayHours += 7;
+    carryOverSunday = 7;
+  }
+}
+
+// Report dépannage nuit du mois précédent (00h-07h)
+if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
+  totalHours += 7;
+  depannageHours += 7;
+  carryOverDepannage = 7;
+  
+  const firstDayThisMonth = new Date(year, month, 1);
+  const firstDayThisMonthStr = formatDate(firstDayThisMonth);
+  carryOverNight = 6;
+  
+  if (isHoliday(firstDayThisMonthStr)) {
+    carryOverHoliday = 7;
+  }
+  if (firstDayThisMonth.getDay() === 0) {
+    sundayHours += 7;
+    carryOverSunday = 7;
+  }
+}
   
   // Report dépannage nuit du mois précédent (00h-07h)
   if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
@@ -2716,10 +2737,26 @@ function updateStats() {
     const isSunday = shiftDate.getDay() === 0;
     const isHol = isHoliday(dateStr);
     
-    if (shifts[dateStr] === 'cp' && shiftDate >= cpStart && shiftDate <= cpEnd && !isSunday && !isHol) {
-      cpDays++;
-    }
-  });
+   
+ if (shifts[dateStr] === 'cp' && shiftDate >= cpStart && shiftDate <= cpEnd && !isSunday && !isHol) {
+  cpDays++;
+}
+});
+
+// Enlever les 7h de la nuit du dernier jour si c'est une nuit
+const lastDayThisMonth = new Date(year, month + 1, 0);
+const lastDayThisMonthStr = formatDate(lastDayThisMonth);
+
+if (shifts[lastDayThisMonthStr] === 'night') {
+  totalHours -= 7;
+}
+
+if (shifts[lastDayThisMonthStr] === 'depannage_night') {
+  totalHours -= 7;
+  depannageHours -= 7;
+}
+
+document.getElementById('totalHours').textContent = totalHours.toFixed(2) + 'h';
   
   document.getElementById('totalHours').textContent = totalHours.toFixed(2) + 'h';
   document.getElementById('nightHours').textContent = nightHours + 'h';
