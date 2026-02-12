@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -2346,19 +2347,34 @@ function renderCalendar() {
     }
     
     const weekNum = document.createElement('div');
-	    // Report des 7h d'une nuit de dimanche de la semaine précédente
-    if (i > 0) {
-      const prevSunday = weekCells[i - 1];
-      if (prevSunday && prevSunday.date.getDay() === 0) {
-        const prevSundayStr = formatDate(prevSunday.date);
-        const prevShift = shifts[prevSundayStr];
-        
-        if (prevShift === 'night' || prevShift === 'depannage_night') {
-          weekHours += 7;
-        }
-      }
+// Report des 7h d'une nuit de dimanche de la semaine précédente
+if (i > 0) {
+  const prevSunday = weekCells[i - 1];
+  if (prevSunday && prevSunday.date.getDay() === 0) {
+    const prevSundayStr = formatDate(prevSunday.date);
+    const prevShift = shifts[prevSundayStr];
+    
+    if (prevShift === 'night' || prevShift === 'depannage_night') {
+      weekHours += 7;
     }
-    weekNum.className = 'week-number';
+  }
+}
+
+// Première semaine du mois : vérifier le dernier dimanche du mois précédent
+if (i === 0) {
+  const lastDayPrevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+  
+  if (lastDayPrevMonth.getDay() === 0) {
+    const lastDayPrevMonthStr = formatDate(lastDayPrevMonth);
+    const prevShift = shifts[lastDayPrevMonthStr];
+    
+    if (prevShift === 'night' || prevShift === 'depannage_night') {
+      weekHours += 7;
+    }
+  }
+}
+
+weekNum.className = 'week-number';
     weekNum.innerHTML = `<div style="font-size: 1.2em; font-weight: bold; position: absolute; top: 15px;">${getWeekNumber(weekCells[i].date)}</div><div style="font-size: 1.1em; position: absolute; bottom: 5px; color: ${weekHours > 48 ? '#ff0000' : '#00ff00'};">${weekHours.toFixed(0)}h</div>`;
     calendar.appendChild(weekNum);
     
