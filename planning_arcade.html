@@ -1,7 +1,3 @@
-
-
-
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -2596,27 +2592,6 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
   }
 }
   
-  // Report dépannage nuit du mois précédent (00h-07h)
-  if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
-    carryOverDepannage = 7;  // 00h-07h du 1er jour
-    totalHours += 7;
-    depannageHours += 7;
-    
-    const firstDayThisMonth = new Date(year, month, 1);
-    const firstDayThisMonthStr = formatDate(firstDayThisMonth);
-    
-    // Compter aussi les heures de nuit (00h-06h = 6h)
-    carryOverNight = 6;
-    
-    if (isHoliday(firstDayThisMonthStr)) {
-      carryOverHoliday = 7;
-    }
-    if (firstDayThisMonth.getDay() === 0) {
-      sundayHours += 7;
-      carryOverSunday = 7;
-    }
-  }
-  
   Object.keys(shifts).forEach(dateStr => {
     const parts = dateStr.split('-');
     const y = parseInt(parts[0]);
@@ -2707,13 +2682,16 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
     
     if (shift === 'night') {
       paniers++;
-      totalHours += 12;
       
       if (d === daysInMonth) {
+        // Dernier jour du mois : seulement 19h-00h (5h)
+        totalHours += 5;
         nightHours += 3;
         if (isSunday) sundayHours += 5;
         if (isHol) holidayHours += 5;
       } else {
+        // Jour normal : 12h complètes
+        totalHours += 12;
         nightHours += 9;
         const nextDay = new Date(y, m, d + 1);
         const nextDayStr = formatDate(nextDay);
@@ -2727,9 +2705,12 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
       return;
     }
   });
+
   
   const cpStart = new Date(2026, 5, 1);
   const cpEnd = new Date(2027, 4, 31);
+  
+  totalCP = 0; // Réinitialiser
   
   Object.keys(shifts).forEach(dateStr => {
     const parts = dateStr.split('-');
@@ -2737,26 +2718,13 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
     const isSunday = shiftDate.getDay() === 0;
     const isHol = isHoliday(dateStr);
     
-   
- if (shifts[dateStr] === 'cp' && shiftDate >= cpStart && shiftDate <= cpEnd && !isSunday && !isHol) {
-  cpDays++;
-}
-});
+    if (shifts[dateStr] === 'cp' && shiftDate >= cpStart && shiftDate <= cpEnd && !isSunday && !isHol) {
+      cpDays++;
+    }
+  });
 
-// Enlever les 7h de la nuit du dernier jour si c'est une nuit
-const lastDayThisMonth = new Date(year, month + 1, 0);
-const lastDayThisMonthStr = formatDate(lastDayThisMonth);
 
-if (shifts[lastDayThisMonthStr] === 'night') {
-  totalHours -= 7;
-}
 
-if (shifts[lastDayThisMonthStr] === 'depannage_night') {
-  totalHours -= 7;
-  depannageHours -= 7;
-}
-
-document.getElementById('totalHours').textContent = totalHours.toFixed(2) + 'h';
   
   document.getElementById('totalHours').textContent = totalHours.toFixed(2) + 'h';
   document.getElementById('nightHours').textContent = nightHours + 'h';
