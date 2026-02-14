@@ -3807,6 +3807,12 @@ window.addEventListener('DOMContentLoaded', () => {
   }, { passive: true });
   
   function handleSwipe() {
+    // Ne pas swiper si un modal est ouvert
+    if (document.getElementById('planningViewer').style.display === 'block' ||
+        document.getElementById('payslipViewer').style.display === 'block') {
+      return;
+    }
+    
     const swipeDistance = touchEndX - touchStartX;
     const calendar = document.getElementById('calendar');
     
