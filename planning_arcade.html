@@ -3796,12 +3796,15 @@ window.addEventListener('DOMContentLoaded', () => {
   let touchStartX = 0;
   let touchEndX = 0;
   const minSwipeDistance = 50;
+  let swipeEnabled = true; // Variable pour activer/désactiver le swipe
   
   document.addEventListener('touchstart', (e) => {
+    if (!swipeEnabled) return;
     touchStartX = e.changedTouches[0].screenX;
   }, { passive: true });
   
   document.addEventListener('touchend', (e) => {
+    if (!swipeEnabled) return;
     touchEndX = e.changedTouches[0].screenX;
     handleSwipe();
   }, { passive: true });
@@ -4776,14 +4779,11 @@ function viewPlanning(id) {
       const viewer = document.getElementById('planningViewer');
       viewer.style.display = 'block';
       
-      // Bloquer le swipe du calendrier en arrière-plan
-      document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
+      // DÉSACTIVER COMPLÈTEMENT LE SWIPE
+      window.swipeEnabled = false;
       
-      // Empêcher la propagation des événements tactiles vers le document
-      viewer.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
-      viewer.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: false });
-      viewer.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
+      // Bloquer le scroll
+      document.body.style.overflow = 'hidden';
       
       enableImageZoom(img);
     }
@@ -4794,9 +4794,11 @@ function viewPlanning(id) {
 function closePlanningViewer() {
   document.getElementById('planningViewer').style.display = 'none';
   
-  // Réactiver le swipe du calendrier
+  // RÉACTIVER LE SWIPE
+  window.swipeEnabled = true;
+  
+  // Réactiver le scroll
   document.body.style.overflow = '';
-  document.body.style.touchAction = '';
 }
 
 // Supprimer un planning
