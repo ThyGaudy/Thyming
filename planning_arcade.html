@@ -4769,6 +4769,10 @@ function viewPlanning(id) {
       img.src = planning.image;
       document.getElementById('planningViewer').style.display = 'block';
       
+      // Bloquer le swipe du calendrier en arrière-plan
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+      
       enableImageZoom(img);
     }
   };
@@ -4777,6 +4781,10 @@ function viewPlanning(id) {
 // Fermer la visionneuse planning
 function closePlanningViewer() {
   document.getElementById('planningViewer').style.display = 'none';
+  
+  // Réactiver le swipe du calendrier
+  document.body.style.overflow = '';
+  document.body.style.touchAction = '';
 }
 
 // Supprimer un planning
