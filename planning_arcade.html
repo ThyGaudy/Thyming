@@ -4773,11 +4773,17 @@ function viewPlanning(id) {
       document.getElementById('planningViewerTitle').textContent = planning.name;
       const img = document.getElementById('planningViewerImage');
       img.src = planning.image;
-      document.getElementById('planningViewer').style.display = 'block';
+      const viewer = document.getElementById('planningViewer');
+      viewer.style.display = 'block';
       
       // Bloquer le swipe du calendrier en arrière-plan
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none';
+      
+      // Empêcher la propagation des événements tactiles vers le document
+      viewer.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
+      viewer.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: false });
+      viewer.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
       
       enableImageZoom(img);
     }
