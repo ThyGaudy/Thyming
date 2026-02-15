@@ -4724,6 +4724,7 @@ function loadRadioPresets() {
         btn.addEventListener('touchstart', (e) => {
           console.log('👆 Touchstart favori vide', i);
           btn.style.backgroundColor = 'orange'; // DEBUG VISUEL
+          btn.style.transform = 'scale(0.95)'; // Feedback tactile
           e.stopPropagation();
           e.preventDefault();
           touchMoved = false;
@@ -4731,14 +4732,24 @@ function loadRadioPresets() {
         
         btn.addEventListener('touchmove', (e) => {
           touchMoved = true;
+          btn.style.backgroundColor = ''; // Reset
+          btn.style.transform = '';
         });
         
         btn.addEventListener('touchend', (e) => {
-          console.log('👋 Touchend favori vide', i);
-          btn.style.backgroundColor = ''; // Reset
+          console.log('👋 Touchend favori vide', i, 'moved:', touchMoved);
           e.stopPropagation();
+          
           if (!touchMoved) {
-            savePreset(i);
+            btn.style.backgroundColor = 'green'; // SUCCES
+            btn.style.transform = '';
+            setTimeout(() => {
+              savePreset(i);
+              btn.style.backgroundColor = ''; // Reset après save
+            }, 200);
+          } else {
+            btn.style.backgroundColor = ''; // Reset
+            btn.style.transform = '';
           }
         });
         
@@ -5718,8 +5729,9 @@ initPlanningsDB();
         <button class="radio-preset-btn" id="radioPreset6">6 - Vide</button>
       </div>
       
-      <div style="text-align:center;margin-top:15px;color:#666;font-size:0.85em">
-        💡 Appui long sur un favori pour le remplacer
+      <div style="text-align:center;margin-top:15px;color:#666;font-size:0.85em;line-height:1.5">
+        💡 <strong>Favori vide :</strong> Tap pour sauvegarder<br>
+        💡 <strong>Favori plein :</strong> Appui long (800ms) pour remplacer
       </div>
       
       <button class="radio-scan-btn" id="radioScanBtn" onclick="scanRadio()">🔍 SCAN AUTO</button>
