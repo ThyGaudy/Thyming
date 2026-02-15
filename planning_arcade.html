@@ -4117,23 +4117,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ========== RADIO FM ==========
 
-// Liste de stations radio françaises populaires
+// Liste de stations radio - URLs vérifiées qui marchent vraiment
 const radioStations = [
-  { name: 'NRJ', freq: '98.2', url: 'https://scdn.nrjaudio.fm/fr/30001/mp3_128.mp3?cdn_path=adswizz_lbs9&access_token=3f1c0b0b7fda11efb2a500163e992192' },
-  { name: 'Fun Radio', freq: '101.9', url: 'https://stream.funradio.fr/fun-1-48-192' },
-  { name: 'Skyrock', freq: '96.0', url: 'https://icecast.skyrock.net/s/natio_mp3_128k' },
-  { name: 'RTL', freq: '104.3', url: 'https://streamer-01.rtl.fr/rtl-1-44-128' },
-  { name: 'Europe 1', freq: '104.7', url: 'https://europe1.lmn.fm/europe1.mp3' },
-  { name: 'RFM', freq: '103.9', url: 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3' },
-  { name: 'Nostalgie', freq: '105.1', url: 'https://scdn.nrjaudio.fm/fr/30601/mp3_128.mp3?cdn_path=adswizz_lbs9' },
-  { name: 'Chérie FM', freq: '91.3', url: 'https://scdn.nrjaudio.fm/fr/30201/mp3_128.mp3?cdn_path=adswizz_lbs9' },
-  { name: 'Rire & Chansons', freq: '97.4', url: 'https://scdn.nrjaudio.fm/fr/30401/mp3_128.mp3?cdn_path=adswizz_lbs9' },
+  { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
   { name: 'France Inter', freq: '87.8', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
   { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' },
   { name: 'France Musique', freq: '91.7', url: 'https://icecast.radiofrance.fr/francemusique-midfi.mp3' },
-  { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
   { name: 'Mouv', freq: '92.1', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' },
-  { name: 'Jazz Radio', freq: '106.2', url: 'https://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3' }
+  { name: 'Jazz Radio', freq: '106.2', url: 'https://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3' },
+  { name: 'Generations', freq: '88.2', url: 'https://generationfm.ice.infomaniak.ch/generationfm-high.mp3' },
+  { name: 'Radio Nova', freq: '101.5', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3' },
+  { name: 'TSF Jazz', freq: '89.9', url: 'https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3' },
+  { name: 'Radio Classique', freq: '101.1', url: 'https://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3' },
+  { name: 'Couleur 3', freq: '93.8', url: 'https://stream.srg-ssr.ch/m/couleur3/mp3_128' },
+  { name: 'RFM', freq: '103.9', url: 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3' },
+  { name: 'Nostalgie', freq: '105.1', url: 'https://scdn.nrjaudio.fm/fr/30601/mp3_128.mp3' },
+  { name: 'Chérie FM', freq: '91.3', url: 'https://scdn.nrjaudio.fm/fr/30201/mp3_128.mp3' },
+  { name: 'Rire & Chansons', freq: '97.4', url: 'https://scdn.nrjaudio.fm/fr/30401/mp3_128.mp3' }
 ];
 
 let currentStationIndex = 0;
@@ -4231,29 +4231,49 @@ function changeStation(direction) {
 function playRadio() {
   const station = radioStations[currentStationIndex];
   const nowPlaying = document.getElementById('radioNowPlaying');
+  const playBtn = document.getElementById('radioPlayBtn');
   
   if (radioAudio.paused || radioAudio.src !== station.url) {
-    nowPlaying.textContent = '🔄 Chargement...';
+    nowPlaying.textContent = '🔄 Connexion à ' + station.name + '...';
     radioAudio.src = station.url;
     radioAudio.load();
     
+    // Timeout de 10 secondes max pour charger
+    const loadTimeout = setTimeout(() => {
+      if (radioAudio.readyState < 3) {
+        console.warn('⏱️ Timeout chargement:', station.name);
+        nowPlaying.textContent = '⏭️ Station trop lente, passage à la suivante...';
+        changeStation('next');
+        setTimeout(() => playRadio(), 1000);
+      }
+    }, 10000);
+    
     radioAudio.play().then(() => {
-      document.getElementById('radioPlayBtn').textContent = '⏸';
-      nowPlaying.textContent = '🎵 En lecture...';
+      clearTimeout(loadTimeout);
+      playBtn.textContent = '⏸';
+      nowPlaying.textContent = '🎵 ' + station.name;
       console.log('✅ Lecture OK:', station.name);
     }).catch(err => {
-      console.error('❌ Erreur lecture radio:', err);
-      nowPlaying.textContent = '❌ Station indisponible - Essayez une autre';
-      // Auto-passer à la station suivante après 2 secondes
+      clearTimeout(loadTimeout);
+      console.error('❌ Erreur:', station.name, err.message);
+      nowPlaying.textContent = '❌ ' + station.name + ' indisponible';
+      
+      // Auto-passer à la suivante après 2 secondes
       setTimeout(() => {
+        nowPlaying.textContent = '⏭️ Changement de station...';
         changeStation('next');
-        // Réessayer la lecture
         setTimeout(() => playRadio(), 500);
       }, 2000);
     });
+    
+    // Event quand le chargement est OK
+    radioAudio.addEventListener('canplay', () => {
+      console.log('📻 Station prête:', station.name);
+    }, { once: true });
+    
   } else {
     radioAudio.pause();
-    document.getElementById('radioPlayBtn').textContent = '▶';
+    playBtn.textContent = '▶';
     nowPlaying.textContent = '';
   }
 }
