@@ -4659,26 +4659,31 @@ function loadRadioPresets() {
         btn.classList.add('saved');
         
         // Appui long = remplacer (mobile)
-        btn.ontouchstart = (e) => {
+        btn.addEventListener('touchstart', (e) => {
+          console.log('👆 Touchstart favori', i);
           e.stopPropagation(); // Empêcher le swipe
+          e.preventDefault(); // Empêcher le click fantôme
           touchMoved = false;
           longPressTimer = setTimeout(() => {
+            console.log('⏱️ Appui long détecté', i);
             if (!touchMoved && confirm(`Remplacer "${station.name}" par "${radioStations[currentStationIndex].name}" ?`)) {
               savePreset(i);
             }
           }, 800);
-        };
+        }, { passive: false });
         
-        btn.ontouchmove = (e) => {
+        btn.addEventListener('touchmove', (e) => {
+          console.log('👉 Touchmove favori', i);
           touchMoved = true;
           if (longPressTimer) {
             clearTimeout(longPressTimer);
             longPressTimer = null;
           }
-        };
+        });
         
-        btn.ontouchend = (e) => {
-          e.stopPropagation(); // Empêcher le swipe
+        btn.addEventListener('touchend', (e) => {
+          console.log('👋 Touchend favori', i, 'moved:', touchMoved);
+          e.stopPropagation();
           if (longPressTimer) {
             clearTimeout(longPressTimer);
             longPressTimer = null;
@@ -4687,7 +4692,7 @@ function loadRadioPresets() {
               loadPreset(i);
             }
           }
-        };
+        });
         
         // Clic normal desktop = charger
         btn.onclick = () => loadPreset(i);
@@ -4707,21 +4712,24 @@ function loadRadioPresets() {
         
         let touchMoved = false;
         
-        btn.ontouchstart = (e) => {
+        btn.addEventListener('touchstart', (e) => {
+          console.log('👆 Touchstart favori vide', i);
           e.stopPropagation();
+          e.preventDefault();
           touchMoved = false;
-        };
+        }, { passive: false });
         
-        btn.ontouchmove = (e) => {
+        btn.addEventListener('touchmove', (e) => {
           touchMoved = true;
-        };
+        });
         
-        btn.ontouchend = (e) => {
+        btn.addEventListener('touchend', (e) => {
+          console.log('👋 Touchend favori vide', i);
           e.stopPropagation();
           if (!touchMoved) {
             savePreset(i);
           }
-        };
+        });
         
         // Desktop
         btn.onclick = () => savePreset(i);
