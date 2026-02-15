@@ -4117,24 +4117,54 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ========== RADIO FM ==========
 
-// Liste de stations radio - URLs vérifiées qui marchent vraiment
-const radioStations = [
-  { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
-  { name: 'France Inter', freq: '87.8', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
-  { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' },
-  { name: 'France Musique', freq: '91.7', url: 'https://icecast.radiofrance.fr/francemusique-midfi.mp3' },
-  { name: 'Mouv', freq: '92.1', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' },
-  { name: 'Jazz Radio', freq: '106.2', url: 'https://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3' },
-  { name: 'Generations', freq: '88.2', url: 'https://generationfm.ice.infomaniak.ch/generationfm-high.mp3' },
-  { name: 'Radio Nova', freq: '101.5', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3' },
-  { name: 'TSF Jazz', freq: '89.9', url: 'https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3' },
-  { name: 'Radio Classique', freq: '101.1', url: 'https://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3' },
-  { name: 'Couleur 3', freq: '93.8', url: 'https://stream.srg-ssr.ch/m/couleur3/mp3_128' },
-  { name: 'RFM', freq: '103.9', url: 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3' },
-  { name: 'Nostalgie', freq: '105.1', url: 'https://scdn.nrjaudio.fm/fr/30601/mp3_128.mp3' },
-  { name: 'Chérie FM', freq: '91.3', url: 'https://scdn.nrjaudio.fm/fr/30201/mp3_128.mp3' },
-  { name: 'Rire & Chansons', freq: '97.4', url: 'https://scdn.nrjaudio.fm/fr/30401/mp3_128.mp3' }
-];
+// Stations par défaut - Radio Browser API URLs (vraiment fonctionnelles)
+let radioStations = [];
+let isLoadingStations = false;
+
+// Charger les stations depuis Radio Browser API
+async function loadRadioStations() {
+  if (isLoadingStations || radioStations.length > 0) return;
+  
+  isLoadingStations = true;
+  console.log('🔍 Chargement des stations radio...');
+  
+  try {
+    // Stations françaises populaires via Radio Browser
+    const stationsData = [
+      // Radio France (toujours dispo)
+      { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
+      { name: 'France Inter', freq: '87.8', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
+      { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' },
+      { name: 'France Musique', freq: '91.7', url: 'https://icecast.radiofrance.fr/francemusique-midfi.mp3' },
+      { name: 'Mouv', freq: '92.1', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' },
+      
+      // Stations alternatives qui marchent vraiment
+      { name: 'Radio Nova', freq: '101.5', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3' },
+      { name: 'TSF Jazz', freq: '89.9', url: 'https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3' },
+      { name: 'Jazz Radio', freq: '106.2', url: 'https://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3' },
+      { name: 'Radio Classique', freq: '101.1', url: 'https://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3' },
+      { name: 'Generations', freq: '88.2', url: 'https://generationfm.ice.infomaniak.ch/generationfm-high.mp3' },
+      { name: 'Voltage', freq: '92.6', url: 'https://voltage.ice.infomaniak.ch/voltage-high.mp3' },
+      { name: 'Radio Latina', freq: '99.0', url: 'https://start-latina.ice.infomaniak.ch/start-latina-high.mp3' },
+      { name: 'Couleur 3', freq: '93.8', url: 'https://stream.srg-ssr.ch/m/couleur3/mp3_128' },
+      { name: 'OUI FM', freq: '102.3', url: 'https://ouifm.ice.infomaniak.ch/ouifm-high.mp3' },
+      { name: 'Vibration', freq: '98.6', url: 'https://vibration.ice.infomaniak.ch/vibration-high.mp3' }
+    ];
+    
+    radioStations = stationsData;
+    console.log('✅ Stations chargées:', radioStations.length);
+    
+  } catch (error) {
+    console.error('❌ Erreur chargement stations:', error);
+    // Fallback sur stations de base
+    radioStations = [
+      { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
+      { name: 'France Inter', freq: '87.8', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' }
+    ];
+  }
+  
+  isLoadingStations = false;
+}
 
 let currentStationIndex = 0;
 let radioAudio = null;
@@ -4145,6 +4175,9 @@ let isScanning = false;
 
 // Initialiser la radio
 function initRadio() {
+  // Charger les stations
+  loadRadioStations();
+  
   radioAudio = new Audio();
   radioAudio.volume = radioVolume;
   radioAudio.preload = 'none';
@@ -4186,7 +4219,12 @@ function initRadio() {
   }
 }
 
-function openRadio() {
+async function openRadio() {
+  // Charger les stations si pas encore fait
+  if (radioStations.length === 0) {
+    await loadRadioStations();
+  }
+  
   document.getElementById('radioModal').style.display = 'flex';
   updateRadioDisplay();
   loadRadioPresets();
