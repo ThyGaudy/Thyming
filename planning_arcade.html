@@ -4210,6 +4210,8 @@ async function loadRadioStations() {
   
   // Pour chaque station de Bordeaux
   for (const localStation of bordeauxStations) {
+    let stationAdded = false;
+    
     // PRIORITÉ 1 : Flux local direct si disponible
     if (bordeauxLocalStreams[localStation.name]) {
       foundStations.push({
@@ -4218,42 +4220,48 @@ async function loadRadioStations() {
         url: bordeauxLocalStreams[localStation.name]
       });
       console.log('✅ Local:', localStation.name, '-', localStation.freq, 'FM');
-      continue;
+      stationAdded = true;
     }
     
-    // PRIORITÉ 2 : Chercher dans Radio Browser
-    try {
-      const searchName = localStation.name
-        .replace(/\s*Bordeaux$/i, '')
-        .replace(/\s*FM$/i, '')
-        .replace(/\s*Radio$/i, '')
-        .trim();
-      
-      const response = await fetch(
-        `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(searchName)}?limit=1&hidebroken=true`
-      );
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        const station = data[0];
-        foundStations.push({
-          name: localStation.name,
-          freq: localStation.freq,
-          url: station.url_resolved || station.url
-        });
-        console.log('✅ API:', localStation.name, '-', localStation.freq, 'FM');
-      } else {
-        console.warn('⚠️ Pas de flux pour:', localStation.name);
+    // PRIORITÉ 2 : Chercher dans Radio Browser (même si flux local existe pas)
+    if (!stationAdded) {
+      try {
+        const searchName = localStation.name
+          .replace(/\s*Bordeaux$/i, '')
+          .replace(/\s*FM$/i, '')
+          .replace(/\s*Radio$/i, '')
+          .trim();
+        
+        const response = await fetch(
+          `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(searchName)}?limit=1&hidebroken=true`
+        );
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const station = data[0];
+          foundStations.push({
+            name: localStation.name,
+            freq: localStation.freq,
+            url: station.url_resolved || station.url
+          });
+          console.log('✅ API:', localStation.name, '-', localStation.freq, 'FM');
+          stationAdded = true;
+        }
+      } catch (err) {
+        // Continuer
       }
-    } catch (err) {
-      console.warn('⚠️ Erreur pour:', localStation.name);
+    }
+    
+    // Si toujours rien trouvé, on laisse un placeholder
+    if (!stationAdded) {
+      console.warn('⚠️ Pas de flux pour:', localStation.name, '(FM uniquement)');
     }
   }
   
   // Utiliser les stations trouvées
   if (foundStations.length > 0) {
     radioStations = foundStations;
-    console.log('✅ Total:', radioStations.length, 'stations chargées');
+    console.log('✅ Total:', radioStations.length, '/', bordeauxStations.length, 'stations');
   } else {
     // Fallback minimal
     radioStations = [
