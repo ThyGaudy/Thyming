@@ -3953,8 +3953,8 @@ window.addEventListener('DOMContentLoaded', () => {
   // Bloquer complètement la sélection de texte et les bulles
   document.addEventListener('selectstart', (e) => e.preventDefault());
   document.addEventListener('contextmenu', (e) => {
-    // Autoriser contextmenu uniquement sur les cellules du calendrier pour les notes
-    if (!e.target.closest('.day-cell')) {
+    // Autoriser contextmenu sur les cellules du calendrier (notes) et sur l'heure (radio)
+    if (!e.target.closest('.day-cell') && e.target.id !== 'currentTime') {
       e.preventDefault();
     }
   });
@@ -3996,6 +3996,10 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+  
+  // Initialiser la radio FM
+  initRadio();
+  handleRadioSwipe();
   
   // Event listeners pour la modal de notes
   document.getElementById('noteSave').addEventListener('click', saveNote);
@@ -4115,21 +4119,21 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Liste de stations radio françaises populaires
 const radioStations = [
-  { name: 'NRJ', freq: '98.2', url: 'http://cdn.nrjaudio.fm/audio1/fr/30001/mp3_128.mp3' },
-  { name: 'Fun Radio', freq: '101.9', url: 'http://stream.funradio.fr/fun-1-48-192' },
-  { name: 'Skyrock', freq: '96.0', url: 'http://icecast.skyrock.net/s/natio_mp3_128k' },
-  { name: 'RTL', freq: '104.3', url: 'http://streaming.radio.rtl.fr/rtl-1-48-192' },
-  { name: 'Europe 1', freq: '104.7', url: 'http://stream.europe1.fr/europe1.mp3' },
+  { name: 'NRJ', freq: '98.2', url: 'https://scdn.nrjaudio.fm/fr/30001/mp3_128.mp3?cdn_path=adswizz_lbs9&access_token=3f1c0b0b7fda11efb2a500163e992192' },
+  { name: 'Fun Radio', freq: '101.9', url: 'https://stream.funradio.fr/fun-1-48-192' },
+  { name: 'Skyrock', freq: '96.0', url: 'https://icecast.skyrock.net/s/natio_mp3_128k' },
+  { name: 'RTL', freq: '104.3', url: 'https://streamer-01.rtl.fr/rtl-1-44-128' },
+  { name: 'Europe 1', freq: '104.7', url: 'https://europe1.lmn.fm/europe1.mp3' },
   { name: 'RFM', freq: '103.9', url: 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3' },
-  { name: 'Nostalgie', freq: '105.1', url: 'http://stream.nostalgie.fr/nostalgie.mp3' },
-  { name: 'Chérie FM', freq: '91.3', url: 'http://stream.cheriefm.fr/cheriefm.mp3' },
-  { name: 'Virgin Radio', freq: '103.5', url: 'http://stream.virginradio.fr/virgin.mp3' },
-  { name: 'France Inter', freq: '87.8', url: 'https://stream.radiofrance.fr/franceinter/franceinter_hifi.m3u8' },
-  { name: 'France Info', freq: '105.5', url: 'https://stream.radiofrance.fr/franceinfo/franceinfo_hifi.m3u8' },
-  { name: 'RTL2', freq: '105.9', url: 'http://streaming.radio.rtl2.fr/rtl2-1-48-192' },
-  { name: 'Radio Classique', freq: '101.1', url: 'http://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3' },
-  { name: 'Rire & Chansons', freq: '97.4', url: 'http://stream.rireetchansons.fr/rireetchansons.mp3' },
-  { name: 'Jazz Radio', freq: '106.2', url: 'http://jazz-wr11.ice.infomaniak.ch/jazz-wr11-128.mp3' }
+  { name: 'Nostalgie', freq: '105.1', url: 'https://scdn.nrjaudio.fm/fr/30601/mp3_128.mp3?cdn_path=adswizz_lbs9' },
+  { name: 'Chérie FM', freq: '91.3', url: 'https://scdn.nrjaudio.fm/fr/30201/mp3_128.mp3?cdn_path=adswizz_lbs9' },
+  { name: 'Rire & Chansons', freq: '97.4', url: 'https://scdn.nrjaudio.fm/fr/30401/mp3_128.mp3?cdn_path=adswizz_lbs9' },
+  { name: 'France Inter', freq: '87.8', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
+  { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' },
+  { name: 'France Musique', freq: '91.7', url: 'https://icecast.radiofrance.fr/francemusique-midfi.mp3' },
+  { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
+  { name: 'Mouv', freq: '92.1', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' },
+  { name: 'Jazz Radio', freq: '106.2', url: 'https://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3' }
 ];
 
 let currentStationIndex = 0;
@@ -4152,13 +4156,18 @@ function initRadio() {
   // Appui long sur l'heure pour ouvrir la radio
   const timeEl = document.getElementById('currentTime');
   if (timeEl) {
+    console.log('✅ Radio initialisée - appui long sur heure activé');
+    
     timeEl.addEventListener('touchstart', (e) => {
+      console.log('👆 Touchstart détecté sur heure');
       radioLongPressTimer = setTimeout(() => {
+        console.log('📻 Ouverture radio !');
         openRadio();
       }, 800);
     });
     
     timeEl.addEventListener('touchend', () => {
+      console.log('👆 Touchend - annulation timer');
       clearTimeout(radioLongPressTimer);
     });
     
@@ -4169,8 +4178,11 @@ function initRadio() {
     // Desktop : clic droit
     timeEl.addEventListener('contextmenu', (e) => {
       e.preventDefault();
+      console.log('🖱️ Clic droit sur heure - ouverture radio');
       openRadio();
     });
+  } else {
+    console.error('❌ Élément currentTime non trouvé !');
   }
 }
 
@@ -4227,10 +4239,17 @@ function playRadio() {
     
     radioAudio.play().then(() => {
       document.getElementById('radioPlayBtn').textContent = '⏸';
-      nowPlaying.textContent = '🎵 En cours de lecture...';
+      nowPlaying.textContent = '🎵 En lecture...';
+      console.log('✅ Lecture OK:', station.name);
     }).catch(err => {
-      console.error('Erreur lecture radio:', err);
-      nowPlaying.textContent = '❌ Erreur de lecture';
+      console.error('❌ Erreur lecture radio:', err);
+      nowPlaying.textContent = '❌ Station indisponible - Essayez une autre';
+      // Auto-passer à la station suivante après 2 secondes
+      setTimeout(() => {
+        changeStation('next');
+        // Réessayer la lecture
+        setTimeout(() => playRadio(), 500);
+      }, 2000);
     });
   } else {
     radioAudio.pause();
@@ -4338,14 +4357,6 @@ function handleRadioGesture() {
     changeStation('prev');
   }
 }
-
-// Initialiser la radio au chargement
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    initRadio();
-    handleRadioSwipe();
-  }, 500);
-});
 
 // ========== ARCADE SYSTEM ==========
 
