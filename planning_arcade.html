@@ -4117,9 +4117,48 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ========== RADIO FM ==========
 
-// Stations radio - seront chargées depuis Radio Browser API
+// Stations radio - TOUTES les fréquences FM de Bordeaux
 let radioStations = [];
 let isLoadingStations = false;
+
+// Flux locaux Bordeaux (URLs directes vérifiées)
+const bordeauxLocalStreams = {
+  'Le Mouv': 'https://icecast.radiofrance.fr/mouv-midfi.mp3',
+  'Radio Campus': null, // Pas de flux web public
+  'MFM Radio': 'https://mfm.ice.infomaniak.ch/mfm-128.mp3',
+  'RCF Bordeaux': 'https://rcf.streamakaci.com/rcfbordeaux.mp3',
+  'France Inter': 'https://icecast.radiofrance.fr/franceinter-midfi.mp3',
+  'La Clé Des Ondes': null,
+  'RIG': null,
+  'O2 Radio': null,
+  'Fun Radio': 'https://stream.funradio.fr/fun-1-48-192',
+  'Radio Classique': 'https://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3',
+  'Enjoy 33': null,
+  'France Musique': 'https://icecast.radiofrance.fr/francemusique-midfi.mp3',
+  'Virgin Radio': 'https://virgin.ice.infomaniak.ch/virgin-high.mp3',
+  'Radio Nova': 'https://novazz.ice.infomaniak.ch/novazz-128.mp3',
+  'Chérie FM': 'https://scdn.nrjaudio.fm/fr/30201/mp3_128.mp3',
+  'ARL': null,
+  'FIP': 'https://icecast.radiofrance.fr/fip-midfi.mp3',
+  'Nostalgie': 'https://scdn.nrjaudio.fm/fr/30601/mp3_128.mp3',
+  'France Culture': 'https://icecast.radiofrance.fr/franceculture-midfi.mp3',
+  'Rire & Chansons': 'https://scdn.nrjaudio.fm/fr/30401/mp3_128.mp3',
+  'RFM': 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3',
+  'France Bleu Gironde': 'https://icecast.radiofrance.fr/fbgironde-midfi.mp3',
+  'Wit FM': 'https://witfm.ice.infomaniak.ch/witfm-high.mp3',
+  'NRJ': 'https://scdn.nrjaudio.fm/fr/30001/mp3_128.mp3',
+  'Skyrock': 'https://icecast.skyrock.net/s/natio_mp3_128k',
+  'Blackbox': null,
+  'Gold FM': 'https://goldfm.ice.infomaniak.ch/goldfm-high.mp3',
+  'RMC': 'https://rmc.bfmtv.com/rmcinfo-mp3',
+  'Europe 1': 'https://europe1.lmn.fm/europe1.mp3',
+  'RTL': 'https://streamer-01.rtl.fr/rtl-1-44-128',
+  'France Info': 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3',
+  'Sud Radio': 'https://start-sud.ice.infomaniak.ch/start-sud-high.mp3',
+  'Radio Orient': 'https://stream.radioorient.com/live',
+  'RTL2': 'https://streamer-01.rtl2.fr/rtl2-1-44-128',
+  'BFM Business': 'https://bfmbusispeech.lmn.fm/bfmbusispeech.mp3'
+};
 
 // TOUTES les fréquences FM de Bordeaux (ordre croissant)
 const bordeauxStations = [
@@ -4160,22 +4199,34 @@ const bordeauxStations = [
   { name: 'BFM Business', freq: '107.3' }
 ];
 
-// Charger les vraies stations depuis Radio Browser API
+// Charger les stations avec priorité aux flux locaux
 async function loadRadioStations() {
   if (isLoadingStations || radioStations.length > 0) return;
   
   isLoadingStations = true;
-  console.log('🔍 Chargement de TOUTES les stations FM Bordeaux...');
+  console.log('🔍 Chargement stations FM Bordeaux (flux locaux prioritaires)...');
   
   const foundStations = [];
   
   // Pour chaque station de Bordeaux
   for (const localStation of bordeauxStations) {
+    // PRIORITÉ 1 : Flux local direct si disponible
+    if (bordeauxLocalStreams[localStation.name]) {
+      foundStations.push({
+        name: localStation.name,
+        freq: localStation.freq,
+        url: bordeauxLocalStreams[localStation.name]
+      });
+      console.log('✅ Local:', localStation.name, '-', localStation.freq, 'FM');
+      continue;
+    }
+    
+    // PRIORITÉ 2 : Chercher dans Radio Browser
     try {
-      // Chercher dans Radio Browser
       const searchName = localStation.name
         .replace(/\s*Bordeaux$/i, '')
         .replace(/\s*FM$/i, '')
+        .replace(/\s*Radio$/i, '')
         .trim();
       
       const response = await fetch(
@@ -4190,31 +4241,25 @@ async function loadRadioStations() {
           freq: localStation.freq,
           url: station.url_resolved || station.url
         });
-        console.log('✅', localStation.name, '-', localStation.freq, 'FM');
+        console.log('✅ API:', localStation.name, '-', localStation.freq, 'FM');
       } else {
-        console.warn('⚠️ Stream non trouvé pour:', localStation.name);
+        console.warn('⚠️ Pas de flux pour:', localStation.name);
       }
     } catch (err) {
       console.warn('⚠️ Erreur pour:', localStation.name);
     }
   }
   
-  // Si on a trouvé des stations, on les utilise
+  // Utiliser les stations trouvées
   if (foundStations.length > 0) {
     radioStations = foundStations;
-    console.log('✅ Total:', radioStations.length, 'stations FM chargées');
+    console.log('✅ Total:', radioStations.length, 'stations chargées');
   } else {
-    // Fallback sur stations de base
+    // Fallback minimal
     radioStations = [
-      { name: 'Le Mouv', freq: '87.7', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' },
       { name: 'France Inter', freq: '89.7', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
-      { name: 'Fun Radio', freq: '91.8', url: 'https://stream.funradio.fr/fun-1-48-192' },
-      { name: 'France Musique', freq: '93.5', url: 'https://icecast.radiofrance.fr/francemusique-midfi.mp3' },
-      { name: 'Radio Nova', freq: '94.9', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3' },
       { name: 'FIP', freq: '96.7', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
-      { name: 'RFM', freq: '99.6', url: 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3' },
-      { name: 'France Bleu', freq: '100.1', url: 'https://icecast.radiofrance.fr/fbgironde-midfi.mp3' },
-      { name: 'NRJ', freq: '102.4', url: 'https://scdn.nrjaudio.fm/fr/30001/mp3_128.mp3' },
+      { name: 'France Bleu Gironde', freq: '100.1', url: 'https://icecast.radiofrance.fr/fbgironde-midfi.mp3' },
       { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' }
     ];
     console.log('⚠️ Stations de secours');
