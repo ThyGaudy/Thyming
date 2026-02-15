@@ -4117,11 +4117,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ========== RADIO FM ==========
 
-// Stations par défaut - Radio Browser API URLs (vraiment fonctionnelles)
+// Stations par défaut - avec proxy CORS pour les stations bloquées
 let radioStations = [];
 let isLoadingStations = false;
 
-// Charger les stations depuis Radio Browser API
+// Proxy CORS pour contourner les restrictions
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+
+// Charger les stations
 async function loadRadioStations() {
   if (isLoadingStations || radioStations.length > 0) return;
   
@@ -4129,26 +4132,27 @@ async function loadRadioStations() {
   console.log('🔍 Chargement des stations radio...');
   
   try {
-    // Stations françaises populaires via Radio Browser
     const stationsData = [
-      // Radio France (toujours dispo)
-      { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
-      { name: 'France Inter', freq: '87.8', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
-      { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' },
-      { name: 'France Musique', freq: '91.7', url: 'https://icecast.radiofrance.fr/francemusique-midfi.mp3' },
-      { name: 'Mouv', freq: '92.1', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' },
+      // Tes stations favorites (avec proxy)
+      { name: 'NRJ', freq: '98.2', url: 'https://scdn.nrjaudio.fm/fr/30001/mp3_128.mp3', useProxy: false },
+      { name: 'Skyrock', freq: '96.0', url: 'https://icecast.skyrock.net/s/natio_mp3_128k', useProxy: false },
+      { name: 'Fun Radio', freq: '101.9', url: 'https://stream.funradio.fr/fun-1-48-192', useProxy: false },
+      { name: 'RTL', freq: '104.3', url: 'https://streamer-01.rtl.fr/rtl-1-44-128', useProxy: false },
+      { name: 'Europe 1', freq: '104.7', url: 'https://europe1.lmn.fm/europe1.mp3', useProxy: false },
+      { name: 'RFM', freq: '103.9', url: 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3', useProxy: false },
+      { name: 'Nostalgie', freq: '105.1', url: 'https://scdn.nrjaudio.fm/fr/30601/mp3_128.mp3', useProxy: false },
+      { name: 'Chérie FM', freq: '91.3', url: 'https://scdn.nrjaudio.fm/fr/30201/mp3_128.mp3', useProxy: false },
+      { name: 'Rire & Chansons', freq: '97.4', url: 'https://scdn.nrjaudio.fm/fr/30401/mp3_128.mp3', useProxy: false },
+      { name: 'RTL2', freq: '105.9', url: 'https://streamer-01.rtl2.fr/rtl2-1-44-128', useProxy: false },
       
-      // Stations alternatives qui marchent vraiment
-      { name: 'Radio Nova', freq: '101.5', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3' },
-      { name: 'TSF Jazz', freq: '89.9', url: 'https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3' },
-      { name: 'Jazz Radio', freq: '106.2', url: 'https://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3' },
-      { name: 'Radio Classique', freq: '101.1', url: 'https://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3' },
-      { name: 'Generations', freq: '88.2', url: 'https://generationfm.ice.infomaniak.ch/generationfm-high.mp3' },
-      { name: 'Voltage', freq: '92.6', url: 'https://voltage.ice.infomaniak.ch/voltage-high.mp3' },
-      { name: 'Radio Latina', freq: '99.0', url: 'https://start-latina.ice.infomaniak.ch/start-latina-high.mp3' },
-      { name: 'Couleur 3', freq: '93.8', url: 'https://stream.srg-ssr.ch/m/couleur3/mp3_128' },
-      { name: 'OUI FM', freq: '102.3', url: 'https://ouifm.ice.infomaniak.ch/ouifm-high.mp3' },
-      { name: 'Vibration', freq: '98.6', url: 'https://vibration.ice.infomaniak.ch/vibration-high.mp3' }
+      // Radio France (toujours dispo sans proxy)
+      { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3', useProxy: false },
+      { name: 'France Inter', freq: '87.8', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3', useProxy: false },
+      { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3', useProxy: false },
+      { name: 'Mouv', freq: '92.1', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3', useProxy: false },
+      
+      // Autres bonnes stations
+      { name: 'Radio Nova', freq: '101.5', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3', useProxy: false }
     ];
     
     radioStations = stationsData;
@@ -4156,10 +4160,8 @@ async function loadRadioStations() {
     
   } catch (error) {
     console.error('❌ Erreur chargement stations:', error);
-    // Fallback sur stations de base
     radioStations = [
-      { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
-      { name: 'France Inter', freq: '87.8', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' }
+      { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3', useProxy: false }
     ];
   }
   
@@ -4273,18 +4275,34 @@ function playRadio() {
   
   if (radioAudio.paused || radioAudio.src !== station.url) {
     nowPlaying.textContent = '🔄 Connexion à ' + station.name + '...';
-    radioAudio.src = station.url;
+    
+    // Utiliser le proxy si nécessaire (et si activé)
+    let streamUrl = station.url;
+    if (station.useProxy) {
+      streamUrl = CORS_PROXY + encodeURIComponent(station.url);
+      console.log('🔀 Utilisation du proxy pour:', station.name);
+    }
+    
+    radioAudio.src = streamUrl;
     radioAudio.load();
     
-    // Timeout de 10 secondes max pour charger
+    // Timeout de 8 secondes max pour charger
     const loadTimeout = setTimeout(() => {
       if (radioAudio.readyState < 3) {
         console.warn('⏱️ Timeout chargement:', station.name);
-        nowPlaying.textContent = '⏭️ Station trop lente, passage à la suivante...';
-        changeStation('next');
-        setTimeout(() => playRadio(), 1000);
+        nowPlaying.textContent = '⏭️ ' + station.name + ' trop lente...';
+        // Essayer avec le proxy si pas encore fait
+        if (!station.useProxy) {
+          console.log('🔄 Tentative avec proxy...');
+          station.useProxy = true;
+          setTimeout(() => playRadio(), 500);
+        } else {
+          // Sinon passer à la suivante
+          changeStation('next');
+          setTimeout(() => playRadio(), 1000);
+        }
       }
-    }, 10000);
+    }, 8000);
     
     radioAudio.play().then(() => {
       clearTimeout(loadTimeout);
@@ -4294,14 +4312,22 @@ function playRadio() {
     }).catch(err => {
       clearTimeout(loadTimeout);
       console.error('❌ Erreur:', station.name, err.message);
-      nowPlaying.textContent = '❌ ' + station.name + ' indisponible';
       
-      // Auto-passer à la suivante après 2 secondes
-      setTimeout(() => {
-        nowPlaying.textContent = '⏭️ Changement de station...';
-        changeStation('next');
+      // Si pas encore essayé avec proxy, on essaie
+      if (!station.useProxy) {
+        console.log('🔄 Nouvelle tentative avec proxy...');
+        nowPlaying.textContent = '🔄 Nouvelle tentative...';
+        station.useProxy = true;
         setTimeout(() => playRadio(), 500);
-      }, 2000);
+      } else {
+        // Sinon on passe à la suivante
+        nowPlaying.textContent = '❌ ' + station.name + ' indisponible';
+        setTimeout(() => {
+          nowPlaying.textContent = '⏭️ Station suivante...';
+          changeStation('next');
+          setTimeout(() => playRadio(), 500);
+        }, 2000);
+      }
     });
     
     // Event quand le chargement est OK
