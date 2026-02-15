@@ -1792,21 +1792,21 @@ h3::after {
   -webkit-backdrop-filter: blur(40px);
   border-radius: 24px;
   padding: 0;
-  width: 92%;
-  max-width: 400px;
+  width: 88%;
+  max-width: 380px;
   max-height: 92vh;
   overflow-y: auto;
   position: relative;
   animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Bordure animée holographique */
+/* Bordure animée holographique - PLUS ÉPAISSE */
 .radio-container::before {
   content: '';
   position: absolute;
-  inset: -2px;
+  inset: -3px;
   border-radius: 24px;
-  padding: 2px;
+  padding: 3px;
   background: linear-gradient(
     60deg,
     #00ff88,
@@ -4729,28 +4729,32 @@ function loadRadioPresets() {
   for (let i = 1; i <= 6; i++) {
     const btn = document.getElementById(`radioPreset${i}`);
     if (btn) {
-      // Nettoyer les anciens événements
-      btn.replaceWith(btn.cloneNode(true));
-      const newBtn = document.getElementById(`radioPreset${i}`);
+      // Nettoyer TOUS les événements
+      const newBtn = btn.cloneNode(false);
+      btn.parentNode.replaceChild(newBtn, btn);
       
       if (radioPresets[i] !== undefined) {
         // Favori PLEIN
         const station = radioStations[radioPresets[i]];
         newBtn.innerHTML = `
-          <span style="flex:1">${i} - ${station.name}</span>
-          <span onclick="event.stopPropagation(); deletePreset(${i})" style="color:#ff4444;font-weight:bold;cursor:pointer">✕</span>
+          <span style="flex:1;pointer-events:none">${i} - ${station.name}</span>
+          <span onclick="event.stopPropagation(); deletePreset(${i})" style="color:#ff4444;font-weight:bold;cursor:pointer;padding:4px;margin:-4px">✕</span>
         `;
         newBtn.classList.add('saved');
         
-        // Clic = charger la station
-        newBtn.onclick = () => loadPreset(i);
+        // UNIQUEMENT onclick - rien d'autre
+        newBtn.onclick = (e) => {
+          if (e.target.tagName !== 'SPAN' || !e.target.textContent.includes('✕')) {
+            loadPreset(i);
+          }
+        };
         
       } else {
         // Favori VIDE
-        newBtn.innerHTML = `${i} - Vide`;
+        newBtn.textContent = `${i} - Vide`;
         newBtn.classList.remove('saved');
         
-        // Clic = sauvegarder
+        // UNIQUEMENT onclick - rien d'autre
         newBtn.onclick = () => savePreset(i);
       }
     }
