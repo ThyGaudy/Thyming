@@ -1823,23 +1823,30 @@ h3::after {
 /* Header avec titre et fermeture */
 .radio-header {
   background: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
-  padding: 20px 20px 25px 20px;
+  padding: 15px 20px;
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  border-radius: 30px 30px 0 0;
+}
+
+.radio-title {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.4em;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  letter-spacing: 1px;
+  margin: 0;
 }
 
 .radio-close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(0,0,0,0.3);
-  border: none;
+  background: rgba(0,0,0,0.4);
+  border: 2px solid rgba(255,255,255,0.3);
   color: #fff;
-  font-size: 1.4em;
-  width: 36px;
-  height: 36px;
+  font-size: 1.6em;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s;
@@ -1848,25 +1855,18 @@ h3::after {
   justify-content: center;
   font-family: Arial, sans-serif;
   line-height: 1;
-  backdrop-filter: blur(10px);
-  z-index: 10;
+  font-weight: bold;
+  flex-shrink: 0;
 }
 
 .radio-close:hover {
-  background: rgba(255,255,255,0.2);
-  transform: scale(1.1);
+  background: rgba(255,255,255,0.3);
+  border-color: rgba(255,255,255,0.5);
+  transform: scale(1.1) rotate(90deg);
 }
 
 .radio-close:active {
-  transform: scale(0.95);
-}
-
-.radio-title {
-  font-family: 'Black Ops One', cursive;
-  font-size: 1.6em;
-  color: #fff;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-  letter-spacing: 1px;
+  transform: scale(0.9);
 }
 
 /* Contenu principal */
@@ -1876,16 +1876,16 @@ h3::after {
 
 .radio-display {
   background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 2px solid #00ff88;
   border-radius: 20px;
   padding: 20px;
   margin-bottom: 25px;
-  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+  box-shadow: 0 0 20px rgba(0,255,136,0.2), inset 0 2px 10px rgba(0,0,0,0.5);
 }
 
 .radio-frequency {
   font-family: 'Orbitron', monospace;
-  font-size: 3em;
+  font-size: 2.8em;
   color: #00ff88;
   text-align: center;
   text-shadow: 0 0 20px rgba(0,255,136,0.6), 0 0 40px rgba(0,255,136,0.3);
@@ -1904,16 +1904,17 @@ h3::after {
 }
 
 .radio-station-side {
-  color: #666;
-  font-size: 0.9em;
+  color: #aaa;
+  font-size: 1em;
   flex: 1;
   text-align: center;
-  opacity: 0.5;
+  opacity: 0.7;
+  font-weight: 500;
 }
 
 .radio-station-current {
   color: #fff;
-  font-size: 1.3em;
+  font-size: 1.4em;
   font-weight: 700;
   flex: 2;
   text-align: center;
@@ -1921,6 +1922,10 @@ h3::after {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  padding: 5px;
+  border: 2px solid rgba(0,255,136,0.3);
+  border-radius: 10px;
+  background-color: rgba(0,255,136,0.05);
 }
 
 .radio-now-playing {
@@ -2005,6 +2010,8 @@ h3::after {
   outline: none;
   -webkit-appearance: none;
   border: 1px solid rgba(255,255,255,0.05);
+  touch-action: pan-y; /* Empêche le swipe horizontal */
+  pointer-events: auto;
 }
 
 .radio-volume-slider::-webkit-slider-thumb {
@@ -5428,7 +5435,7 @@ initPlanningsDB();
         <button class="radio-btn" onclick="changeStation('next')">►►</button>
       </div>
       
-      <div class="radio-volume">
+      <div class="radio-volume" ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()">
         <div class="radio-volume-label">
           <span>🔊 Volume</span>
           <span id="radioVolumeValue">50%</span>
@@ -5442,6 +5449,8 @@ initPlanningsDB();
           step="0.01" 
           value="0.5"
           oninput="setRadioVolume(this.value)"
+          ontouchstart="event.stopPropagation()"
+          ontouchmove="event.stopPropagation()"
         />
       </div>
       
