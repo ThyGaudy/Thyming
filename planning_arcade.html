@@ -2360,20 +2360,26 @@ h3::after {
 .radio-scan-btn {
   width: 100%;
   margin-top: 15px;
-  background: linear-gradient(135deg, #4a0080, #6000a0);
-  border: 2px solid #FFD700;
-  color: #FFD700;
-  font-family: 'Black Ops One', cursive;
+  background: linear-gradient(145deg, rgba(42,42,42,0.6), rgba(28,28,28,0.8));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(0,255,136,0.3);
+  color: #00ff88;
+  font-family: 'Rajdhani', sans-serif;
   font-size: 1em;
-  padding: 12px;
-  border-radius: 10px;
+  font-weight: 600;
+  padding: 14px;
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.3s;
+  letter-spacing: 0.5px;
 }
 
 .radio-scan-btn:hover {
-  background: linear-gradient(135deg, #6000a0, #7000b0);
-  box-shadow: 0 0 20px rgba(255,215,0,0.4);
+  background: linear-gradient(145deg, rgba(0,255,136,0.15), rgba(0,204,255,0.12));
+  border-color: rgba(0,255,136,0.5);
+  box-shadow: 0 4px 20px rgba(0,255,136,0.2);
+  transform: translateY(-2px);
 }
 
 .radio-loading {
