@@ -4204,7 +4204,7 @@ async function loadRadioStations() {
   if (isLoadingStations || radioStations.length > 0) return;
   
   isLoadingStations = true;
-  console.log('🔍 Chargement stations FM Bordeaux (flux locaux prioritaires)...');
+  console.log('🔍 Chargement stations FM Bordeaux (recherche approfondie)...');
   
   const foundStations = [];
   
@@ -4223,51 +4223,67 @@ async function loadRadioStations() {
       stationAdded = true;
     }
     
-    // PRIORITÉ 2 : Chercher dans Radio Browser (même si flux local existe pas)
+    // PRIORITÉ 2 : Chercher dans Radio Browser avec plusieurs variantes
     if (!stationAdded) {
-      try {
-        const searchName = localStation.name
-          .replace(/\s*Bordeaux$/i, '')
-          .replace(/\s*FM$/i, '')
-          .replace(/\s*Radio$/i, '')
-          .trim();
+      // Essayer plusieurs variantes de noms
+      const searchVariants = [
+        localStation.name,
+        localStation.name + ' France',
+        localStation.name + ' Bordeaux',
+        localStation.name.replace(/\s*FM$/i, ''),
+        localStation.name.replace(/\s*Radio$/i, ''),
+        localStation.name.split(' ')[0] // Premier mot seulement
+      ];
+      
+      for (const variant of searchVariants) {
+        if (stationAdded) break;
         
-        const response = await fetch(
-          `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(searchName)}?limit=1&hidebroken=true`
-        );
-        const data = await response.json();
-        
-        if (data && data.length > 0) {
-          const station = data[0];
-          foundStations.push({
-            name: localStation.name,
-            freq: localStation.freq,
-            url: station.url_resolved || station.url
-          });
-          console.log('✅ API:', localStation.name, '-', localStation.freq, 'FM');
-          stationAdded = true;
+        try {
+          const response = await fetch(
+            `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(variant)}?limit=5&hidebroken=true`
+          );
+          const data = await response.json();
+          
+          if (data && data.length > 0) {
+            // Prendre le premier résultat avec une URL valide
+            for (const station of data) {
+              if (station.url_resolved || station.url) {
+                foundStations.push({
+                  name: localStation.name,
+                  freq: localStation.freq,
+                  url: station.url_resolved || station.url
+                });
+                console.log('✅ API:', localStation.name, '-', localStation.freq, 'FM', `(via "${variant}")`);
+                stationAdded = true;
+                break;
+              }
+            }
+          }
+        } catch (err) {
+          // Continuer avec la variante suivante
         }
-      } catch (err) {
-        // Continuer
       }
     }
     
-    // Si toujours rien trouvé, on laisse un placeholder
+    // Si toujours rien trouvé
     if (!stationAdded) {
-      console.warn('⚠️ Pas de flux pour:', localStation.name, '(FM uniquement)');
+      console.warn('❌ Pas de flux pour:', localStation.name, localStation.freq, 'FM');
     }
   }
   
   // Utiliser les stations trouvées
   if (foundStations.length > 0) {
     radioStations = foundStations;
-    console.log('✅ Total:', radioStations.length, '/', bordeauxStations.length, 'stations');
+    console.log('✅ TOTAL:', radioStations.length, '/', bordeauxStations.length, 'stations chargées');
+    console.log('📻 Stations:', radioStations.map(s => s.name).join(', '));
   } else {
     // Fallback minimal
     radioStations = [
       { name: 'France Inter', freq: '89.7', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
       { name: 'FIP', freq: '96.7', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
       { name: 'France Bleu Gironde', freq: '100.1', url: 'https://icecast.radiofrance.fr/fbgironde-midfi.mp3' },
+      { name: 'RFM', freq: '99.6', url: 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3' },
+      { name: 'NRJ', freq: '102.4', url: 'https://scdn.nrjaudio.fm/fr/30001/mp3_128.mp3' },
       { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' }
     ];
     console.log('⚠️ Stations de secours');
