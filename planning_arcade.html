@@ -4509,17 +4509,30 @@ function loadRadioPresets() {
         };
         
       } else {
+        // Favori vide
         btn.textContent = `${i} - Vide`;
         btn.classList.remove('saved');
-        btn.onclick = () => savePreset(i);
+        
+        let touchMoved = false;
+        
         btn.ontouchstart = (e) => {
           e.stopPropagation();
+          touchMoved = false;
         };
+        
+        btn.ontouchmove = (e) => {
+          touchMoved = true;
+        };
+        
         btn.ontouchend = (e) => {
           e.stopPropagation();
-          savePreset(i);
+          if (!touchMoved) {
+            savePreset(i);
+          }
         };
-        btn.ontouchmove = null;
+        
+        // Desktop
+        btn.onclick = () => savePreset(i);
         btn.oncontextmenu = null;
       }
     }
