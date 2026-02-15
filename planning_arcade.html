@@ -1324,18 +1324,6 @@ h3::after {
   backdrop-filter: blur(10px);
 }
 
-.radio-container {
-  position: relative;
-  width: 90%;
-  max-width: 500px;
-  background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
-  border: 2px solid #FFD700;
-  border-radius: 20px;
-  padding: 30px 20px;
-  box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
-  z-index: 10001;
-}
-
 .radio-close {
   position: absolute;
   top: 15px;
@@ -1802,11 +1790,11 @@ h3::after {
   background: linear-gradient(160deg, rgba(30,30,30,0.95) 0%, rgba(15,15,15,0.98) 100%);
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
-  border-radius: 32px;
+  border-radius: 24px;
   padding: 0;
-  width: 94%;
-  max-width: 440px;
-  max-height: 90vh;
+  width: 92%;
+  max-width: 400px;
+  max-height: 92vh;
   overflow-y: auto;
   position: relative;
   animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1817,7 +1805,7 @@ h3::after {
   content: '';
   position: absolute;
   inset: -2px;
-  border-radius: 32px;
+  border-radius: 24px;
   padding: 2px;
   background: linear-gradient(
     60deg,
@@ -1833,6 +1821,7 @@ h3::after {
   mask-composite: exclude;
   animation: borderRotate 6s linear infinite;
   pointer-events: none;
+  z-index: -1;
 }
 
 @keyframes borderRotate {
@@ -1928,7 +1917,7 @@ h3::after {
 
 /* Contenu principal */
 .radio-content {
-  padding: 28px 24px 24px 24px;
+  padding: 20px 18px 18px 18px;
 }
 
 /* Display avec effet glassmorphism */
@@ -1938,9 +1927,9 @@ h3::after {
     rgba(28,28,28,0.6));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
-  padding: 24px 20px;
-  margin-bottom: 28px;
+  border-radius: 20px;
+  padding: 18px 16px;
+  margin-bottom: 20px;
   position: relative;
   overflow: hidden;
 }
@@ -2054,8 +2043,8 @@ h3::after {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 18px;
-  margin: 32px 0 28px 0;
+  gap: 16px;
+  margin: 24px 0 20px 0;
 }
 
 .radio-btn {
@@ -2153,7 +2142,7 @@ h3::after {
 }
 
 .radio-volume {
-  margin: 28px 0 24px 0;
+  margin: 20px 0 18px 0;
   padding: 0 4px;
 }
 
@@ -2233,8 +2222,8 @@ h3::after {
 .radio-presets {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 28px;
+  gap: 8px;
+  margin-top: 20px;
 }
 
 .radio-preset-btn {
