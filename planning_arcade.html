@@ -1940,6 +1940,7 @@ h3::after {
 
 .radio-controls {
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
   gap: 20px;
@@ -4456,37 +4457,48 @@ function loadRadioPresets() {
   for (let i = 1; i <= 6; i++) {
     const btn = document.getElementById(`radioPreset${i}`);
     if (btn) {
+      // Variable pour le timer (closure)
       let longPressTimer = null;
+      let touchMoved = false;
       
       if (radioPresets[i] !== undefined) {
         const station = radioStations[radioPresets[i]];
         btn.textContent = `${i} - ${station.name}`;
         btn.classList.add('saved');
         
-        // Clic normal = charger
-        btn.onclick = () => loadPreset(i);
-        
         // Appui long = remplacer (mobile)
         btn.ontouchstart = (e) => {
-          e.preventDefault();
+          e.stopPropagation(); // Empêcher le swipe
+          touchMoved = false;
           longPressTimer = setTimeout(() => {
-            if (confirm(`Remplacer "${station.name}" par "${radioStations[currentStationIndex].name}" ?`)) {
+            if (!touchMoved && confirm(`Remplacer "${station.name}" par "${radioStations[currentStationIndex].name}" ?`)) {
               savePreset(i);
             }
           }, 800);
         };
         
-        btn.ontouchend = () => {
+        btn.ontouchmove = (e) => {
+          touchMoved = true;
           if (longPressTimer) {
             clearTimeout(longPressTimer);
-            // Si c'était un clic court, charger
-            setTimeout(() => loadPreset(i), 10);
+            longPressTimer = null;
           }
         };
         
-        btn.ontouchmove = () => {
-          clearTimeout(longPressTimer);
+        btn.ontouchend = (e) => {
+          e.stopPropagation(); // Empêcher le swipe
+          if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+            // Si c'était un clic court et pas de mouvement, charger
+            if (!touchMoved) {
+              loadPreset(i);
+            }
+          }
         };
+        
+        // Clic normal desktop = charger
+        btn.onclick = () => loadPreset(i);
         
         // Clic droit = remplacer (desktop)
         btn.oncontextmenu = (e) => {
@@ -4500,8 +4512,13 @@ function loadRadioPresets() {
         btn.textContent = `${i} - Vide`;
         btn.classList.remove('saved');
         btn.onclick = () => savePreset(i);
-        btn.ontouchstart = null;
-        btn.ontouchend = null;
+        btn.ontouchstart = (e) => {
+          e.stopPropagation();
+        };
+        btn.ontouchend = (e) => {
+          e.stopPropagation();
+          savePreset(i);
+        };
         btn.ontouchmove = null;
         btn.oncontextmenu = null;
       }
@@ -4551,10 +4568,20 @@ function handleRadioSwipe() {
   const radioContainer = document.getElementById('radioModal');
   
   radioContainer.addEventListener('touchstart', (e) => {
+    // Ignorer si on touche le slider de volume
+    if (e.target.classList.contains('radio-volume-slider') || 
+        e.target.closest('.radio-volume')) {
+      return;
+    }
     radioTouchStartX = e.changedTouches[0].screenX;
   });
   
   radioContainer.addEventListener('touchend', (e) => {
+    // Ignorer si on touche le slider de volume
+    if (e.target.classList.contains('radio-volume-slider') || 
+        e.target.closest('.radio-volume')) {
+      return;
+    }
     radioTouchEndX = e.changedTouches[0].screenX;
     handleRadioGesture();
   });
