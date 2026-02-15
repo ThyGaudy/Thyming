@@ -4121,20 +4121,60 @@ window.addEventListener('DOMContentLoaded', () => {
 let radioStations = [];
 let isLoadingStations = false;
 
+// VRAIES fréquences FM de Bordeaux
+const stationFrequencies = {
+  'NRJ': '102.4',
+  'Skyrock': '102.8',
+  'Fun Radio': '91.8',
+  'RTL': '105.1',
+  'Europe 1': '104.6',
+  'RFM': '99.6',
+  'Nostalgie': '97.3',
+  'Chérie FM': '95.3',
+  'Cherie': '95.3',
+  'Rire': '98.2',
+  'RTL2': '106.8',
+  'RTL 2': '106.8',
+  'France Inter': '89.7',
+  'France Info': '105.5',
+  'FIP': '96.7',
+  'Mouv': '87.7',
+  'France Musique': '93.5',
+  'France Culture': '97.7',
+  'France Bleu': '100.1',
+  'Radio Nova': '94.9',
+  'Radio Classique': '92.2',
+  'Virgin': '94.3',
+  'OUI FM': '103.3',
+  'Gold': '103.3',
+  'RMC': '104.2',
+  'MFM': '88.5',
+  'BFM': '107.3'
+};
+
+// Ordre de popularité des stations
+const stationOrder = [
+  'NRJ', 'Skyrock', 'Fun Radio', 'RTL', 'Europe 1', 'RFM',
+  'Nostalgie', 'Chérie FM', 'Rire', 'RTL2', 'Virgin',
+  'France Inter', 'France Info', 'FIP', 'Mouv', 'France Bleu',
+  'Radio Nova', 'RMC', 'Radio Classique', 'France Musique', 'France Culture'
+];
+
 // Charger les vraies stations depuis Radio Browser API
 async function loadRadioStations() {
   if (isLoadingStations || radioStations.length > 0) return;
   
   isLoadingStations = true;
-  console.log('🔍 Chargement des stations depuis Radio Browser...');
+  console.log('🔍 Chargement des stations (Bordeaux FM)...');
   
   try {
     // Liste des stations françaises populaires à rechercher
     const stationNames = [
       'NRJ France', 'Skyrock', 'Fun Radio', 'RTL', 'Europe 1',
       'RFM', 'Nostalgie', 'Chérie FM', 'Rire et Chansons', 'RTL2',
-      'France Inter', 'France Info', 'FIP', 'Mouv', 'France Musique',
-      'Radio Nova', 'Jazz Radio', 'TSF Jazz', 'Generations', 'OUI FM'
+      'Virgin Radio', 'France Inter', 'France Info', 'FIP', 'Mouv',
+      'France Bleu Gironde', 'Radio Nova', 'RMC', 'Radio Classique',
+      'France Musique', 'France Culture'
     ];
     
     const foundStations = [];
@@ -4149,45 +4189,63 @@ async function loadRadioStations() {
         
         if (data && data.length > 0) {
           const station = data[0];
-          // Générer une fausse fréquence si pas disponible
-          const freq = station.tags ? station.tags.match(/\d+\.\d+/)?.[0] || (87 + Math.random() * 20).toFixed(1) : (87 + Math.random() * 20).toFixed(1);
+          const cleanName = station.name
+            .replace(/\s*-\s*France$/i, '')
+            .replace(/\s*Bordeaux$/i, '')
+            .replace(/\s+Radio$/i, '')
+            .trim()
+            .substring(0, 20);
+          
+          // Trouver la VRAIE fréquence Bordeaux
+          let freq = '87.5';
+          for (const [key, value] of Object.entries(stationFrequencies)) {
+            if (cleanName.includes(key) || stationName.includes(key)) {
+              freq = value;
+              break;
+            }
+          }
           
           foundStations.push({
-            name: station.name.replace(/\s*-\s*France$/i, '').substring(0, 20),
+            name: cleanName,
             freq: freq,
-            url: station.url_resolved || station.url
+            url: station.url_resolved || station.url,
+            searchName: stationName
           });
-          console.log('✅ Trouvé:', station.name);
+          console.log('✅', cleanName, '-', freq, 'FM');
         }
       } catch (err) {
         console.warn('⚠️ Pas trouvé:', stationName);
       }
     }
     
+    // Trier par ordre de popularité
+    foundStations.sort((a, b) => {
+      const indexA = stationOrder.findIndex(s => a.name.includes(s));
+      const indexB = stationOrder.findIndex(s => b.name.includes(s));
+      const orderA = indexA === -1 ? 999 : indexA;
+      const orderB = indexB === -1 ? 999 : indexB;
+      return orderA - orderB;
+    });
+    
     // Si on a trouvé des stations, on les utilise
     if (foundStations.length > 0) {
       radioStations = foundStations;
-      console.log('✅ Total stations chargées:', radioStations.length);
+      console.log('✅ Total:', radioStations.length, 'stations');
     } else {
-      // Fallback sur nos stations de secours
       throw new Error('Aucune station trouvée');
     }
     
   } catch (error) {
     console.error('❌ Erreur API:', error);
-    // Fallback - stations de base qui marchent
+    // Fallback - stations de base Bordeaux
     radioStations = [
-      { name: 'FIP', freq: '105.1', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
-      { name: 'France Inter', freq: '87.8', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
+      { name: 'FIP', freq: '96.7', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
+      { name: 'France Inter', freq: '89.7', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
       { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' },
-      { name: 'Mouv', freq: '92.1', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' },
-      { name: 'Radio Nova', freq: '101.5', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3' },
-      { name: 'TSF Jazz', freq: '89.9', url: 'https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3' },
-      { name: 'Jazz Radio', freq: '106.2', url: 'https://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3' },
-      { name: 'Generations', freq: '88.2', url: 'https://generationfm.ice.infomaniak.ch/generationfm-high.mp3' },
-      { name: 'OUI FM', freq: '102.3', url: 'https://ouifm.ice.infomaniak.ch/ouifm-high.mp3' }
+      { name: 'Mouv', freq: '87.7', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' },
+      { name: 'Radio Nova', freq: '94.9', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3' }
     ];
-    console.log('⚠️ Utilisation des stations de secours');
+    console.log('⚠️ Stations de secours (Bordeaux)');
   }
   
   isLoadingStations = false;
