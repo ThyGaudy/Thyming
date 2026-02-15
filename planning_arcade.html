@@ -2214,10 +2214,11 @@ h3::after {
     inset 0 1px 0 rgba(255,255,255,0.03);
   position: relative;
   overflow: hidden;
-  touch-action: manipulation; /* Active les touch events */
-  user-select: none; /* Empêche la sélection de texte */
+  touch-action: manipulation;
+  user-select: none;
   -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent; /* Enlève le highlight bleu sur mobile */
+  -webkit-tap-highlight-color: transparent;
+  gap: 4px;
 }
 
 .radio-preset-btn::before {
@@ -2229,7 +2230,7 @@ h3::after {
     transparent 100%);
   opacity: 0;
   transition: opacity 0.25s;
-  pointer-events: none; /* Important ! */
+  pointer-events: none;
 }
 
 .radio-preset-btn:hover::before {
@@ -4654,87 +4655,39 @@ function loadRadioPresets() {
   for (let i = 1; i <= 6; i++) {
     const btn = document.getElementById(`radioPreset${i}`);
     if (btn) {
-      // Variable pour le timer (closure)
-      let longPressTimer = null;
-      let touchMoved = false;
+      // Nettoyer les anciens événements
+      btn.replaceWith(btn.cloneNode(true));
+      const newBtn = document.getElementById(`radioPreset${i}`);
       
       if (radioPresets[i] !== undefined) {
+        // Favori PLEIN
         const station = radioStations[radioPresets[i]];
-        btn.textContent = `${i} - ${station.name}`;
-        btn.classList.add('saved');
+        newBtn.innerHTML = `
+          <span style="flex:1">${i} - ${station.name}</span>
+          <span onclick="event.stopPropagation(); deletePreset(${i})" style="color:#ff4444;font-weight:bold;cursor:pointer">✕</span>
+        `;
+        newBtn.classList.add('saved');
         
-        // Appui long = remplacer (mobile)
-        btn.addEventListener('touchstart', (e) => {
-          console.log('👆 Touchstart favori', i);
-          btn.style.backgroundColor = 'red'; // DEBUG VISUEL
-          e.stopPropagation();
-          e.preventDefault();
-          touchMoved = false;
-          longPressTimer = setTimeout(() => {
-            console.log('⏱️ Appui long détecté', i);
-            btn.style.backgroundColor = 'green'; // DEBUG VISUEL
-            if (!touchMoved && confirm(`Remplacer "${station.name}" par "${radioStations[currentStationIndex].name}" ?`)) {
-              savePreset(i);
-            }
-            btn.style.backgroundColor = ''; // Reset
-          }, 800);
-        }, { passive: false });
-        
-        btn.addEventListener('touchmove', (e) => {
-          console.log('👉 Touchmove favori', i);
-          touchMoved = true;
-          if (longPressTimer) {
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
-          }
-        });
-        
-        btn.addEventListener('touchend', (e) => {
-          console.log('👋 Touchend favori', i, 'moved:', touchMoved);
-          btn.style.backgroundColor = ''; // Reset
-          e.stopPropagation();
-          if (longPressTimer) {
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
-            // Si c'était un clic court et pas de mouvement, charger
-            if (!touchMoved) {
-              loadPreset(i);
-            }
-          }
-        });
-        
-        // Clic normal desktop = charger
-        btn.onclick = () => loadPreset(i);
-        
-        // Clic droit = remplacer (desktop)
-        btn.oncontextmenu = (e) => {
-          e.preventDefault();
-          if (confirm(`Remplacer "${station.name}" par "${radioStations[currentStationIndex].name}" ?`)) {
-            savePreset(i);
-          }
-        };
+        // Clic = charger la station
+        newBtn.onclick = () => loadPreset(i);
         
       } else {
-        // Favori vide - TEST SIMPLE
-        btn.textContent = `${i} - Vide`;
-        btn.classList.remove('saved');
+        // Favori VIDE
+        newBtn.innerHTML = `${i} - Vide`;
+        newBtn.classList.remove('saved');
         
-        // SUPER SIMPLE - juste un alert
-        btn.addEventListener('touchend', (e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          alert('TOUCH DETECTE sur favori ' + i);
-          savePreset(i);
-        }, { passive: false });
-        
-        // Desktop
-        btn.onclick = () => {
-          alert('CLICK DETECTE sur favori ' + i);
-          savePreset(i);
-        };
-        btn.oncontextmenu = null;
+        // Clic = sauvegarder
+        newBtn.onclick = () => savePreset(i);
       }
     }
+  }
+}
+
+function deletePreset(slot) {
+  if (confirm('Supprimer ce favori ?')) {
+    delete radioPresets[slot];
+    localStorage.setItem('radioPresets', JSON.stringify(radioPresets));
+    loadRadioPresets();
   }
 }
 
@@ -5707,8 +5660,9 @@ initPlanningsDB();
       </div>
       
       <div style="text-align:center;margin-top:15px;color:#666;font-size:0.85em;line-height:1.5">
-        💡 <strong>Favori vide :</strong> Tap pour sauvegarder<br>
-        💡 <strong>Favori plein :</strong> Appui long (800ms) pour remplacer
+        💡 Clic sur favori vide = Sauvegarder<br>
+        💡 Clic sur favori plein = Charger<br>
+        💡 Clic sur ✕ = Supprimer
       </div>
       
       <button class="radio-scan-btn" id="radioScanBtn" onclick="scanRadio()">🔍 SCAN AUTO</button>
