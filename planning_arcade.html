@@ -2214,6 +2214,10 @@ h3::after {
     inset 0 1px 0 rgba(255,255,255,0.03);
   position: relative;
   overflow: hidden;
+  touch-action: manipulation; /* Active les touch events */
+  user-select: none; /* Empêche la sélection de texte */
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent; /* Enlève le highlight bleu sur mobile */
 }
 
 .radio-preset-btn::before {
@@ -2225,6 +2229,7 @@ h3::after {
     transparent 100%);
   opacity: 0;
   transition: opacity 0.25s;
+  pointer-events: none; /* Important ! */
 }
 
 .radio-preset-btn:hover::before {
