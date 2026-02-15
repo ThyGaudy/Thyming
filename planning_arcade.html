@@ -4121,24 +4121,44 @@ window.addEventListener('DOMContentLoaded', () => {
 let radioStations = [];
 let isLoadingStations = false;
 
-// Liste des stations à chercher (ordre des fréquences Bordeaux)
+// Liste des stations à chercher (toutes les fréquences Bordeaux)
 const bordeauxStationsToFind = [
   { name: 'Mouv', freq: '87.7', search: 'Mouv France' },
+  { name: 'Radio Campus', freq: '88.1', search: 'Radio Campus Bordeaux' },
+  { name: 'M Radio', freq: '88.5', search: 'M Radio' },
+  { name: 'RCF Bordeaux', freq: '88.9', search: 'RCF Bordeaux' },
   { name: 'France Inter', freq: '89.7', search: 'France Inter' },
+  { name: 'La Clé Des Ondes', freq: '90.1', search: 'Clé Des Ondes' },
+  { name: 'RIG', freq: '90.7', search: 'RIG Radio' },
+  { name: 'O2 Radio', freq: '91.3', search: 'O2 Radio' },
   { name: 'Fun Radio', freq: '91.8', search: 'Fun Radio France' },
+  { name: 'Radio Classique', freq: '92.2', search: 'Radio Classique' },
+  { name: 'Enjoy 33', freq: '92.6', search: 'Enjoy 33' },
   { name: 'France Musique', freq: '93.5', search: 'France Musique' },
+  { name: 'Europe 2', freq: '94.3', search: 'Europe 2 Gironde' },
   { name: 'Radio Nova', freq: '94.9', search: 'Radio Nova' },
   { name: 'Chérie FM', freq: '95.3', search: 'Chérie FM France' },
+  { name: 'ARL', freq: '96.2', search: 'ARL Aquitaine' },
   { name: 'FIP', freq: '96.7', search: 'FIP' },
   { name: 'Nostalgie', freq: '97.3', search: 'Nostalgie France' },
   { name: 'France Culture', freq: '97.7', search: 'France Culture' },
   { name: 'Rire & Chansons', freq: '98.2', search: 'Rire et Chansons' },
   { name: 'RFM', freq: '99.6', search: 'RFM France' },
   { name: 'France Bleu', freq: '100.1', search: 'France Bleu Gironde' },
+  { name: 'Wit FM', freq: '100.8', search: 'Wit FM' },
   { name: 'NRJ', freq: '102.4', search: 'NRJ France' },
   { name: 'Skyrock', freq: '102.8', search: 'Skyrock' },
+  { name: 'Forever', freq: '103.3', search: 'Forever Aquitaine' },
+  { name: 'Blackbox', freq: '103.7', search: 'Blackbox' },
+  { name: 'RMC', freq: '104.2', search: 'RMC' },
+  { name: 'Europe 1', freq: '104.6', search: 'Europe 1' },
+  { name: 'RTL', freq: '105.1', search: 'RTL' },
   { name: 'France Info', freq: '105.5', search: 'France Info' },
-  { name: 'Jazz Radio', freq: '106.2', search: 'Jazz Radio' }
+  { name: 'Sud Radio', freq: '106.0', search: 'Sud Radio' },
+  { name: 'Radio Orient', freq: '106.4', search: 'Radio Orient' },
+  { name: 'RTL2', freq: '106.8', search: 'RTL2 France' },
+  { name: 'BFM Business', freq: '107.3', search: 'BFM Business' },
+  { name: 'Radio Vinci', freq: '107.7', search: 'Radio Vinci Autoroutes' }
 ];
 
 // Charger les stations depuis Radio Browser
