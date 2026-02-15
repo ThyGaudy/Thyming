@@ -1805,7 +1805,7 @@ h3::after {
   content: '';
   position: absolute;
   inset: -3px;
-  border-radius: 24px;
+  border-radius: 27px;
   padding: 3px;
   background: linear-gradient(
     60deg,
@@ -1821,7 +1821,14 @@ h3::after {
   mask-composite: exclude;
   animation: borderRotate 6s linear infinite;
   pointer-events: none;
-  z-index: -1;
+  z-index: 0;
+}
+
+/* S'assurer que le contenu est au-dessus */
+.radio-header,
+.radio-content {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes borderRotate {
