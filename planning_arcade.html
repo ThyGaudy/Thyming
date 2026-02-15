@@ -1798,44 +1798,47 @@ h3::after {
   overflow-y: auto;
   position: relative;
   animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Bordure animée holographique - PLUS ÉPAISSE */
-.radio-container::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: 27px;
-  padding: 3px;
-  background: linear-gradient(
-    60deg,
-    #00ff88,
-    #00ccff,
-    #ff00ff,
-    #ffaa00,
-    #00ff88
-  );
-  background-size: 300% 300%;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  
+  /* Bordure dégradé animé DIRECTE */
+  border: 3px solid transparent;
+  background-image: 
+    linear-gradient(160deg, rgba(30,30,30,0.95) 0%, rgba(15,15,15,0.98) 100%),
+    linear-gradient(60deg, #00ff88, #00ccff, #ff00ff, #ffaa00, #00ff88);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
   animation: borderRotate 6s linear infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* S'assurer que le contenu est au-dessus */
-.radio-header,
-.radio-content {
-  position: relative;
-  z-index: 1;
 }
 
 @keyframes borderRotate {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% { 
+    background-image: 
+      linear-gradient(160deg, rgba(30,30,30,0.95) 0%, rgba(15,15,15,0.98) 100%),
+      linear-gradient(60deg, #00ff88, #00ccff, #ff00ff, #ffaa00, #00ff88);
+  }
+  25% { 
+    background-image: 
+      linear-gradient(160deg, rgba(30,30,30,0.95) 0%, rgba(15,15,15,0.98) 100%),
+      linear-gradient(150deg, #00ff88, #00ccff, #ff00ff, #ffaa00, #00ff88);
+  }
+  50% { 
+    background-image: 
+      linear-gradient(160deg, rgba(30,30,30,0.95) 0%, rgba(15,15,15,0.98) 100%),
+      linear-gradient(240deg, #00ff88, #00ccff, #ff00ff, #ffaa00, #00ff88);
+  }
+  75% { 
+    background-image: 
+      linear-gradient(160deg, rgba(30,30,30,0.95) 0%, rgba(15,15,15,0.98) 100%),
+      linear-gradient(330deg, #00ff88, #00ccff, #ff00ff, #ffaa00, #00ff88);
+  }
+  100% { 
+    background-image: 
+      linear-gradient(160deg, rgba(30,30,30,0.95) 0%, rgba(15,15,15,0.98) 100%),
+      linear-gradient(420deg, #00ff88, #00ccff, #ff00ff, #ffaa00, #00ff88);
+  }
 }
+
+/* Supprimer l'ancien ::before */
+/* .radio-container::before sera ignoré */
 
 @keyframes slideUp {
   from { 
