@@ -4733,38 +4733,44 @@ function loadPreset(slot) {
 }
 
 function loadRadioPresets() {
+  const presetsContainer = document.querySelector('.radio-presets');
+  if (!presetsContainer) return;
+  
+  presetsContainer.innerHTML = '';
+  
   for (let i = 1; i <= 6; i++) {
-    const btn = document.getElementById(`radioPreset${i}`);
-    if (btn) {
-      // Nettoyer TOUS les événements
-      const newBtn = btn.cloneNode(false);
-      btn.parentNode.replaceChild(newBtn, btn);
+    const btn = document.createElement('button');
+    btn.className = 'radio-preset-btn';
+    btn.id = `radioPreset${i}`;
+    
+    if (radioPresets[i] !== undefined) {
+      // Favori PLEIN
+      const station = radioStations[radioPresets[i]];
+      btn.innerHTML = `${i} - ${station.name} <span style="color:#ff4444;margin-left:4px">✕</span>`;
+      btn.classList.add('saved');
       
-      if (radioPresets[i] !== undefined) {
-        // Favori PLEIN
-        const station = radioStations[radioPresets[i]];
-        newBtn.innerHTML = `
-          <span style="flex:1;pointer-events:none">${i} - ${station.name}</span>
-          <span onclick="event.stopPropagation(); deletePreset(${i})" style="color:#ff4444;font-weight:bold;cursor:pointer;padding:4px;margin:-4px">✕</span>
-        `;
-        newBtn.classList.add('saved');
-        
-        // UNIQUEMENT onclick - rien d'autre
-        newBtn.onclick = (e) => {
-          if (e.target.tagName !== 'SPAN' || !e.target.textContent.includes('✕')) {
-            loadPreset(i);
+      btn.addEventListener('click', (e) => {
+        // Si clic sur la croix
+        if (e.target.textContent === '✕') {
+          if (confirm('Supprimer ce favori ?')) {
+            delete radioPresets[i];
+            localStorage.setItem('radioPresets', JSON.stringify(radioPresets));
+            loadRadioPresets();
           }
-        };
-        
-      } else {
-        // Favori VIDE
-        newBtn.textContent = `${i} - Vide`;
-        newBtn.classList.remove('saved');
-        
-        // UNIQUEMENT onclick - rien d'autre
-        newBtn.onclick = () => savePreset(i);
-      }
+        } else {
+          // Sinon charger
+          loadPreset(i);
+        }
+      });
+    } else {
+      // Favori VIDE
+      btn.textContent = `${i} - Vide`;
+      btn.addEventListener('click', () => {
+        savePreset(i);
+      });
     }
+    
+    presetsContainer.appendChild(btn);
   }
 }
 
@@ -5736,12 +5742,7 @@ initPlanningsDB();
       </div>
       
       <div class="radio-presets">
-        <button class="radio-preset-btn" id="radioPreset1">1 - Vide</button>
-        <button class="radio-preset-btn" id="radioPreset2">2 - Vide</button>
-        <button class="radio-preset-btn" id="radioPreset3">3 - Vide</button>
-        <button class="radio-preset-btn" id="radioPreset4">4 - Vide</button>
-        <button class="radio-preset-btn" id="radioPreset5">5 - Vide</button>
-        <button class="radio-preset-btn" id="radioPreset6">6 - Vide</button>
+        <!-- Boutons générés dynamiquement en JS -->
       </div>
       
       <div style="text-align:center;margin-top:15px;color:#666;font-size:0.85em;line-height:1.5">
