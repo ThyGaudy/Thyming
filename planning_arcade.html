@@ -4715,46 +4715,23 @@ function loadRadioPresets() {
         };
         
       } else {
-        // Favori vide
+        // Favori vide - TEST SIMPLE
         btn.textContent = `${i} - Vide`;
         btn.classList.remove('saved');
         
-        let touchMoved = false;
-        
-        btn.addEventListener('touchstart', (e) => {
-          console.log('👆 Touchstart favori vide', i);
-          btn.style.backgroundColor = 'orange'; // DEBUG VISUEL
-          btn.style.transform = 'scale(0.95)'; // Feedback tactile
+        // SUPER SIMPLE - juste un alert
+        btn.addEventListener('touchend', (e) => {
           e.stopPropagation();
           e.preventDefault();
-          touchMoved = false;
+          alert('TOUCH DETECTE sur favori ' + i);
+          savePreset(i);
         }, { passive: false });
         
-        btn.addEventListener('touchmove', (e) => {
-          touchMoved = true;
-          btn.style.backgroundColor = ''; // Reset
-          btn.style.transform = '';
-        });
-        
-        btn.addEventListener('touchend', (e) => {
-          console.log('👋 Touchend favori vide', i, 'moved:', touchMoved);
-          e.stopPropagation();
-          
-          if (!touchMoved) {
-            btn.style.backgroundColor = 'green'; // SUCCES
-            btn.style.transform = '';
-            setTimeout(() => {
-              savePreset(i);
-              btn.style.backgroundColor = ''; // Reset après save
-            }, 200);
-          } else {
-            btn.style.backgroundColor = ''; // Reset
-            btn.style.transform = '';
-          }
-        });
-        
         // Desktop
-        btn.onclick = () => savePreset(i);
+        btn.onclick = () => {
+          alert('CLICK DETECTE sur favori ' + i);
+          savePreset(i);
+        };
         btn.oncontextmenu = null;
       }
     }
