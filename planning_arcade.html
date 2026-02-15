@@ -4386,17 +4386,65 @@ function loadRadioPresets() {
   for (let i = 1; i <= 6; i++) {
     const btn = document.getElementById(`radioPreset${i}`);
     if (btn) {
+      let longPressTimer = null;
+      
       if (radioPresets[i] !== undefined) {
         const station = radioStations[radioPresets[i]];
         btn.textContent = `${i} - ${station.name}`;
         btn.classList.add('saved');
+        
+        // Clic normal = charger
         btn.onclick = () => loadPreset(i);
+        
+        // Appui long = remplacer (mobile)
+        btn.ontouchstart = (e) => {
+          e.preventDefault();
+          longPressTimer = setTimeout(() => {
+            if (confirm(`Remplacer "${station.name}" par "${radioStations[currentStationIndex].name}" ?`)) {
+              savePreset(i);
+            }
+          }, 800);
+        };
+        
+        btn.ontouchend = () => {
+          if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            // Si c'était un clic court, charger
+            setTimeout(() => loadPreset(i), 10);
+          }
+        };
+        
+        btn.ontouchmove = () => {
+          clearTimeout(longPressTimer);
+        };
+        
+        // Clic droit = remplacer (desktop)
+        btn.oncontextmenu = (e) => {
+          e.preventDefault();
+          if (confirm(`Remplacer "${station.name}" par "${radioStations[currentStationIndex].name}" ?`)) {
+            savePreset(i);
+          }
+        };
+        
       } else {
         btn.textContent = `${i} - Vide`;
         btn.classList.remove('saved');
         btn.onclick = () => savePreset(i);
+        btn.ontouchstart = null;
+        btn.ontouchend = null;
+        btn.ontouchmove = null;
+        btn.oncontextmenu = null;
       }
     }
+  }
+}
+
+function resetRadioPresets() {
+  if (confirm('⚠️ Supprimer tous les favoris ?')) {
+    radioPresets = {};
+    localStorage.removeItem('radioPresets');
+    loadRadioPresets();
+    alert('✅ Favoris réinitialisés');
   }
 }
 
@@ -5339,7 +5387,15 @@ initPlanningsDB();
       <button class="radio-preset-btn" id="radioPreset6">6 - Vide</button>
     </div>
     
+    <div style="text-align:center;margin-top:10px;color:#888;font-size:0.85em">
+      💡 Appui long sur un favori pour le remplacer
+    </div>
+    
     <button class="radio-scan-btn" id="radioScanBtn" onclick="scanRadio()">🔍 SCAN AUTO</button>
+    
+    <button class="radio-scan-btn" onclick="resetRadioPresets()" style="margin-top:10px;background:linear-gradient(135deg,#730000,#4d0000);font-size:0.9em">
+      🗑️ Réinitialiser favoris
+    </button>
   </div>
 </div>
 
