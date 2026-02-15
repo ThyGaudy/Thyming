@@ -4146,42 +4146,70 @@ async function loadRadioStations() {
   if (isLoadingStations || radioStations.length > 0) return;
   
   isLoadingStations = true;
-  console.log('🔍 Chargement Radio Browser API...');
+  console.log('🔍 Chargement Radio Browser API (recherche approfondie)...');
   
   const foundStations = [];
   
   for (const station of bordeauxStationsToFind) {
-    try {
-      const response = await fetch(
-        `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(station.search)}?limit=1&hidebroken=true`
-      );
-      const data = await response.json();
+    let found = false;
+    
+    // Essayer plusieurs variantes de recherche
+    const searchVariants = [
+      station.search,
+      station.name,
+      station.name + ' France',
+      station.name.split(' ')[0], // Premier mot
+      station.search.replace(' France', ''),
+      station.search.replace(' et ', ' & ')
+    ];
+    
+    for (const searchTerm of searchVariants) {
+      if (found) break;
       
-      if (data && data.length > 0 && (data[0].url || data[0].url_resolved)) {
-        foundStations.push({
-          name: station.name,
-          freq: station.freq,
-          url: data[0].url_resolved || data[0].url
-        });
-        console.log('✅', station.name, station.freq, 'FM');
-      } else {
-        console.warn('⚠️ Non trouvé:', station.name);
+      try {
+        // Chercher les 5 premiers résultats au lieu d'un seul
+        const response = await fetch(
+          `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(searchTerm)}?limit=5&hidebroken=true`
+        );
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          // Prendre le premier avec une URL valide
+          for (const result of data) {
+            if (result.url || result.url_resolved) {
+              foundStations.push({
+                name: station.name,
+                freq: station.freq,
+                url: result.url_resolved || result.url
+              });
+              console.log('✅', station.name, station.freq, 'FM', `(via "${searchTerm}")`);
+              found = true;
+              break;
+            }
+          }
+        }
+      } catch (err) {
+        // Continuer avec la variante suivante
       }
-    } catch (err) {
-      console.error('❌ Erreur:', station.name, err);
+    }
+    
+    if (!found) {
+      console.warn('⚠️ Non trouvé:', station.name, station.freq, 'FM');
     }
   }
   
   if (foundStations.length > 0) {
     radioStations = foundStations;
-    console.log('✅ Total:', radioStations.length, 'stations chargées');
+    console.log('✅ TOTAL:', radioStations.length, '/', bordeauxStationsToFind.length, 'stations');
   } else {
-    // Fallback si aucune station trouvée
+    // Fallback Radio France (URLs directes)
     radioStations = [
       { name: 'FIP', freq: '96.7', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
-      { name: 'France Inter', freq: '89.7', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' }
+      { name: 'France Inter', freq: '89.7', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
+      { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' },
+      { name: 'Mouv', freq: '87.7', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' }
     ];
-    console.log('⚠️ Fallback: 2 stations de secours');
+    console.log('⚠️ Fallback: 4 stations Radio France');
   }
   
   isLoadingStations = false;
