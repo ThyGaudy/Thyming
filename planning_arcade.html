@@ -4117,114 +4117,27 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ========== RADIO FM ==========
 
-// TOUTES les stations FM Bordeaux avec URLs directes vérifiées
+// Stations FM Bordeaux avec TuneIn (iframe embarqué)
 let radioStations = [
-  // 87.7 - Le Mouv
-  { name: 'Le Mouv', freq: '87.7', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' },
-  
-  // 88.1 - Radio Campus (pas de flux web)
-  
-  // 88.5 - MFM Radio
-  { name: 'MFM Radio', freq: '88.5', url: 'https://mfm.ice.infomaniak.ch/mfm-128.mp3' },
-  
-  // 88.9 - RCF Bordeaux
-  { name: 'RCF Bordeaux', freq: '88.9', url: 'https://rcf.streamakaci.com/rcfbordeaux.mp3' },
-  
-  // 89.7 - France Inter
-  { name: 'France Inter', freq: '89.7', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
-  
-  // 90.1 - La Clé Des Ondes (pas de flux web)
-  
-  // 90.7 - RIG (pas de flux web)
-  
-  // 91.3 - O2 Radio (pas de flux web)
-  
-  // 91.8 - Fun Radio
-  { name: 'Fun Radio', freq: '91.8', url: 'https://stream.funradio.fr/fun-1-48-192' },
-  
-  // 92.2 - Radio Classique
-  { name: 'Radio Classique', freq: '92.2', url: 'https://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3' },
-  
-  // 92.6 - Enjoy 33 (pas de flux web)
-  
-  // 93.5 - France Musique
-  { name: 'France Musique', freq: '93.5', url: 'https://icecast.radiofrance.fr/francemusique-midfi.mp3' },
-  
-  // 94.3 - Virgin Radio
-  { name: 'Virgin Radio', freq: '94.3', url: 'https://virgin.ice.infomaniak.ch/virgin-high.mp3' },
-  
-  // 94.9 - Radio Nova
-  { name: 'Radio Nova', freq: '94.9', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3' },
-  
-  // 95.3 - Chérie FM
-  { name: 'Chérie FM', freq: '95.3', url: 'https://scdn.nrjaudio.fm/fr/30201/mp3_128.mp3' },
-  
-  // 96.2 - ARL (pas de flux web)
-  
-  // 96.7 - FIP
-  { name: 'FIP', freq: '96.7', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
-  
-  // 97.3 - Nostalgie
-  { name: 'Nostalgie', freq: '97.3', url: 'https://scdn.nrjaudio.fm/fr/30601/mp3_128.mp3' },
-  
-  // 97.7 - France Culture
-  { name: 'France Culture', freq: '97.7', url: 'https://icecast.radiofrance.fr/franceculture-midfi.mp3' },
-  
-  // 98.2 - Rire & Chansons
-  { name: 'Rire & Chansons', freq: '98.2', url: 'https://scdn.nrjaudio.fm/fr/30401/mp3_128.mp3' },
-  
-  // 99.6 - RFM
-  { name: 'RFM', freq: '99.6', url: 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3' },
-  
-  // 100.1 - France Bleu Gironde
-  { name: 'France Bleu Gironde', freq: '100.1', url: 'https://icecast.radiofrance.fr/fbgironde-midfi.mp3' },
-  
-  // 100.8 - Wit FM
-  { name: 'Wit FM', freq: '100.8', url: 'https://witfm.ice.infomaniak.ch/witfm-high.mp3' },
-  
-  // 102.4 - NRJ
-  { name: 'NRJ', freq: '102.4', url: 'https://scdn.nrjaudio.fm/fr/30001/mp3_128.mp3' },
-  
-  // 102.8 - Skyrock
-  { name: 'Skyrock', freq: '102.8', url: 'https://icecast.skyrock.net/s/natio_mp3_128k' },
-  
-  // 103.3 - Gold FM
-  { name: 'Gold FM', freq: '103.3', url: 'https://goldfm.ice.infomaniak.ch/goldfm-high.mp3' },
-  
-  // 103.7 - Blackbox (pas de flux web)
-  
-  // 104.2 - RMC
-  { name: 'RMC', freq: '104.2', url: 'https://rmc.bfmtv.com/rmcinfo-mp3' },
-  
-  // 104.6 - Europe 1
-  { name: 'Europe 1', freq: '104.6', url: 'https://europe1.lmn.fm/europe1.mp3' },
-  
-  // 105.1 - RTL
-  { name: 'RTL', freq: '105.1', url: 'https://streamer-01.rtl.fr/rtl-1-44-128' },
-  
-  // 105.5 - France Info
-  { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' },
-  
-  // 106.0 - Sud Radio
-  { name: 'Sud Radio', freq: '106.0', url: 'https://start-sud.ice.infomaniak.ch/start-sud-high.mp3' },
-  
-  // 106.4 - Radio Orient
-  { name: 'Radio Orient', freq: '106.4', url: 'https://stream.radioorient.com/live' },
-  
-  // 106.8 - RTL2
-  { name: 'RTL2', freq: '106.8', url: 'https://streamer-01.rtl2.fr/rtl2-1-44-128' },
-  
-  // 107.3 - BFM Business
-  { name: 'BFM Business', freq: '107.3', url: 'https://bfmbusispeech.lmn.fm/bfmbusispeech.mp3' }
+  { name: 'Le Mouv', freq: '87.7', tunein: 's24944' },
+  { name: 'France Inter', freq: '89.7', tunein: 's24877' },
+  { name: 'Fun Radio', freq: '91.8', tunein: 's8007' },
+  { name: 'France Musique', freq: '93.5', tunein: 's24881' },
+  { name: 'Virgin Radio', freq: '94.3', tunein: 's8151' },
+  { name: 'FIP', freq: '96.7', tunein: 's24879' },
+  { name: 'Nostalgie', freq: '97.3', tunein: 's8131' },
+  { name: 'France Culture', freq: '97.7', tunein: 's24878' },
+  { name: 'Rire & Chansons', freq: '98.2', tunein: 's8133' },
+  { name: 'RFM', freq: '99.6', tunein: 's8132' },
+  { name: 'France Bleu Gironde', freq: '100.1', tunein: 's24925' },
+  { name: 'NRJ', freq: '102.4', tunein: 's8129' },
+  { name: 'Skyrock', freq: '102.8', tunein: 's8157' },
+  { name: 'RMC', freq: '104.2', tunein: 's2704' },
+  { name: 'Europe 1', freq: '104.6', tunein: 's2728' },
+  { name: 'RTL', freq: '105.1', tunein: 's2730' },
+  { name: 'France Info', freq: '105.5', tunein: 's24876' },
+  { name: 'RTL2', freq: '106.8', tunein: 's8142' }
 ];
-
-let isLoadingStations = false;
-
-// Fonction simple - stations déjà chargées
-async function loadRadioStations() {
-  console.log('✅ Stations FM Bordeaux:', radioStations.length, 'stations disponibles');
-  console.log('📻', radioStations.map(s => `${s.name} (${s.freq})`).join(', '));
-}
 
 let currentStationIndex = 0;
 let radioAudio = null;
@@ -4232,35 +4145,24 @@ let radioPresets = JSON.parse(localStorage.getItem('radioPresets') || '{}');
 let radioVolume = parseFloat(localStorage.getItem('radioVolume') || '0.5');
 let radioLongPressTimer = null;
 let isScanning = false;
+let currentTuneInPlayer = null;
 
 // Initialiser la radio
 function initRadio() {
-  // Charger les stations
-  loadRadioStations();
+  console.log('✅ Radio TuneIn -', radioStations.length, 'stations');
   
-  radioAudio = new Audio();
-  radioAudio.volume = radioVolume;
-  radioAudio.preload = 'none';
-  
-  // Charger la dernière station écoutée
+  // Charger la dernière station
   const lastStation = parseInt(localStorage.getItem('lastRadioStation') || '0');
   currentStationIndex = lastStation;
   
-  // Appui long sur l'heure pour ouvrir la radio
+  // Appui long sur l'heure
   const timeEl = document.getElementById('currentTime');
   if (timeEl) {
-    console.log('✅ Radio initialisée - appui long sur heure activé');
-    
     timeEl.addEventListener('touchstart', (e) => {
-      console.log('👆 Touchstart détecté sur heure');
-      radioLongPressTimer = setTimeout(() => {
-        console.log('📻 Ouverture radio !');
-        openRadio();
-      }, 800);
+      radioLongPressTimer = setTimeout(() => openRadio(), 800);
     });
     
     timeEl.addEventListener('touchend', () => {
-      console.log('👆 Touchend - annulation timer');
       clearTimeout(radioLongPressTimer);
     });
     
@@ -4268,25 +4170,14 @@ function initRadio() {
       clearTimeout(radioLongPressTimer);
     });
     
-    // Desktop : clic droit
     timeEl.addEventListener('contextmenu', (e) => {
       e.preventDefault();
-      console.log('🖱️ Clic droit sur heure - ouverture radio');
       openRadio();
     });
-  } else {
-    console.error('❌ Élément currentTime non trouvé !');
   }
 }
 
-async function openRadio() {
-  // Charger les stations si pas encore fait
-  if (radioStations.length === 0) {
-    const nowPlaying = document.getElementById('radioNowPlaying');
-    if (nowPlaying) nowPlaying.textContent = '⏳ Chargement des stations...';
-    await loadRadioStations();
-  }
-  
+function openRadio() {
   document.getElementById('radioModal').style.display = 'flex';
   updateRadioDisplay();
   loadRadioPresets();
@@ -4330,33 +4221,24 @@ function changeStation(direction) {
 
 function playRadio() {
   const station = radioStations[currentStationIndex];
+  const playerContainer = document.getElementById('radioPlayerContainer');
   const nowPlaying = document.getElementById('radioNowPlaying');
-  const playBtn = document.getElementById('radioPlayBtn');
   
-  if (radioAudio.paused || radioAudio.src !== station.url) {
-    nowPlaying.textContent = '🔄 ' + station.name + '...';
-    radioAudio.src = station.url;
-    radioAudio.load();
-    
-    radioAudio.play().then(() => {
-      playBtn.textContent = '⏸';
-      nowPlaying.textContent = '🎵 ' + station.name;
-      console.log('✅ Lecture:', station.name);
-    }).catch(err => {
-      console.error('❌ Erreur:', station.name, err);
-      nowPlaying.textContent = '❌ Erreur - Changement...';
-      // Auto-skip après 1.5 secondes
-      setTimeout(() => {
-        changeStation('next');
-        setTimeout(() => playRadio(), 300);
-      }, 1500);
-    });
-    
-  } else {
-    radioAudio.pause();
-    playBtn.textContent = '▶';
-    nowPlaying.textContent = '';
-  }
+  nowPlaying.textContent = '🔄 Chargement ' + station.name + '...';
+  
+  // Créer l'iframe TuneIn
+  playerContainer.innerHTML = `
+    <iframe src="https://tunein.com/embed/player/${station.tunein}/" 
+            width="100%" 
+            height="100px" 
+            frameborder="0" 
+            scrolling="no"
+            allow="autoplay"
+            style="border-radius:8px"></iframe>
+  `;
+  
+  nowPlaying.textContent = '🎵 ' + station.name;
+  console.log('✅ TuneIn:', station.name);
 }
 
 function setRadioVolume(value) {
@@ -5364,22 +5246,8 @@ initPlanningsDB();
       <button class="radio-btn" onclick="changeStation('next')">►►</button>
     </div>
     
-    <div class="radio-volume">
-      <div class="radio-volume-label">
-        <span>🔊 Volume</span>
-        <span id="radioVolumeValue">50%</span>
-      </div>
-      <input 
-        type="range" 
-        class="radio-volume-slider" 
-        id="radioVolumeSlider"
-        min="0" 
-        max="1" 
-        step="0.01" 
-        value="0.5"
-        oninput="setRadioVolume(this.value)"
-      />
-    </div>
+    <!-- Lecteur TuneIn embarqué -->
+    <div id="radioPlayerContainer" style="margin: 10px 0;"></div>
     
     <div class="radio-presets">
       <button class="radio-preset-btn" id="radioPreset1">1 - Vide</button>
