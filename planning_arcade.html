@@ -4117,30 +4117,30 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ========== RADIO FM ==========
 
-// Stations FM Bordeaux avec flux nationaux (les plus fiables)
+// Stations FM Bordeaux - Uniquement flux 100% fiables
 let radioStations = [
-  // Radio France (100% fiables)
+  // Radio France (toujours 100% fiables)
   { name: 'Le Mouv', freq: '87.7', url: 'https://icecast.radiofrance.fr/mouv-midfi.mp3' },
   { name: 'France Inter', freq: '89.7', url: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3' },
-  { name: 'Fun Radio', freq: '91.8', url: 'https://stream.funradio.fr/fun-1-48-192' },
-  { name: 'Radio Classique', freq: '92.2', url: 'https://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3' },
   { name: 'France Musique', freq: '93.5', url: 'https://icecast.radiofrance.fr/francemusique-midfi.mp3' },
-  { name: 'Virgin Radio', freq: '94.3', url: 'https://virgin.ice.infomaniak.ch/virgin-high.mp3' },
-  { name: 'Radio Nova', freq: '94.9', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3' },
-  { name: 'Chérie FM', freq: '95.3', url: 'https://scdn.nrjaudio.fm/fr/30201/mp3_128.mp3' },
   { name: 'FIP', freq: '96.7', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
-  { name: 'Nostalgie', freq: '97.3', url: 'https://scdn.nrjaudio.fm/fr/30601/mp3_128.mp3' },
   { name: 'France Culture', freq: '97.7', url: 'https://icecast.radiofrance.fr/franceculture-midfi.mp3' },
-  { name: 'Rire & Chansons', freq: '98.2', url: 'https://scdn.nrjaudio.fm/fr/30401/mp3_128.mp3' },
-  { name: 'RFM', freq: '99.6', url: 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3' },
   { name: 'France Bleu Gironde', freq: '100.1', url: 'https://icecast.radiofrance.fr/fbgironde-midfi.mp3' },
+  { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' },
+  
+  // Stations Infomaniak (très fiables)
+  { name: 'Radio Nova', freq: '94.9', url: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3' },
+  { name: 'Jazz Radio', freq: '106.2', url: 'https://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3' },
+  { name: 'TSF Jazz', freq: '89.9', url: 'https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3' },
+  
+  // Stations commerciales (peuvent fonctionner)
   { name: 'NRJ', freq: '102.4', url: 'https://scdn.nrjaudio.fm/fr/30001/mp3_128.mp3' },
   { name: 'Skyrock', freq: '102.8', url: 'https://icecast.skyrock.net/s/natio_mp3_128k' },
-  { name: 'RMC', freq: '104.2', url: 'https://rmc.bfmtv.com/rmcinfo-mp3' },
-  { name: 'Europe 1', freq: '104.6', url: 'https://europe1.lmn.fm/europe1.mp3' },
-  { name: 'RTL', freq: '105.1', url: 'https://streamer-01.rtl.fr/rtl-1-44-128' },
-  { name: 'France Info', freq: '105.5', url: 'https://icecast.radiofrance.fr/franceinfo-midfi.mp3' },
-  { name: 'RTL2', freq: '106.8', url: 'https://streamer-01.rtl2.fr/rtl2-1-44-128' }
+  { name: 'Fun Radio', freq: '91.8', url: 'https://stream.funradio.fr/fun-1-48-192' },
+  { name: 'RFM', freq: '99.6', url: 'https://rfm-live-mp3-128.scdn.arkena.com/rfm.mp3' },
+  { name: 'Nostalgie', freq: '97.3', url: 'https://scdn.nrjaudio.fm/fr/30601/mp3_128.mp3' },
+  { name: 'Chérie FM', freq: '95.3', url: 'https://scdn.nrjaudio.fm/fr/30201/mp3_128.mp3' },
+  { name: 'Rire & Chansons', freq: '98.2', url: 'https://scdn.nrjaudio.fm/fr/30401/mp3_128.mp3' }
 ];
 
 let currentStationIndex = 0;
