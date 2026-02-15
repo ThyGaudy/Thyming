@@ -4666,14 +4666,17 @@ function loadRadioPresets() {
         // Appui long = remplacer (mobile)
         btn.addEventListener('touchstart', (e) => {
           console.log('👆 Touchstart favori', i);
-          e.stopPropagation(); // Empêcher le swipe
-          e.preventDefault(); // Empêcher le click fantôme
+          btn.style.backgroundColor = 'red'; // DEBUG VISUEL
+          e.stopPropagation();
+          e.preventDefault();
           touchMoved = false;
           longPressTimer = setTimeout(() => {
             console.log('⏱️ Appui long détecté', i);
+            btn.style.backgroundColor = 'green'; // DEBUG VISUEL
             if (!touchMoved && confirm(`Remplacer "${station.name}" par "${radioStations[currentStationIndex].name}" ?`)) {
               savePreset(i);
             }
+            btn.style.backgroundColor = ''; // Reset
           }, 800);
         }, { passive: false });
         
@@ -4688,6 +4691,7 @@ function loadRadioPresets() {
         
         btn.addEventListener('touchend', (e) => {
           console.log('👋 Touchend favori', i, 'moved:', touchMoved);
+          btn.style.backgroundColor = ''; // Reset
           e.stopPropagation();
           if (longPressTimer) {
             clearTimeout(longPressTimer);
@@ -4719,6 +4723,7 @@ function loadRadioPresets() {
         
         btn.addEventListener('touchstart', (e) => {
           console.log('👆 Touchstart favori vide', i);
+          btn.style.backgroundColor = 'orange'; // DEBUG VISUEL
           e.stopPropagation();
           e.preventDefault();
           touchMoved = false;
@@ -4730,6 +4735,7 @@ function loadRadioPresets() {
         
         btn.addEventListener('touchend', (e) => {
           console.log('👋 Touchend favori vide', i);
+          btn.style.backgroundColor = ''; // Reset
           e.stopPropagation();
           if (!touchMoved) {
             savePreset(i);
@@ -4786,18 +4792,22 @@ function handleRadioSwipe() {
   const radioContainer = document.getElementById('radioModal');
   
   radioContainer.addEventListener('touchstart', (e) => {
-    // Ignorer si on touche le slider de volume
+    // Ignorer si on touche le slider de volume OU les presets
     if (e.target.classList.contains('radio-volume-slider') || 
-        e.target.closest('.radio-volume')) {
+        e.target.closest('.radio-volume') ||
+        e.target.classList.contains('radio-preset-btn') ||
+        e.target.closest('.radio-presets')) {
       return;
     }
     radioTouchStartX = e.changedTouches[0].screenX;
   });
   
   radioContainer.addEventListener('touchend', (e) => {
-    // Ignorer si on touche le slider de volume
+    // Ignorer si on touche le slider de volume OU les presets
     if (e.target.classList.contains('radio-volume-slider') || 
-        e.target.closest('.radio-volume')) {
+        e.target.closest('.radio-volume') ||
+        e.target.classList.contains('radio-preset-btn') ||
+        e.target.closest('.radio-presets')) {
       return;
     }
     radioTouchEndX = e.changedTouches[0].screenX;
