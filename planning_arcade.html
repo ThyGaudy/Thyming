@@ -4612,6 +4612,29 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
   
+  // Appui long sur "Planning de travail" pour ouvrir le guide
+  const mainTitle = document.getElementById('mainTitle');
+  if(mainTitle){
+    let guideLongPress;
+    mainTitle.addEventListener('touchstart',()=>{
+      guideLongPress=setTimeout(()=>openGuide(),1000);
+    });
+    mainTitle.addEventListener('touchend',()=>clearTimeout(guideLongPress));
+    mainTitle.addEventListener('touchmove',()=>clearTimeout(guideLongPress));
+    mainTitle.addEventListener('contextmenu',(e)=>{
+      e.preventDefault();
+      openGuide();
+    });
+  }
+  
+  function openGuide() {
+    document.getElementById('guideModal').style.display = 'block';
+  }
+  
+  function closeGuide() {
+    document.getElementById('guideModal').style.display = 'none';
+  }
+  
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
       const calendar = document.getElementById('calendar');
@@ -6227,6 +6250,55 @@ initPlanningsDB();
       <button class="radio-scan-btn" id="radioScanBtn" onclick="scanRadio()">🔍 SCAN AUTO</button>
     </div>
     </button>
+  </div>
+</div>
+
+<!-- Modal Guide -->
+<div id="guideModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:10000;overflow-y:auto;padding:20px">
+  <div style="max-width:600px;margin:0 auto;background:linear-gradient(145deg,#1a1a1a,#0a0a0a);border-radius:20px;padding:30px;border:2px solid #00ff88">
+    <button onclick="closeGuide()" style="position:absolute;top:30px;right:50px;background:rgba(255,0,0,0.3);border:2px solid #ff4444;color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.5em;cursor:pointer">✕</button>
+    
+    <h1 style="color:#00ff88;text-align:center;font-family:'Black Ops One',cursive;margin-bottom:30px">📱 GUIDE THYMING</h1>
+    
+    <div style="color:#e8e8e8;font-family:'Rajdhani',sans-serif;font-size:1.1em;line-height:1.8">
+      
+      <h3 style="color:#00ccff;margin-top:20px">📅 CALENDRIER</h3>
+      <p>• Clic jour → Choisir vacation<br>
+      • Swipe = changer mois<br>
+      • Rouge (gauche) = >48h/semaine<br>
+      • Bordure rouge = repos <11h ⚠️</p>
+      
+      <h3 style="color:#00ccff;margin-top:20px">📂💰 PLANNINGS & PAIES</h3>
+      <p>• Boutons en haut (📅 💰)<br>
+      • Import PDF ou image<br>
+      • Max 24 chacun</p>
+      
+      <h3 style="color:#00ccff;margin-top:20px">💾 SAUVEGARDE</h3>
+      <p style="color:#ff4444"><b>⚠️ IMPORTANT - Entre calendrier et récap</b></p>
+      <p>• 📤 Restaurer = charger backup<br>
+      • 💾 Sauvegarder = créer backup<br>
+      • Fichier .json dans Téléchargements</p>
+      <p style="color:#ff4444"><b>Cache :</b> Vider QUE "Images"<br>
+      ❌ PAS Cookies ni Données !</p>
+      
+      <h3 style="color:#00ccff;margin-top:20px">📻 RADIO</h3>
+      <p>• Appui long sur HEURE<br>
+      • 36 stations Bordeaux<br>
+      • Swipe = changer<br>
+      • Bouton − = réduire</p>
+      
+      <h3 style="color:#00ccff;margin-top:20px">🎮 SECRETS</h3>
+      <p>• Appui long sur "Total année" = Arcade<br>
+      • Appui long sur "Planning de travail" = Guide</p>
+      
+      <h3 style="color:#00ccff;margin-top:20px">❓ DÉPANNAGE</h3>
+      <p><b>Pas de mise à jour ?</b><br>
+      Sauvegarder → Supprimer icône → Réinstaller → Restaurer</p>
+      
+      <p><b>Données perdues ?</b><br>
+      Restaurer backup (si sauvegardé) 😢</p>
+      
+    </div>
   </div>
 </div>
 
