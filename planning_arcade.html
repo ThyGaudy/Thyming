@@ -2002,6 +2002,40 @@ h3::after {
   transform: scale(0.92);
 }
 
+.radio-minimize {
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  color: #fff;
+  font-size: 1.2em;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+  line-height: 0.5;
+  font-weight: bold;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.radio-minimize:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.5);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.radio-minimize:active {
+  transform: scale(0.92);
+}
+
 /* Contenu principal */
 .radio-content {
   padding: 20px 18px 18px 18px;
@@ -4819,10 +4853,47 @@ async function openRadio() {
 
 function closeRadio() {
   document.getElementById('radioModal').style.display = 'none';
+  document.getElementById('miniRadioPlayer').style.display = 'none';
   if (radioAudio) {
     radioAudio.pause();
   }
   isScanning = false;
+}
+
+function minimizeRadio() {
+  document.getElementById('radioModal').style.display = 'none';
+  document.getElementById('miniRadioPlayer').style.display = 'flex';
+  updateMiniPlayer();
+}
+
+function maximizeRadio() {
+  document.getElementById('radioModal').style.display = 'flex';
+  document.getElementById('miniRadioPlayer').style.display = 'none';
+}
+
+function updateMiniPlayer() {
+  const station = radioStations[currentStationIndex];
+  document.getElementById('miniStationName').textContent = station.name;
+  document.getElementById('miniFrequency').textContent = station.freq + ' FM';
+  
+  const miniPlayBtn = document.getElementById('miniPlayBtn');
+  if (radioAudio && !radioAudio.paused) {
+    miniPlayBtn.textContent = '⏸';
+  } else {
+    miniPlayBtn.textContent = '▶';
+  }
+}
+
+function toggleRadioPlayPause() {
+  if (radioAudio && !radioAudio.paused) {
+    radioAudio.pause();
+    document.getElementById('miniPlayBtn').textContent = '▶';
+    document.getElementById('radioPlayBtn').textContent = '▶';
+  } else {
+    playRadio();
+    document.getElementById('miniPlayBtn').textContent = '⏸';
+    document.getElementById('radioPlayBtn').textContent = '⏸';
+  }
 }
 
 function updateRadioDisplay() {
@@ -4834,6 +4905,11 @@ function updateRadioDisplay() {
   document.getElementById('radioStationLeft').textContent = prevStation.name;
   document.getElementById('radioStationCurrent').textContent = station.name;
   document.getElementById('radioStationRight').textContent = nextStation.name;
+  
+  // Mettre à jour le mini player aussi
+  if (document.getElementById('miniRadioPlayer').style.display === 'flex') {
+    updateMiniPlayer();
+  }
 }
 
 function changeStation(direction) {
@@ -6097,7 +6173,10 @@ initPlanningsDB();
     <!-- Header avec titre et fermeture -->
     <div class="radio-header">
       <h2 class="radio-title">📻 RADIO FM</h2>
-      <button class="radio-close" onclick="closeRadio()">✕</button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="radio-minimize" onclick="minimizeRadio()" title="Réduire">━</button>
+        <button class="radio-close" onclick="closeRadio()">✕</button>
+      </div>
     </div>
     
     <!-- Contenu principal -->
@@ -6225,6 +6304,21 @@ initPlanningsDB();
   <div class="viewer-title" id="viewerTitle"></div>
   <div id="viewerImageContainer" class="viewer-container">
     <img id="viewerImage" class="viewer-image" alt="Bulletin">
+  </div>
+</div>
+
+<!-- Mini Radio Player -->
+<div id="miniRadioPlayer" style="display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(145deg,rgba(30,30,30,0.98),rgba(15,15,15,1));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:2px solid #00ff88;padding:12px 20px;z-index:9999;display:none;flex-direction:row;align-items:center;justify-content:space-between;gap:15px;box-shadow:0 -4px 20px rgba(0,0,0,0.8)">
+  <div style="flex:1;min-width:0">
+    <div id="miniStationName" style="color:#00ff88;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">NRJ</div>
+    <div id="miniFrequency" style="color:#aaa;font-family:'Orbitron',monospace;font-size:0.85em">102.4 FM</div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center">
+    <button onclick="changeStation('prev')" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.2em;cursor:pointer">◄</button>
+    <button id="miniPlayBtn" onclick="toggleRadioPlayPause()" style="background:linear-gradient(145deg,#00ff88,#00ccff);border:none;color:#000;width:50px;height:50px;border-radius:50%;font-size:1.5em;cursor:pointer;font-weight:bold">▶</button>
+    <button onclick="changeStation('next')" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.2em;cursor:pointer">►</button>
+    <button onclick="maximizeRadio()" style="background:rgba(0,255,136,0.2);border:1px solid rgba(0,255,136,0.4);color:#00ff88;width:40px;height:40px;border-radius:50%;font-size:1.2em;cursor:pointer">🔼</button>
+    <button onclick="closeRadio()" style="background:rgba(255,0,0,0.2);border:1px solid rgba(255,0,0,0.4);color:#ff4444;width:40px;height:40px;border-radius:50%;font-size:1.2em;cursor:pointer">✕</button>
   </div>
 </div>
 
