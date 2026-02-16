@@ -520,6 +520,12 @@ header {
   box-shadow: 0 0 8px rgba(0, 255, 179, 0.3);
 }
 
+/* Violation repos de 11h minimum */
+.day-cell.rest-violation {
+  border: 4px solid #ff0000 !important;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.6), inset 0 0 15px rgba(255, 0, 0, 0.3) !important;
+}
+
 .day-cell.weekend .day-number {
   color: #FFD700;
   font-weight: 900;
@@ -2973,6 +2979,70 @@ function isWeekend(date) {
   return date.getDay() === 0 || date.getDay() === 6;
 }
 
+// Vérifier le repos de 11h minimum entre 2 vacations
+function checkRestPeriod(date, currentShift) {
+  // Vacations concernées : day, night, depannage_day, depannage_night, formation
+  const workShifts = ['day', 'night', 'depannage_day', 'depannage_night', 'formation'];
+  
+  if (!workShifts.includes(currentShift)) {
+    return null; // Pas une vacation de travail
+  }
+  
+  // Chercher la vacation précédente
+  const prevDate = new Date(date);
+  prevDate.setDate(prevDate.getDate() - 1);
+  const prevDateStr = formatDate(prevDate);
+  const prevShift = shifts[prevDateStr];
+  
+  if (!workShifts.includes(prevShift)) {
+    return null; // Pas de vacation la veille
+  }
+  
+  // Horaires de fin de la vacation précédente
+  let prevEndHour = 0;
+  if (prevShift === 'day' || prevShift === 'depannage_day') {
+    prevEndHour = 19; // Fin à 19h
+  } else if (prevShift === 'night' || prevShift === 'depannage_night') {
+    prevEndHour = 7; // Fin à 07h du jour actuel
+  } else if (prevShift === 'formation') {
+    prevEndHour = 16; // Fin à 16h
+  }
+  
+  // Horaires de début de la vacation actuelle
+  let currentStartHour = 0;
+  if (currentShift === 'day' || currentShift === 'depannage_day') {
+    currentStartHour = 7; // Début à 07h
+  } else if (currentShift === 'night' || currentShift === 'depannage_night') {
+    currentStartHour = 19; // Début à 19h
+  } else if (currentShift === 'formation') {
+    currentStartHour = 9; // Début à 09h
+  }
+  
+  // Calculer les heures de repos
+  let restHours = 0;
+  
+  if (prevShift === 'night' || prevShift === 'depannage_night') {
+    // Vacation de nuit : fin à 07h du jour actuel
+    if (currentStartHour >= 7) {
+      restHours = currentStartHour - 7;
+    } else {
+      // Cas où la vacation suivante est aussi une nuit (19h)
+      restHours = 24 - 7 + currentStartHour;
+    }
+  } else {
+    // Vacation de jour ou formation : fin la veille
+    if (currentStartHour > prevEndHour) {
+      // Vacation le même jour (impossible normalement)
+      restHours = currentStartHour - prevEndHour;
+    } else {
+      // Vacation le lendemain
+      restHours = 24 - prevEndHour + currentStartHour;
+    }
+  }
+  
+  return restHours;
+}
+
 function renderCalendar() {
   const calendar = document.getElementById('calendar');
   const monthYear = currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
@@ -3117,6 +3187,14 @@ function createDayCell(date, otherMonth) {
   else if (shift === 'depannage_day') cell.classList.add('depannage_day-shift');
   else if (shift === 'depannage_night') cell.classList.add('depannage_night-shift');
   else if (shift === 'rc') cell.classList.add('rc-shift');
+  
+  // Vérifier repos de 11h minimum
+  if (shift && !otherMonth) {
+    const restHours = checkRestPeriod(date, shift);
+    if (restHours !== null && restHours < 11) {
+      cell.classList.add('rest-violation');
+    }
+  }
   
   const dayNumber = document.createElement('div');
   dayNumber.className = 'day-number';
