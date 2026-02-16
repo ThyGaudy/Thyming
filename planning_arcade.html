@@ -2023,6 +2023,8 @@ h3::after {
   flex-shrink: 0;
   position: relative;
   z-index: 1;
+  padding: 0;
+  margin: 0;
 }
 
 .radio-minimize:hover {
@@ -6172,10 +6174,10 @@ initPlanningsDB();
   <div class="radio-container">
     <!-- Header avec titre et fermeture -->
     <div class="radio-header">
-      <h2 class="radio-title">📻 RADIO FM</h2>
-      <div style="display:flex;gap:15px;align-items:center">
-        <button class="radio-minimize" onclick="minimizeRadio()" title="Réduire">━</button>
-        <button class="radio-close" onclick="closeRadio()">✕</button>
+      <h2 class="radio-title" style="color:#ffffff;text-shadow:0 2px 8px rgba(0,0,0,0.8)">📻 RADIO FM</h2>
+      <div style="display:flex;gap:15px;align-items:center;height:38px">
+        <button style="background:rgba(0,0,0,0.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,0.3);color:#fff;font-size:1.6em;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;margin:0;line-height:1" onclick="minimizeRadio()" title="Réduire">−</button>
+        <button style="background:rgba(0,0,0,0.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,0.3);color:#fff;font-size:1.4em;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;margin:0;line-height:1" onclick="closeRadio()">✕</button>
       </div>
     </div>
     
