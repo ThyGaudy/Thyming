@@ -320,6 +320,77 @@ header {
   transform-style: preserve-3d;
 }
 
+/* ========== BOUTONS BACKUP ========== */
+.backup-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px 0 25px 0;
+  padding: 0 5px;
+}
+
+.backup-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: 16px;
+  border: none;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.05em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.backup-icon {
+  font-size: 1.3em;
+  line-height: 1;
+}
+
+.backup-text {
+  letter-spacing: 0.5px;
+}
+
+.restore-btn {
+  background: linear-gradient(145deg, rgba(0,120,255,0.2), rgba(0,180,255,0.15));
+  border: 1.5px solid rgba(0,180,255,0.4);
+  color: #00b4ff;
+}
+
+.restore-btn:hover {
+  background: linear-gradient(145deg, rgba(0,120,255,0.3), rgba(0,180,255,0.25));
+  border-color: rgba(0,180,255,0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,180,255,0.3);
+}
+
+.restore-btn:active {
+  transform: translateY(0);
+}
+
+.save-btn {
+  background: linear-gradient(145deg, rgba(0,200,100,0.2), rgba(0,255,136,0.15));
+  border: 1.5px solid rgba(0,255,136,0.4);
+  color: #00ff88;
+}
+
+.save-btn:hover {
+  background: linear-gradient(145deg, rgba(0,200,100,0.3), rgba(0,255,136,0.25));
+  border-color: rgba(0,255,136,0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,255,136,0.3);
+}
+
+.save-btn:active {
+  transform: translateY(0);
+}
+
 /* Effet page qui tourne vers la gauche (mois suivant - swipe gauche) */
 #calendar.cube-left {
   animation: pageFlipLeft 1s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2588,6 +2659,18 @@ h3::after {
 
 <div class="calendar-wrapper">
 <div id="calendar"></div>
+</div>
+
+<!-- Boutons Backup -->
+<div class="backup-buttons">
+  <button class="backup-btn restore-btn" onclick="restoreBackup()">
+    <span class="backup-icon">📤</span>
+    <span class="backup-text">Restaurer</span>
+  </button>
+  <button class="backup-btn save-btn" onclick="saveBackup()">
+    <span class="backup-icon">💾</span>
+    <span class="backup-text">Sauvegarder</span>
+  </button>
 </div>
 
 <div class="stats">
@@ -4862,6 +4945,170 @@ function handleRadioGesture() {
     // Swipe droite - station précédente
     changeStation('prev');
   }
+}
+
+// ========== BACKUP & RESTORE ==========
+
+async function saveBackup() {
+  try {
+    // Récupérer localStorage
+    const localData = {
+      vacations: localStorage.getItem('vacations') || '[]',
+      radioPresets: localStorage.getItem('radioPresets') || '{}',
+      radioVolume: localStorage.getItem('radioVolume') || '0.5',
+      lastRadioStation: localStorage.getItem('lastRadioStation') || '0',
+      currentMonth: localStorage.getItem('currentMonth'),
+      currentYear: localStorage.getItem('currentYear')
+    };
+    
+    // Récupérer plannings depuis IndexedDB
+    const plannings = await getAllPlannings();
+    
+    // Récupérer paies depuis IndexedDB
+    const paies = await getAllPayslips();
+    
+    const data = {
+      version: '1.0',
+      date: new Date().toISOString(),
+      localStorage: localData,
+      plannings: plannings,
+      paies: paies
+    };
+    
+    // Créer le fichier
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    a.href = url;
+    a.download = `thyming_backup_${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    alert(`✅ Sauvegarde complète téléchargée !\n\n📅 ${plannings.length} plannings\n💰 ${paies.length} fiches de paie\n🗓️ Toutes vos vacations`);
+  } catch(err) {
+    alert('❌ Erreur lors de la sauvegarde: ' + err.message);
+    console.error(err);
+  }
+}
+
+async function restoreBackup() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        
+        const planningsCount = data.plannings?.length || 0;
+        const paiesCount = data.paies?.length || 0;
+        
+        if (!confirm(`⚠️ Restaurer cette sauvegarde ?\n\n📅 ${planningsCount} plannings\n💰 ${paiesCount} fiches de paie\n🗓️ Toutes les vacations\n\nVos données actuelles seront remplacées !`)) {
+          return;
+        }
+        
+        // Restaurer localStorage
+        if (data.localStorage) {
+          Object.keys(data.localStorage).forEach(key => {
+            if (data.localStorage[key]) {
+              localStorage.setItem(key, data.localStorage[key]);
+            }
+          });
+        }
+        
+        // Restaurer plannings dans IndexedDB
+        if (data.plannings && data.plannings.length > 0) {
+          await clearAllPlannings();
+          for (const planning of data.plannings) {
+            await savePlanningToIndexedDB(planning.name, planning.image);
+          }
+        }
+        
+        // Restaurer paies dans IndexedDB
+        if (data.paies && data.paies.length > 0) {
+          await clearAllPayslips();
+          for (const paie of data.paies) {
+            await savePayslipToIndexedDB(paie.name, paie.image);
+          }
+        }
+        
+        alert('✅ Sauvegarde restaurée !\n\nLa page va se recharger.');
+        location.reload();
+      } catch(err) {
+        alert('❌ Fichier invalide: ' + err.message);
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  };
+  
+  input.click();
+}
+
+// Fonctions helper pour IndexedDB
+async function getAllPlannings() {
+  return new Promise((resolve) => {
+    if (!planningsDB) {
+      resolve([]);
+      return;
+    }
+    const transaction = planningsDB.transaction(['plannings'], 'readonly');
+    const store = transaction.objectStore('plannings');
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => resolve([]);
+  });
+}
+
+async function getAllPayslips() {
+  return new Promise((resolve) => {
+    if (!payslipsDB) {
+      resolve([]);
+      return;
+    }
+    const transaction = payslipsDB.transaction(['payslips'], 'readonly');
+    const store = transaction.objectStore('payslips');
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => resolve([]);
+  });
+}
+
+async function clearAllPlannings() {
+  return new Promise((resolve) => {
+    if (!planningsDB) {
+      resolve();
+      return;
+    }
+    const transaction = planningsDB.transaction(['plannings'], 'readwrite');
+    const store = transaction.objectStore('plannings');
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => resolve();
+  });
+}
+
+async function clearAllPayslips() {
+  return new Promise((resolve) => {
+    if (!payslipsDB) {
+      resolve();
+      return;
+    }
+    const transaction = payslipsDB.transaction(['payslips'], 'readwrite');
+    const store = transaction.objectStore('payslips');
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => resolve();
+  });
 }
 
 // ========== ARCADE SYSTEM ==========
