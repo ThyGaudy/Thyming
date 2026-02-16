@@ -2691,9 +2691,14 @@ h3::after {
 <span id="totalNightHours" class="stat-value">0h</span>
 </div>
 <div class="stat-item highlight">
+<span class="stat-label">Prime d'habillage :</span>
+<span id="primeHabillage" class="stat-value">0h (0 vac)</span>
+</div>
+</div>
+<div class="stats-grid recap-section" style="margin-top:12px">
+<div class="stat-item highlight">
 <span class="stat-label">Total heures fériées :</span>
 <span id="totalHolidayHours" class="stat-value">0h</span>
-</div>
 </div>
 <div class="stats-grid recap-section" style="margin-top:12px">
 <div class="stat-item highlight">
@@ -3254,6 +3259,7 @@ function updateStats() {
   let cpDays = 0;
   let depannageHours = 0;
   let carryOverDepannage = 0;  // Report dépannages nuit du mois précédent
+  let primeHabillageVacations = 0;  // Compteur vacations pour prime d'habillage
   
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const lastDayPrevMonth = new Date(year, month, 0);
@@ -3338,6 +3344,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
     }
     
     if (shift === 'depannage_day') {
+      primeHabillageVacations++;  // Compte pour prime d'habillage
       paniers++;
       totalHours += 12;
       depannageHours += 12;
@@ -3347,6 +3354,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
     }
     
     if (shift === 'depannage_night') {
+      primeHabillageVacations++;  // Compte pour prime d'habillage
       paniers++;
       
       if (d === daysInMonth) {
@@ -3374,6 +3382,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
     }
     
     if (shift === 'day') {
+      primeHabillageVacations++;  // Compte pour prime d'habillage
       paniers++;
       totalHours += 12;
       if (isSunday) sundayHours += 12;
@@ -3382,6 +3391,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
     }
     
     if (shift === 'night') {
+      primeHabillageVacations++;  // Compte pour prime d'habillage
       paniers++;
       
       if (d === daysInMonth) {
@@ -3436,6 +3446,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
   document.getElementById('carryOverHolidayHours').textContent = carryOverHoliday + 'h';
   document.getElementById('carryOverSundayHours').textContent = carryOverSunday + 'h';
   document.getElementById('totalNightHours').textContent = (nightHours + carryOverNight) + 'h';
+  document.getElementById('primeHabillage').textContent = (primeHabillageVacations * 12) + 'h (' + primeHabillageVacations + ' vac)';
   document.getElementById('totalHolidayHours').textContent = (holidayHours + carryOverHoliday) + 'h';
   document.getElementById('totalCP').textContent = totalCP.toFixed(2) + 'h';
   document.getElementById('totalFormation').textContent = totalFormation + 'h';
