@@ -5489,8 +5489,8 @@ function closePayslips() {
 // Gérer l'upload d'un bulletin
 function handlePayslipUpload(event) {
   const file = event.target.files[0];
-  if (!file || !file.type.startsWith('image/')) {
-    alert('Veuillez sélectionner une image');
+  if (!file || (!file.type.startsWith('image/') && file.type !== 'application/pdf')) {
+    alert('Veuillez sélectionner une image ou un PDF');
     return;
   }
   
@@ -5499,8 +5499,9 @@ function handlePayslipUpload(event) {
   
   const reader = new FileReader();
   reader.onload = (e) => {
-    const imageData = e.target.result;
-    savePayslip(name, imageData);
+    const fileData = e.target.result;
+    const isPdf = file.type === 'application/pdf';
+    savePayslip(name, fileData, isPdf);
   };
   reader.readAsDataURL(file);
   
@@ -5509,7 +5510,7 @@ function handlePayslipUpload(event) {
 }
 
 // Sauvegarder un bulletin dans IndexedDB
-function savePayslip(name, imageData) {
+function savePayslip(name, fileData, isPdf = false) {
   if (!payslipsDB) {
     alert('Base de données non initialisée');
     return;
@@ -5520,7 +5521,8 @@ function savePayslip(name, imageData) {
   
   const payslip = {
     name: name,
-    image: imageData,
+    image: fileData, // Contient l'image OU le PDF en base64
+    isPdf: isPdf, // Flag pour savoir si c'est un PDF
     date: new Date().toISOString()
   };
   
@@ -5611,12 +5613,19 @@ function viewPayslip(id) {
     const payslip = e.target.result;
     if (payslip) {
       document.getElementById('viewerTitle').textContent = payslip.name;
-      const img = document.getElementById('viewerImage');
-      img.src = payslip.image;
-      document.getElementById('payslipViewer').style.display = 'block';
+      const container = document.getElementById('viewerImageContainer');
       
-      // Activer le zoom sur l'image
-      enableImageZoom(img);
+      if (payslip.isPdf) {
+        // Afficher le PDF
+        container.innerHTML = `<iframe src="${payslip.image}" style="width:100%;height:calc(100vh - 100px);border:none;background:#fff;"></iframe>`;
+      } else {
+        // Afficher l'image
+        container.innerHTML = `<img id="viewerImage" src="${payslip.image}" style="max-width:100%;height:auto;display:block;margin:0 auto;">`;
+        const img = document.getElementById('viewerImage');
+        enableImageZoom(img);
+      }
+      
+      document.getElementById('payslipViewer').style.display = 'block';
     }
   };
 }
@@ -6067,7 +6076,7 @@ initPlanningsDB();
     <p id="payslipsMax" style="text-align:center;color:#FFD700;font-size:0.9em;margin-bottom:20px;font-family:'Black Ops One',cursive">(24 max)</p>
     
     <div style="text-align:center;margin-bottom:25px">
-      <input type="file" id="payslipFileInput" accept="image/*" style="display:none" onchange="handlePayslipUpload(event)">
+      <input type="file" id="payslipFileInput" accept="image/*,application/pdf" style="display:none" onchange="handlePayslipUpload(event)">
       <button class="payslip-add-btn" onclick="document.getElementById('payslipFileInput').click()">
         📂 Importer un screen
       </button>
@@ -6083,7 +6092,9 @@ initPlanningsDB();
 <div id="payslipViewer" class="payslip-viewer">
   <button class="viewer-close" onclick="closeViewer()">✕</button>
   <div class="viewer-title" id="viewerTitle"></div>
-  <img id="viewerImage" class="viewer-image" alt="Bulletin">
+  <div id="viewerImageContainer" class="viewer-container">
+    <img id="viewerImage" class="viewer-image" alt="Bulletin">
+  </div>
 </div>
 
 </body>
