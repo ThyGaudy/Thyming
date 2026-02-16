@@ -2692,7 +2692,7 @@ h3::after {
 </div>
 <div class="stat-item highlight">
 <span class="stat-label">Prime habillage :</span>
-<span id="primeHabillage" class="stat-value">0h (0 vac)</span>
+<span id="primeHabillage" class="stat-value">0h</span>
 </div>
 </div>
 <div class="stats-grid recap-section" style="margin-top:12px">
@@ -3446,7 +3446,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
   document.getElementById('carryOverHolidayHours').textContent = carryOverHoliday + 'h';
   document.getElementById('carryOverSundayHours').textContent = carryOverSunday + 'h';
   document.getElementById('totalNightHours').textContent = (nightHours + carryOverNight) + 'h';
-  document.getElementById('primeHabillage').textContent = (primeHabillageVacations * 12) + 'h (' + primeHabillageVacations + ' vac)';
+  document.getElementById('primeHabillage').textContent = (primeHabillageVacations * 12) + 'h';
   document.getElementById('totalHolidayHours').textContent = (holidayHours + carryOverHoliday) + 'h';
   document.getElementById('totalCP').textContent = totalCP.toFixed(2) + 'h';
   document.getElementById('totalFormation').textContent = totalFormation + 'h';
