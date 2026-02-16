@@ -5029,7 +5029,7 @@ async function restoreBackup() {
         if (data.plannings && data.plannings.length > 0) {
           await clearAllPlannings();
           for (const planning of data.plannings) {
-            await savePlanningToIndexedDB(planning.name, planning.image);
+            await savePlanningToIndexedDB(planning.name, planning.image, planning.isPdf);
           }
         }
         
@@ -5037,7 +5037,7 @@ async function restoreBackup() {
         if (data.paies && data.paies.length > 0) {
           await clearAllPayslips();
           for (const paie of data.paies) {
-            await savePayslipToIndexedDB(paie.name, paie.image);
+            await savePayslipToIndexedDB(paie.name, paie.image, paie.isPdf);
           }
         }
         
@@ -5106,6 +5106,46 @@ async function clearAllPayslips() {
     const transaction = payslipsDB.transaction(['payslips'], 'readwrite');
     const store = transaction.objectStore('payslips');
     const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => resolve();
+  });
+}
+
+async function savePlanningToIndexedDB(name, fileData, isPdf = false) {
+  return new Promise((resolve) => {
+    if (!planningsDB) {
+      resolve();
+      return;
+    }
+    const transaction = planningsDB.transaction(['plannings'], 'readwrite');
+    const store = transaction.objectStore('plannings');
+    const planning = {
+      name: name,
+      image: fileData,
+      isPdf: isPdf,
+      date: new Date().toISOString()
+    };
+    const request = store.add(planning);
+    request.onsuccess = () => resolve();
+    request.onerror = () => resolve();
+  });
+}
+
+async function savePayslipToIndexedDB(name, fileData, isPdf = false) {
+  return new Promise((resolve) => {
+    if (!payslipsDB) {
+      resolve();
+      return;
+    }
+    const transaction = payslipsDB.transaction(['payslips'], 'readwrite');
+    const store = transaction.objectStore('payslips');
+    const payslip = {
+      name: name,
+      image: fileData,
+      isPdf: isPdf,
+      date: new Date().toISOString()
+    };
+    const request = store.add(payslip);
     request.onsuccess = () => resolve();
     request.onerror = () => resolve();
   });
@@ -5782,8 +5822,8 @@ function closePlannings() {
 // Gérer l'upload d'un planning
 function handlePlanningUpload(event) {
   const file = event.target.files[0];
-  if (!file || !file.type.startsWith('image/')) {
-    alert('Veuillez sélectionner une image');
+  if (!file || (!file.type.startsWith('image/') && file.type !== 'application/pdf')) {
+    alert('Veuillez sélectionner une image ou un PDF');
     return;
   }
   
@@ -5792,8 +5832,9 @@ function handlePlanningUpload(event) {
   
   const reader = new FileReader();
   reader.onload = (e) => {
-    const imageData = e.target.result;
-    savePlanning(name, imageData);
+    const fileData = e.target.result;
+    const isPdf = file.type === 'application/pdf';
+    savePlanning(name, fileData, isPdf);
   };
   reader.readAsDataURL(file);
   
@@ -5801,7 +5842,7 @@ function handlePlanningUpload(event) {
 }
 
 // Sauvegarder un planning dans IndexedDB
-function savePlanning(name, imageData) {
+function savePlanning(name, fileData, isPdf = false) {
   if (!planningsDB) {
     alert('Base de données non initialisée');
     return;
@@ -5812,7 +5853,8 @@ function savePlanning(name, imageData) {
   
   const planning = {
     name: name,
-    image: imageData,
+    image: fileData,
+    isPdf: isPdf,
     date: new Date().toISOString()
   };
   
@@ -5902,8 +5944,18 @@ function viewPlanning(id) {
     const planning = e.target.result;
     if (planning) {
       document.getElementById('planningViewerTitle').textContent = planning.name;
-      const img = document.getElementById('planningViewerImage');
-      img.src = planning.image;
+      const container = document.getElementById('planningViewerImageContainer');
+      
+      if (planning.isPdf) {
+        // Afficher le PDF
+        container.innerHTML = `<iframe src="${planning.image}" style="width:100%;height:calc(100vh - 100px);border:none;background:#fff;"></iframe>`;
+      } else {
+        // Afficher l'image
+        container.innerHTML = `<img id="planningViewerImage" src="${planning.image}" style="max-width:100%;height:auto;display:block;margin:0 auto;">`;
+        const img = document.getElementById('planningViewerImage');
+        enableImageZoom(img);
+      }
+      
       const viewer = document.getElementById('planningViewer');
       viewer.style.display = 'block';
       
@@ -5912,8 +5964,6 @@ function viewPlanning(id) {
       
       // Bloquer le scroll
       document.body.style.overflow = 'hidden';
-      
-      enableImageZoom(img);
     }
   };
 }
@@ -6049,7 +6099,7 @@ initPlanningsDB();
     <p id="planningsMax" style="text-align:center;color:#FFD700;font-size:0.9em;margin-bottom:20px;font-family:'Black Ops One',cursive">(24 max)</p>
     
     <div style="text-align:center;margin-bottom:25px">
-      <input type="file" id="planningFileInput" accept="image/*" style="display:none" onchange="handlePlanningUpload(event)">
+      <input type="file" id="planningFileInput" accept="image/*,application/pdf" style="display:none" onchange="handlePlanningUpload(event)">
       <button class="payslip-add-btn" onclick="document.getElementById('planningFileInput').click()">
         📂 Importer un screen
       </button>
@@ -6065,7 +6115,9 @@ initPlanningsDB();
 <div id="planningViewer" class="payslip-viewer">
   <button class="viewer-close" onclick="closePlanningViewer()">✕</button>
   <div class="viewer-title" id="planningViewerTitle"></div>
-  <img id="planningViewerImage" class="viewer-image" alt="Planning">
+  <div id="planningViewerImageContainer" class="viewer-container">
+    <img id="planningViewerImage" class="viewer-image" alt="Planning">
+  </div>
 </div>
 
 <!-- Modal Bulletins de Paie -->
