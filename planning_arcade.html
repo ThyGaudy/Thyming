@@ -2537,11 +2537,12 @@ h3::after {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const googleProvider = new GoogleAuthProvider();
   
   window.firebaseAuth = auth;
   window.firebaseDB = db;
   window.firebaseSignInWithPopup = signInWithPopup;
-  window.firebaseGoogleProvider = GoogleAuthProvider;
+  window.firebaseGoogleProvider = googleProvider;
   window.firebaseOnAuthStateChanged = onAuthStateChanged;
   window.firebaseSignOut = signOut;
   window.firebaseDoc = doc;
@@ -4714,8 +4715,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (googleBtn) {
       googleBtn.addEventListener('click', async () => {
         try {
-          const provider = new window.firebaseGoogleProvider();
-          const result = await window.firebaseSignInWithPopup(window.firebaseAuth, provider);
+          const result = await window.firebaseSignInWithPopup(window.firebaseAuth, window.firebaseGoogleProvider);
           console.log('✅ Connexion réussie');
           
           // Sauvegarder immédiatement après connexion
