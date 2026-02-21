@@ -4739,13 +4739,13 @@ window.addEventListener('DOMContentLoaded', () => {
       
       // Header
       html += '<tr>';
-      html += '<th style="padding:6px 8px;text-align:left;color:#00ff88;font-size:0.9em;border-bottom:2px solid rgba(0,255,136,0.3);width:80px">Nom</th>';
+      html += '<th style="padding:4px 6px;text-align:left;color:#00ff88;font-size:0.85em;border-bottom:2px solid rgba(0,255,136,0.3);width:70px">Nom</th>';
       const days = ['L','M','M','J','V','S','D'];
       weekDates.forEach((date, i) => {
         const dayNum = date.getDate();
-        html += `<th style="padding:4px 2px;text-align:center;color:#00ccff;border-bottom:2px solid rgba(0,255,136,0.3);width:38px">
-          <div style="font-size:0.75em;color:#888">${days[i]}</div>
-          <div style="font-size:0.9em;font-weight:700">${dayNum}</div>
+        html += `<th style="padding:4px 1px;text-align:center;color:#00ccff;border-bottom:2px solid rgba(0,255,136,0.3);width:34px">
+          <div style="font-size:0.7em;color:#888">${days[i]}</div>
+          <div style="font-size:0.85em;font-weight:700">${dayNum}</div>
         </th>`;
       });
       html += '</tr>';
@@ -4753,13 +4753,13 @@ window.addEventListener('DOMContentLoaded', () => {
       // Lignes utilisateurs
       teamData.forEach(user => {
         html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.1)">';
-        html += `<td style="padding:6px 8px;color:#e8e8e8;font-weight:700;font-size:0.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${user.name}</td>`;
+        html += `<td style="padding:4px 6px;color:#e8e8e8;font-weight:700;font-size:0.8em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${user.name}</td>`;
         
         weekDates.forEach(date => {
           const dateStr = formatDate(date);
           const shift = user.shifts[dateStr];
           const cell = getShiftCell(shift);
-          html += `<td style="padding:2px;text-align:center">${cell}</td>`;
+          html += `<td style="padding:1px;text-align:center">${cell}</td>`;
         });
         
         html += '</tr>';
@@ -4801,13 +4801,13 @@ window.addEventListener('DOMContentLoaded', () => {
     };
     
     if (!shift || shift === 'ferie') {
-      return '<div style="width:30px;height:30px;background:#0a0a0a;border-radius:5px;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:#444;font-size:0.85em;margin:0 auto">-</div>';
+      return '<div style="width:28px;height:28px;background:#0a0a0a;border-radius:4px;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:#444;font-size:0.8em;margin:0 auto">-</div>';
     }
     
     const bg = shiftColors[shift] || '#333';
     const label = shiftLabels[shift] || '?';
     
-    return `<div style="width:30px;height:30px;background:${bg};border-radius:5px;border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.75em;box-shadow:0 2px 4px rgba(0,0,0,0.3);margin:0 auto">${label}</div>`;
+    return `<div style="width:28px;height:28px;background:${bg};border-radius:4px;border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.7em;box-shadow:0 2px 4px rgba(0,0,0,0.3);margin:0 auto">${label}</div>`;
   }
   
   function getWeekDates(weekNumber, year) {
