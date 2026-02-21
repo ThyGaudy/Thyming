@@ -4882,9 +4882,24 @@ window.addEventListener('DOMContentLoaded', () => {
     if (googleBtn) {
       googleBtn.addEventListener('click', async () => {
         try {
+          // Récupérer le prénom
+          const displayNameInput = document.getElementById('userDisplayName');
+          const displayName = displayNameInput ? displayNameInput.value.trim() : '';
+          
+          if (!displayName) {
+            alert('⚠️ Veuillez entrer votre prénom');
+            return;
+          }
+          
           const provider = new firebase.auth.GoogleAuthProvider();
           const result = await firebase.auth().signInWithPopup(provider);
           console.log('✅ Connexion réussie');
+          
+          // Sauvegarder le prénom dans Firebase
+          await firebase.firestore().collection('users').doc(result.user.uid).set({
+            displayName: displayName,
+            email: result.user.email
+          }, { merge: true });
           
           // Sauvegarder immédiatement après connexion
           setTimeout(() => saveToCloud(), 2000);
@@ -4907,8 +4922,12 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!currentUser || typeof firebase === 'undefined') return;
     
     try {
+      // Récupérer les plannings et paies depuis IndexedDB
+      const plannings = await getAllPlannings();
+      const paies = await getAllPayslips();
+      
       const userData = {
-        email: currentUser.email, // Sauvegarder l'email
+        email: currentUser.email,
         planning_shifts: localStorage.getItem('planning_shifts') || '{}',
         planning_notes: localStorage.getItem('planning_notes') || '{}',
         radioPresets: localStorage.getItem('radioPresets') || '{}',
@@ -4916,11 +4935,13 @@ window.addEventListener('DOMContentLoaded', () => {
         lastRadioStation: localStorage.getItem('lastRadioStation') || '0',
         currentMonth: localStorage.getItem('currentMonth'),
         currentYear: localStorage.getItem('currentYear'),
+        plannings: plannings, // Sauvegarder les plannings
+        paies: paies, // Sauvegarder les paies
         lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
       };
       
       await firebase.firestore().collection('users').doc(currentUser.uid).set(userData, { merge: true });
-      console.log('☁️ Sauvegarde cloud OK');
+      console.log('☁️ Sauvegarde cloud OK (avec PDFs)');
     } catch (error) {
       console.error('Erreur sauvegarde cloud:', error);
     }
@@ -4952,6 +4973,23 @@ window.addEventListener('DOMContentLoaded', () => {
           if (data.currentMonth) localStorage.setItem('currentMonth', data.currentMonth);
           if (data.currentYear) localStorage.setItem('currentYear', data.currentYear);
           
+          // Restaurer plannings et paies
+          if (data.plannings && data.plannings.length > 0) {
+            console.log('📥 Restauration plannings...');
+            await clearAllPlannings();
+            for (const planning of data.plannings) {
+              await savePlanningToIndexedDB(planning.name, planning.image, planning.isPdf);
+            }
+          }
+          
+          if (data.paies && data.paies.length > 0) {
+            console.log('📥 Restauration paies...');
+            await clearAllPayslips();
+            for (const paie of data.paies) {
+              await savePayslipToIndexedDB(paie.name, paie.image, paie.isPdf);
+            }
+          }
+          
           // Recharger la page pour afficher les données
           location.reload();
         } else if (!cloudHasData && localHasData) {
@@ -4963,13 +5001,7 @@ window.addEventListener('DOMContentLoaded', () => {
       } else {
         console.log('☁️ Aucune donnée cloud, première connexion');
         
-        // Demander le prénom
-        const userName = prompt('👤 Bienvenue ! Entrez votre prénom (visible par vos collègues) :');
-        if (userName && userName.trim()) {
-          await firebase.firestore().collection('users').doc(currentUser.uid).set({
-            displayName: userName.trim()
-          }, { merge: true });
-        }
+        // Le prénom a déjà été sauvegardé lors de la connexion
         
         // Sauvegarder les données locales si elles existent
         if (localStorage.getItem('planning_shifts')) {
@@ -6618,12 +6650,17 @@ initPlanningsDB();
 <div id="googleLoginModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:11000;display:flex;align-items:center;justify-content:center">
   <div style="max-width:500px;background:linear-gradient(145deg,#1a1a1a,#0a0a0a);border-radius:20px;padding:40px;border:3px solid #00ff88;text-align:center">
     <h2 style="color:#00ff88;font-family:'Black Ops One',cursive;margin-bottom:20px">☁️ SAUVEGARDE CLOUD</h2>
-    <p style="color:#e8e8e8;font-family:'Rajdhani',sans-serif;font-size:1.1em;line-height:1.6;margin-bottom:30px">
+    <p style="color:#e8e8e8;font-family:'Rajdhani',sans-serif;font-size:1.1em;line-height:1.6;margin-bottom:20px">
       Connectez-vous avec Google pour sauvegarder automatiquement vos données dans le cloud.<br><br>
       ✅ Sauvegarde automatique<br>
       ✅ Synchronisation entre appareils<br>
       ✅ Récupération en cas de changement de téléphone
     </p>
+    
+    <div style="margin-bottom:20px">
+      <input type="text" id="userDisplayName" placeholder="Votre prénom (visible par vos collègues)" style="width:100%;padding:12px;border-radius:8px;border:2px solid rgba(0,255,136,0.3);background:rgba(0,0,0,0.5);color:#fff;font-family:'Rajdhani',sans-serif;font-size:1.1em;text-align:center" />
+    </div>
+    
     <button id="googleSignInBtn" style="background:linear-gradient(145deg,#4285f4,#34a853);border:none;color:#fff;padding:15px 40px;border-radius:10px;font-size:1.1em;font-weight:bold;cursor:pointer;font-family:'Rajdhani',sans-serif;margin-bottom:15px">
       📧 Se connecter avec Google
     </button>
