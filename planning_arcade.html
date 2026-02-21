@@ -4704,8 +4704,11 @@ window.addEventListener('DOMContentLoaded', () => {
       const teamData = [];
       usersSnapshot.forEach(doc => {
         const userData = doc.data();
-        let userName = doc.id.split('@')[0]; // Email → prénom
-        if (userData.displayName) userName = userData.displayName;
+        // Utiliser displayName si présent, sinon email, sinon "Anonyme"
+        let userName = userData.displayName || userData.email || 'Anonyme';
+        if (userData.email && !userData.displayName) {
+          userName = userData.email.split('@')[0]; // Extraire la partie avant @
+        }
         
         const shifts = userData.planning_shifts ? JSON.parse(userData.planning_shifts) : {};
         teamData.push({ name: userName, shifts });
@@ -4905,6 +4908,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     try {
       const userData = {
+        email: currentUser.email, // Sauvegarder l'email
         planning_shifts: localStorage.getItem('planning_shifts') || '{}',
         planning_notes: localStorage.getItem('planning_notes') || '{}',
         radioPresets: localStorage.getItem('radioPresets') || '{}',
@@ -4915,7 +4919,7 @@ window.addEventListener('DOMContentLoaded', () => {
         lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
       };
       
-      await firebase.firestore().collection('users').doc(currentUser.uid).set(userData);
+      await firebase.firestore().collection('users').doc(currentUser.uid).set(userData, { merge: true });
       console.log('☁️ Sauvegarde cloud OK');
     } catch (error) {
       console.error('Erreur sauvegarde cloud:', error);
@@ -4932,16 +4936,6 @@ window.addEventListener('DOMContentLoaded', () => {
       if (doc.exists) {
         const data = doc.data();
         console.log('☁️ Données cloud trouvées');
-        
-        // Vérifier si displayName existe, sinon demander
-        if (!data.displayName) {
-          const userName = prompt('👤 Entrez votre prénom (visible par vos collègues) :');
-          if (userName && userName.trim()) {
-            await firebase.firestore().collection('users').doc(currentUser.uid).set({
-              displayName: userName.trim()
-            }, { merge: true });
-          }
-        }
         
         // Ne restaurer que si les données cloud sont plus récentes
         const cloudHasData = data.planning_shifts && data.planning_shifts !== '{}';
