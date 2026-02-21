@@ -6672,15 +6672,15 @@ initPlanningsDB();
 </div>
 
 <!-- Modal Vue Équipe -->
-<div id="teamViewModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:9999;overflow-y:auto">
+<div id="teamViewModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:9999;overflow-y:auto;touch-action:pan-y">
   <!-- Particules animées (même que le fond principal) -->
   <div class="stars"></div>
   <div class="twinkling"></div>
   
-  <div style="position:relative;z-index:2;padding:20px;max-width:800px;margin:0 auto">
+  <div style="position:relative;z-index:2;padding:20px;max-width:800px;margin:0 auto;touch-action:pan-y">
     <!-- Header -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px">
-      <h1 style="color:#00ff88;font-family:'Black Ops One',cursive;font-size:1.8em;text-shadow:0 0 20px rgba(0,255,136,0.5)">
+      <h1 style="background:linear-gradient(90deg,#00ff88,#00ccff,#00ff88);background-size:200% auto;color:transparent;-webkit-background-clip:text;background-clip:text;animation:gradient-shift 3s ease infinite;font-family:'Black Ops One',cursive;font-size:1.6em;text-shadow:0 0 20px rgba(0,255,136,0.5)">
         👥 PLANNING ÉQUIPE
       </h1>
       <button onclick="closeTeamView()" style="background:rgba(255,0,0,0.2);border:2px solid #ff4444;color:#fff;width:42px;height:42px;border-radius:50%;font-size:1.5em;cursor:pointer;transition:all 0.3s">
@@ -6689,23 +6689,27 @@ initPlanningsDB();
     </div>
     
     <!-- Sélecteur semaine -->
-    <div style="background:linear-gradient(145deg,rgba(30,30,30,0.95),rgba(15,15,15,0.98));backdrop-filter:blur(20px);border:2px solid rgba(0,255,136,0.3);border-radius:15px;padding:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,0.5)">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <button onclick="changeTeamWeek(-1)" style="background:rgba(0,255,136,0.1);border:2px solid rgba(0,255,136,0.3);color:#00ff88;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:1.1em;transition:all 0.3s">
-          ◀ Sem précédente
-        </button>
+    <div style="background:linear-gradient(145deg,rgba(30,30,30,0.95),rgba(15,15,15,0.98));backdrop-filter:blur(20px);border:2px solid rgba(0,255,136,0.3);border-radius:15px;padding:15px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,0.5)">
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+        <!-- Info semaine -->
         <div style="text-align:center">
-          <div id="teamWeekNumber" style="color:#00ccff;font-family:'Orbitron',monospace;font-size:1.3em;font-weight:700">Semaine XX</div>
-          <div id="teamWeekDates" style="color:#888;font-family:'Rajdhani',sans-serif;font-size:0.9em;margin-top:5px">XX - XX mois</div>
+          <div id="teamWeekNumber" style="color:#00ccff;font-family:'Orbitron',monospace;font-size:1.1em;font-weight:700">Semaine XX</div>
+          <div id="teamWeekDates" style="color:#ccc;font-family:'Rajdhani',sans-serif;font-size:1em;margin-top:5px;font-weight:600">XX - XX mois</div>
         </div>
-        <button onclick="changeTeamWeek(1)" style="background:rgba(0,255,136,0.1);border:2px solid rgba(0,255,136,0.3);color:#00ff88;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:1.1em;transition:all 0.3s">
-          Sem suivante ▶
-        </button>
+        <!-- Boutons navigation -->
+        <div style="display:flex;gap:10px;width:100%">
+          <button onclick="changeTeamWeek(-1)" style="flex:1;background:rgba(0,255,136,0.1);border:2px solid rgba(0,255,136,0.3);color:#00ff88;padding:10px 15px;border-radius:10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:1em;transition:all 0.3s;white-space:nowrap">
+            ◀ Précédente
+          </button>
+          <button onclick="changeTeamWeek(1)" style="flex:1;background:rgba(0,255,136,0.1);border:2px solid rgba(0,255,136,0.3);color:#00ff88;padding:10px 15px;border-radius:10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:1em;transition:all 0.3s;white-space:nowrap">
+            Suivante ▶
+          </button>
+        </div>
       </div>
     </div>
     
     <!-- Tableau planning -->
-    <div id="teamPlanningTable" style="background:linear-gradient(145deg,rgba(30,30,30,0.95),rgba(15,15,15,0.98));backdrop-filter:blur(20px);border:2px solid rgba(0,255,136,0.3);border-radius:15px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.5),inset 0 0 30px rgba(0,255,136,0.05)">
+    <div id="teamPlanningTable" style="background:linear-gradient(145deg,rgba(30,30,30,0.95),rgba(15,15,15,0.98));backdrop-filter:blur(20px);border:2px solid rgba(0,255,136,0.3);border-radius:15px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.5),inset 0 0 30px rgba(0,255,136,0.05);touch-action:pan-y">
       <!-- Généré dynamiquement en JS -->
     </div>
     
