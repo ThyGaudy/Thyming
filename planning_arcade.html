@@ -4663,6 +4663,176 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('guideModal').style.display = 'none';
   }
   
+  // ========== VUE ÉQUIPE ==========
+  
+  let currentTeamWeek = null;
+  
+  window.openTeamView = function() {
+    document.getElementById('teamViewModal').style.display = 'block';
+    currentTeamWeek = getWeekNumber(currentDate);
+    loadTeamPlanning();
+  }
+  
+  window.closeTeamView = function() {
+    document.getElementById('teamViewModal').style.display = 'none';
+  }
+  
+  window.changeTeamWeek = function(direction) {
+    currentTeamWeek += direction;
+    loadTeamPlanning();
+  }
+  
+  async function loadTeamPlanning() {
+    if (!firebase || !firebase.firestore) {
+      document.getElementById('teamPlanningTable').innerHTML = '<p style="color:#ff4444;text-align:center;padding:40px">❌ Firebase non disponible</p>';
+      return;
+    }
+    
+    // Afficher loading
+    document.getElementById('teamPlanningTable').innerHTML = '<p style="color:#00ccff;text-align:center;padding:40px">⏳ Chargement...</p>';
+    
+    try {
+      // Récupérer tous les utilisateurs
+      const usersSnapshot = await firebase.firestore().collection('users').get();
+      
+      if (usersSnapshot.empty) {
+        document.getElementById('teamPlanningTable').innerHTML = '<p style="color:#888;text-align:center;padding:40px">Aucun utilisateur trouvé</p>';
+        return;
+      }
+      
+      // Construire les données
+      const teamData = [];
+      usersSnapshot.forEach(doc => {
+        const userData = doc.data();
+        let userName = doc.id.split('@')[0]; // Email → prénom
+        if (userData.displayName) userName = userData.displayName;
+        
+        const shifts = userData.planning_shifts ? JSON.parse(userData.planning_shifts) : {};
+        teamData.push({ name: userName, shifts });
+      });
+      
+      // Calculer les dates de la semaine
+      const weekDates = getWeekDates(currentTeamWeek, currentDate.getFullYear());
+      
+      // Mettre à jour l'affichage semaine
+      document.getElementById('teamWeekNumber').textContent = `Semaine ${currentTeamWeek}`;
+      const startDate = weekDates[0];
+      const endDate = weekDates[6];
+      document.getElementById('teamWeekDates').textContent = `${startDate.getDate()} - ${endDate.getDate()} ${startDate.toLocaleDateString('fr-FR', {month:'long'})}`;
+      
+      // Générer le tableau
+      let html = '<div style="overflow-x:auto">';
+      html += '<table style="width:100%;border-collapse:collapse;font-family:\'Rajdhani\',sans-serif">';
+      
+      // Header
+      html += '<tr>';
+      html += '<th style="padding:15px;text-align:left;color:#00ff88;font-size:1.1em;border-bottom:2px solid rgba(0,255,136,0.3)">Nom</th>';
+      const days = ['L','M','M','J','V','S','D'];
+      weekDates.forEach((date, i) => {
+        const dayNum = date.getDate();
+        html += `<th style="padding:15px;text-align:center;color:#00ccff;border-bottom:2px solid rgba(0,255,136,0.3)">
+          <div style="font-size:0.9em;color:#888">${days[i]}</div>
+          <div style="font-size:1.2em;font-weight:700">${dayNum}</div>
+        </th>`;
+      });
+      html += '</tr>';
+      
+      // Lignes utilisateurs
+      teamData.forEach(user => {
+        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.1)">';
+        html += `<td style="padding:15px;color:#e8e8e8;font-weight:700;font-size:1.1em">${user.name}</td>`;
+        
+        weekDates.forEach(date => {
+          const dateStr = formatDate(date);
+          const shift = user.shifts[dateStr];
+          const cell = getShiftCell(shift);
+          html += `<td style="padding:8px">${cell}</td>`;
+        });
+        
+        html += '</tr>';
+      });
+      
+      html += '</table></div>';
+      
+      document.getElementById('teamPlanningTable').innerHTML = html;
+      
+    } catch (error) {
+      console.error('Erreur chargement équipe:', error);
+      document.getElementById('teamPlanningTable').innerHTML = '<p style="color:#ff4444;text-align:center;padding:40px">❌ Erreur chargement</p>';
+    }
+  }
+  
+  function getShiftCell(shift) {
+    const shiftColors = {
+      'day': 'linear-gradient(135deg,#148A00,#1aa006)',
+      'night': 'linear-gradient(135deg,#0036A1,#0042bb)',
+      'cp': 'linear-gradient(135deg,#207E96,#2894ac)',
+      'formation': 'linear-gradient(135deg,#A6A600,#b8b800)',
+      'indispo': 'linear-gradient(135deg,#9C009C,#b000b0)',
+      'arret': 'linear-gradient(135deg,#946868,#a47878)',
+      'depannage_day': 'linear-gradient(135deg,#FF6B00,#FF8C00)',
+      'depannage_night': 'linear-gradient(135deg,#B35E00,#C86F00)',
+      'rc': 'linear-gradient(135deg,#00CBF0,#00E0FF)'
+    };
+    
+    const shiftLabels = {
+      'day': 'J',
+      'night': 'N',
+      'cp': 'CP',
+      'formation': 'F',
+      'indispo': 'I',
+      'arret': 'A',
+      'depannage_day': 'DJ',
+      'depannage_night': 'DN',
+      'rc': 'RC'
+    };
+    
+    if (!shift || shift === 'ferie') {
+      return '<div style="width:40px;height:40px;background:#0a0a0a;border-radius:8px;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:#444;font-size:1.2em">-</div>';
+    }
+    
+    const bg = shiftColors[shift] || '#333';
+    const label = shiftLabels[shift] || '?';
+    
+    return `<div style="width:40px;height:40px;background:${bg};border-radius:8px;border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1em;box-shadow:0 4px 8px rgba(0,0,0,0.3)">${label}</div>`;
+  }
+  
+  function getWeekDates(weekNumber, year) {
+    const jan1 = new Date(year, 0, 1);
+    const daysOffset = (weekNumber - 1) * 7;
+    const weekStart = new Date(year, 0, 1 + daysOffset);
+    
+    // Ajuster au lundi
+    const day = weekStart.getDay();
+    const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(weekStart.setDate(diff));
+    
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      dates.push(date);
+    }
+    return dates;
+  }
+  
+  // Appui long sur le mois pour ouvrir la vue équipe
+  setTimeout(() => {
+    const monthElem = document.getElementById('currentMonth');
+    if (monthElem) {
+      let teamViewLongPress;
+      monthElem.addEventListener('touchstart', () => {
+        teamViewLongPress = setTimeout(() => openTeamView(), 1000);
+      });
+      monthElem.addEventListener('touchend', () => clearTimeout(teamViewLongPress));
+      monthElem.addEventListener('touchmove', () => clearTimeout(teamViewLongPress));
+      monthElem.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        openTeamView();
+      });
+    }
+  }, 1000);
+  
   // ========== FIREBASE CLOUD SYNC ==========
   
   let currentUser = null;
@@ -4763,6 +4933,16 @@ window.addEventListener('DOMContentLoaded', () => {
         const data = doc.data();
         console.log('☁️ Données cloud trouvées');
         
+        // Vérifier si displayName existe, sinon demander
+        if (!data.displayName) {
+          const userName = prompt('👤 Entrez votre prénom (visible par vos collègues) :');
+          if (userName && userName.trim()) {
+            await firebase.firestore().collection('users').doc(currentUser.uid).set({
+              displayName: userName.trim()
+            }, { merge: true });
+          }
+        }
+        
         // Ne restaurer que si les données cloud sont plus récentes
         const cloudHasData = data.planning_shifts && data.planning_shifts !== '{}';
         const localHasData = localStorage.getItem('planning_shifts') && localStorage.getItem('planning_shifts') !== '{}';
@@ -4788,6 +4968,15 @@ window.addEventListener('DOMContentLoaded', () => {
         // Cas 3: Les deux ont des données → On garde le local (ne rien faire)
       } else {
         console.log('☁️ Aucune donnée cloud, première connexion');
+        
+        // Demander le prénom
+        const userName = prompt('👤 Bienvenue ! Entrez votre prénom (visible par vos collègues) :');
+        if (userName && userName.trim()) {
+          await firebase.firestore().collection('users').doc(currentUser.uid).set({
+            displayName: userName.trim()
+          }, { merge: true });
+        }
+        
         // Sauvegarder les données locales si elles existent
         if (localStorage.getItem('planning_shifts')) {
           saveToCloud();
@@ -6448,6 +6637,70 @@ initPlanningsDB();
     <button onclick="skipGoogleLogin()" style="background:transparent;border:1px solid #666;color:#888;padding:10px 30px;border-radius:8px;font-size:0.95em;cursor:pointer;font-family:'Rajdhani',sans-serif">
       Plus tard
     </button>
+  </div>
+</div>
+
+<!-- Modal Vue Équipe -->
+<div id="teamViewModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:9999;overflow-y:auto">
+  <!-- Particules animées (même que le fond principal) -->
+  <div class="stars"></div>
+  <div class="twinkling"></div>
+  
+  <div style="position:relative;z-index:2;padding:20px;max-width:800px;margin:0 auto">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px">
+      <h1 style="color:#00ff88;font-family:'Black Ops One',cursive;font-size:1.8em;text-shadow:0 0 20px rgba(0,255,136,0.5)">
+        👥 PLANNING ÉQUIPE
+      </h1>
+      <button onclick="closeTeamView()" style="background:rgba(255,0,0,0.2);border:2px solid #ff4444;color:#fff;width:42px;height:42px;border-radius:50%;font-size:1.5em;cursor:pointer;transition:all 0.3s">
+        ✕
+      </button>
+    </div>
+    
+    <!-- Sélecteur semaine -->
+    <div style="background:linear-gradient(145deg,rgba(30,30,30,0.95),rgba(15,15,15,0.98));backdrop-filter:blur(20px);border:2px solid rgba(0,255,136,0.3);border-radius:15px;padding:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,0.5)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <button onclick="changeTeamWeek(-1)" style="background:rgba(0,255,136,0.1);border:2px solid rgba(0,255,136,0.3);color:#00ff88;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:1.1em;transition:all 0.3s">
+          ◀ Sem précédente
+        </button>
+        <div style="text-align:center">
+          <div id="teamWeekNumber" style="color:#00ccff;font-family:'Orbitron',monospace;font-size:1.3em;font-weight:700">Semaine XX</div>
+          <div id="teamWeekDates" style="color:#888;font-family:'Rajdhani',sans-serif;font-size:0.9em;margin-top:5px">XX - XX mois</div>
+        </div>
+        <button onclick="changeTeamWeek(1)" style="background:rgba(0,255,136,0.1);border:2px solid rgba(0,255,136,0.3);color:#00ff88;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:1.1em;transition:all 0.3s">
+          Sem suivante ▶
+        </button>
+      </div>
+    </div>
+    
+    <!-- Tableau planning -->
+    <div id="teamPlanningTable" style="background:linear-gradient(145deg,rgba(30,30,30,0.95),rgba(15,15,15,0.98));backdrop-filter:blur(20px);border:2px solid rgba(0,255,136,0.3);border-radius:15px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.5),inset 0 0 30px rgba(0,255,136,0.05)">
+      <!-- Généré dynamiquement en JS -->
+    </div>
+    
+    <!-- Légende -->
+    <div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:30px;height:30px;background:linear-gradient(135deg,#148A00,#1aa006);border-radius:5px;border:1px solid rgba(255,255,255,0.2)"></div>
+        <span style="color:#e8e8e8;font-family:'Rajdhani',sans-serif">Jour</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:30px;height:30px;background:linear-gradient(135deg,#0036A1,#0042bb);border-radius:5px;border:1px solid rgba(255,255,255,0.2)"></div>
+        <span style="color:#e8e8e8;font-family:'Rajdhani',sans-serif">Nuit</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:30px;height:30px;background:linear-gradient(135deg,#207E96,#2894ac);border-radius:5px;border:1px solid rgba(255,255,255,0.2)"></div>
+        <span style="color:#e8e8e8;font-family:'Rajdhani',sans-serif">CP</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:30px;height:30px;background:linear-gradient(135deg,#FF6B00,#FF8C00);border-radius:5px;border:1px solid rgba(255,255,255,0.2)"></div>
+        <span style="color:#e8e8e8;font-family:'Rajdhani',sans-serif">Dép</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:30px;height:30px;background:#0a0a0a;border-radius:5px;border:1px solid rgba(255,255,255,0.2)"></div>
+        <span style="color:#e8e8e8;font-family:'Rajdhani',sans-serif">Repos</span>
+      </div>
+    </div>
   </div>
 </div>
 
