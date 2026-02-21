@@ -2519,37 +2519,10 @@ h3::after {
 <meta name="apple-mobile-web-app-title" content="Thyming">
 <meta name="mobile-web-app-capable" content="yes">
 
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyATCbqwejhUkSGrvX3abR-PEmxIC2IY-cs",
-    authDomain: "thyming-ebe70.firebaseapp.com",
-    projectId: "thyming-ebe70",
-    storageBucket: "thyming-ebe70.firebasestorage.app",
-    messagingSenderId: "622414036029",
-    appId: "1:622414036029:web:ea7a7d96378264e1d43e54"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const googleProvider = new GoogleAuthProvider();
-  
-  window.firebaseAuth = auth;
-  window.firebaseDB = db;
-  window.firebaseSignInWithPopup = signInWithPopup;
-  window.firebaseGoogleProvider = googleProvider;
-  window.firebaseOnAuthStateChanged = onAuthStateChanged;
-  window.firebaseSignOut = signOut;
-  window.firebaseDoc = doc;
-  window.firebaseSetDoc = setDoc;
-  window.firebaseGetDoc = getDoc;
-  window.firebaseServerTimestamp = serverTimestamp;
-</script>
+<!-- Firebase SDK (version 8 - la plus stable) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 </head>
 <body>
@@ -2955,6 +2928,27 @@ S28 à S44 (2026)<br>
 </div>
 
 <script>
+// ========== FIREBASE INIT ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyATCbqwejhUkSGrvX3abR-PEmxIC2IY-cs",
+  authDomain: "thyming-ebe70.firebaseapp.com",
+  projectId: "thyming-ebe70",
+  storageBucket: "thyming-ebe70.firebasestorage.app",
+  messagingSenderId: "622414036029",
+  appId: "1:622414036029:web:ea7a7d96378264e1d43e54"
+};
+
+// Attendre que Firebase soit chargé
+window.addEventListener('load', () => {
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    console.log('✅ Firebase initialisé');
+  } else {
+    console.error('❌ Firebase non chargé');
+  }
+});
+
+// ========== APP VARIABLES ==========
 let currentDate = new Date();
 let shifts = {};
 let notes = {};
@@ -4679,8 +4673,8 @@ window.addEventListener('DOMContentLoaded', () => {
   
   // Écouter l'état d'authentification
   setTimeout(() => {
-    if (window.firebaseAuth && window.firebaseOnAuthStateChanged) {
-      window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      firebase.auth().onAuthStateChanged((user) => {
         if (user) {
           currentUser = user;
           console.log('✅ Connecté:', user.email);
@@ -4715,7 +4709,8 @@ window.addEventListener('DOMContentLoaded', () => {
     if (googleBtn) {
       googleBtn.addEventListener('click', async () => {
         try {
-          const result = await window.firebaseSignInWithPopup(window.firebaseAuth, window.firebaseGoogleProvider);
+          const provider = new firebase.auth.GoogleAuthProvider();
+          const result = await firebase.auth().signInWithPopup(provider);
           console.log('✅ Connexion réussie');
           
           // Sauvegarder immédiatement après connexion
@@ -4736,7 +4731,7 @@ window.addEventListener('DOMContentLoaded', () => {
   
   // Sauvegarder dans le cloud
   async function saveToCloud() {
-    if (!currentUser || !window.firebaseDB) return;
+    if (!currentUser || typeof firebase === 'undefined') return;
     
     try {
       const userData = {
@@ -4747,11 +4742,10 @@ window.addEventListener('DOMContentLoaded', () => {
         lastRadioStation: localStorage.getItem('lastRadioStation') || '0',
         currentMonth: localStorage.getItem('currentMonth'),
         currentYear: localStorage.getItem('currentYear'),
-        lastUpdate: window.firebaseServerTimestamp()
+        lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
       };
       
-      const userDoc = window.firebaseDoc(window.firebaseDB, 'users', currentUser.uid);
-      await window.firebaseSetDoc(userDoc, userData);
+      await firebase.firestore().collection('users').doc(currentUser.uid).set(userData);
       console.log('☁️ Sauvegarde cloud OK');
     } catch (error) {
       console.error('Erreur sauvegarde cloud:', error);
@@ -4760,14 +4754,13 @@ window.addEventListener('DOMContentLoaded', () => {
   
   // Charger depuis le cloud
   async function loadFromCloud() {
-    if (!currentUser || !window.firebaseDB) return;
+    if (!currentUser || typeof firebase === 'undefined') return;
     
     try {
-      const userDoc = window.firebaseDoc(window.firebaseDB, 'users', currentUser.uid);
-      const docSnap = await window.firebaseGetDoc(userDoc);
+      const doc = await firebase.firestore().collection('users').doc(currentUser.uid).get();
       
-      if (docSnap.exists()) {
-        const data = docSnap.data();
+      if (doc.exists) {
+        const data = doc.data();
         console.log('☁️ Données cloud trouvées');
         
         // Ne restaurer que si les données cloud sont plus récentes
