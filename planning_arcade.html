@@ -2523,7 +2523,6 @@ h3::after {
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 </head>
 <body>
@@ -4957,43 +4956,13 @@ window.addEventListener('DOMContentLoaded', () => {
       
       await firebase.firestore().collection('users').doc(currentUser.uid).set(userData, { merge: true });
       
-      // Sauvegarder les PDFs dans Storage
-      const plannings = await getAllPlannings();
-      const paies = await getAllPayslips();
-      const storage = firebase.storage();
-      
-      // Upload plannings
-      for (const planning of plannings) {
-        const blob = dataURLtoBlob(planning.image);
-        const ref = storage.ref(`users/${currentUser.uid}/plannings/${planning.name}`);
-        await ref.put(blob);
-      }
-      
-      // Upload paies
-      for (const paie of paies) {
-        const blob = dataURLtoBlob(paie.image);
-        const ref = storage.ref(`users/${currentUser.uid}/paies/${paie.name}`);
-        await ref.put(blob);
-      }
-      
-      console.log('☁️ Sauvegarde cloud OK (avec PDFs)');
+      console.log('☁️ Sauvegarde cloud OK');
     } catch (error) {
       console.error('Erreur sauvegarde cloud:', error);
     }
   }
   
   // Convertir base64 en Blob
-  function dataURLtoBlob(dataurl) {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while(n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], {type:mime});
-  }
   
   // Charger depuis le cloud
   async function loadFromCloud() {
@@ -5020,45 +4989,6 @@ window.addEventListener('DOMContentLoaded', () => {
           if (data.lastRadioStation) localStorage.setItem('lastRadioStation', data.lastRadioStation);
           if (data.currentMonth) localStorage.setItem('currentMonth', data.currentMonth);
           if (data.currentYear) localStorage.setItem('currentYear', data.currentYear);
-          
-          // Restaurer plannings et paies depuis Storage
-          const storage = firebase.storage();
-          
-          // Télécharger plannings
-          console.log('📥 Restauration plannings...');
-          await clearAllPlannings();
-          const planningsRef = storage.ref(`users/${currentUser.uid}/plannings`);
-          const planningsList = await planningsRef.listAll();
-          for (const item of planningsList.items) {
-            const url = await item.getDownloadURL();
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const reader = new FileReader();
-            const dataUrl = await new Promise((resolve) => {
-              reader.onloadend = () => resolve(reader.result);
-              reader.readAsDataURL(blob);
-            });
-            const isPdf = blob.type === 'application/pdf';
-            await savePlanningToIndexedDB(item.name, dataUrl, isPdf);
-          }
-          
-          // Télécharger paies
-          console.log('📥 Restauration paies...');
-          await clearAllPayslips();
-          const paiesRef = storage.ref(`users/${currentUser.uid}/paies`);
-          const paiesList = await paiesRef.listAll();
-          for (const item of paiesList.items) {
-            const url = await item.getDownloadURL();
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const reader = new FileReader();
-            const dataUrl = await new Promise((resolve) => {
-              reader.onloadend = () => resolve(reader.result);
-              reader.readAsDataURL(blob);
-            });
-            const isPdf = blob.type === 'application/pdf';
-            await savePayslipToIndexedDB(item.name, dataUrl, isPdf);
-          }
           
           // Recharger la page pour afficher les données
           location.reload();
