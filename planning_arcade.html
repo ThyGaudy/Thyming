@@ -2656,7 +2656,7 @@ h3::after {
 <div class="current-week" id="currentWeek">Chargement...</div>
 </div>
 <button class="payslips-btn" id="planningsBtn" title="Mes plannings">📅</button>
-<button class="payslips-btn" id="cloudLoginBtn" title="Connexion cloud" style="display:none">☁️</button>
+<button class="payslips-btn" id="cloudLoginBtn" title="Cloud" style="background:rgba(0,200,255,0.2);border:2px solid rgba(0,200,255,0.4)">☁️</button>
 </div>
 <h1 id="mainTitle">Planning de travail</h1>
 <div class="month-selector">
@@ -4866,8 +4866,12 @@ window.addEventListener('DOMContentLoaded', () => {
           console.log('✅ Connecté:', user.email);
           document.getElementById('googleLoginModal').style.display = 'none';
           
-          // Cacher le bouton de connexion
-          if (cloudBtn) cloudBtn.style.display = 'none';
+          // Bouton vert quand connecté
+          if (cloudBtn) {
+            cloudBtn.style.background = 'rgba(0,255,136,0.2)';
+            cloudBtn.style.border = '2px solid rgba(0,255,136,0.4)';
+            cloudBtn.title = 'Cloud connecté - Cliquer pour se déconnecter';
+          }
           
           // Charger les données depuis le cloud
           loadFromCloud();
@@ -4881,8 +4885,12 @@ window.addEventListener('DOMContentLoaded', () => {
           currentUser = null;
           console.log('❌ Non connecté');
           
-          // Afficher le bouton de connexion
-          if (cloudBtn) cloudBtn.style.display = 'block';
+          // Bouton bleu quand déconnecté
+          if (cloudBtn) {
+            cloudBtn.style.background = 'rgba(0,200,255,0.2)';
+            cloudBtn.style.border = '2px solid rgba(0,200,255,0.4)';
+            cloudBtn.title = 'Se connecter au cloud';
+          }
           
           // Afficher le modal de connexion si pas encore sauté
           if (!hasSkippedLogin) {
@@ -6402,10 +6410,18 @@ document.getElementById('planningsBtn').addEventListener('click', () => {
 setTimeout(() => {
   const cloudLoginBtn = document.getElementById('cloudLoginBtn');
   if (cloudLoginBtn) {
-    cloudLoginBtn.addEventListener('click', () => {
-      // Réafficher le modal de connexion
-      localStorage.removeItem('skippedGoogleLogin');
-      document.getElementById('googleLoginModal').style.display = 'flex';
+    cloudLoginBtn.addEventListener('click', async () => {
+      if (currentUser) {
+        // Déjà connecté → Déconnexion
+        if (confirm('☁️ Se déconnecter du cloud ?')) {
+          await firebase.auth().signOut();
+          location.reload();
+        }
+      } else {
+        // Pas connecté → Afficher modal de connexion
+        localStorage.removeItem('skippedGoogleLogin');
+        document.getElementById('googleLoginModal').style.display = 'flex';
+      }
     });
   }
 }, 1000);
