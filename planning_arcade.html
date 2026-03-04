@@ -2956,6 +2956,8 @@ let notes = {};
 let longPressTimer;
 let currentNoteDate = null;
 let selectedShiftType = null;  // Pour le mode sélection de la légende
+let currentUser = null;  // Firebase user
+let autoSaveInterval = null;  // Firebase auto-save
 
 const holidays = {
   '2025-01-01':'', '2025-04-21':'', '2025-05-01':'', '2025-05-08':'', '2025-05-29':'',
@@ -4848,9 +4850,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }, 1000);
   
   // ========== FIREBASE CLOUD SYNC ==========
-  
-  let currentUser = null;
-  let autoSaveInterval = null;
   
   // Vérifier si l'utilisateur a déjà sauté la connexion
   const hasSkippedLogin = localStorage.getItem('skippedGoogleLogin') === 'true';
