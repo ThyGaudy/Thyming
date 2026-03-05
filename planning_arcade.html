@@ -2657,6 +2657,7 @@ h3::after {
 </div>
 <button class="payslips-btn" id="planningsBtn" title="Mes plannings">📅</button>
 <button class="payslips-btn" id="cloudLoginBtn" title="Cloud" style="background:rgba(0,200,255,0.2);border:2px solid rgba(0,200,255,0.4)">☁️</button>
+<button class="payslips-btn" id="syncBtn" title="Synchroniser" style="display:none;background:rgba(255,200,0,0.2);border:2px solid rgba(255,200,0,0.4)">🔄</button>
 </div>
 <h1 id="mainTitle">Planning de travail</h1>
 <div class="month-selector">
@@ -4859,6 +4860,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (typeof firebase !== 'undefined' && firebase.auth) {
       firebase.auth().onAuthStateChanged((user) => {
         const cloudBtn = document.getElementById('cloudLoginBtn');
+        const syncBtn = document.getElementById('syncBtn');
         
         if (user) {
           currentUser = user;
@@ -4871,6 +4873,9 @@ window.addEventListener('DOMContentLoaded', () => {
             cloudBtn.style.border = '2px solid rgba(0,255,136,0.4)';
             cloudBtn.title = 'Cloud connecté - Cliquer pour se déconnecter';
           }
+          
+          // Afficher le bouton sync
+          if (syncBtn) syncBtn.style.display = 'block';
           
           // Charger les données depuis le cloud
           loadFromCloud();
@@ -4890,6 +4895,9 @@ window.addEventListener('DOMContentLoaded', () => {
             cloudBtn.style.border = '2px solid rgba(0,200,255,0.4)';
             cloudBtn.title = 'Se connecter au cloud';
           }
+          
+          // Cacher le bouton sync
+          if (syncBtn) syncBtn.style.display = 'none';
           
           // Afficher le modal de connexion si pas encore sauté
           if (!hasSkippedLogin) {
@@ -6432,6 +6440,35 @@ setTimeout(() => {
         // Pas connecté → Afficher modal de connexion
         localStorage.removeItem('skippedGoogleLogin');
         document.getElementById('googleLoginModal').style.display = 'flex';
+      }
+    });
+  }
+}, 1000);
+
+// Bouton synchronisation
+setTimeout(() => {
+  const syncBtn = document.getElementById('syncBtn');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', async () => {
+      if (!currentUser) return;
+      
+      syncBtn.textContent = '⏳';
+      syncBtn.disabled = true;
+      
+      try {
+        await loadFromCloud();
+        syncBtn.textContent = '✅';
+        setTimeout(() => {
+          syncBtn.textContent = '🔄';
+          syncBtn.disabled = false;
+        }, 2000);
+      } catch (error) {
+        console.error('Erreur sync:', error);
+        syncBtn.textContent = '❌';
+        setTimeout(() => {
+          syncBtn.textContent = '🔄';
+          syncBtn.disabled = false;
+        }, 2000);
       }
     });
   }
