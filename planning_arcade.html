@@ -5003,8 +5003,20 @@ window.addEventListener('DOMContentLoaded', () => {
           // Cas 2: Local a des données, cloud est vide → Sauvegarder
           console.log('📤 Première sauvegarde vers le cloud...');
           saveToCloud();
+        } else if (cloudHasData && localHasData) {
+          // Cas 3: Les deux ont des données → Prendre le cloud (le plus récent)
+          console.log('🔄 Synchronisation depuis le cloud...');
+          if (data.planning_shifts) localStorage.setItem('planning_shifts', data.planning_shifts);
+          if (data.planning_notes) localStorage.setItem('planning_notes', data.planning_notes);
+          if (data.radioPresets) localStorage.setItem('radioPresets', data.radioPresets);
+          if (data.radioVolume) localStorage.setItem('radioVolume', data.radioVolume);
+          if (data.lastRadioStation) localStorage.setItem('lastRadioStation', data.lastRadioStation);
+          if (data.currentMonth) localStorage.setItem('currentMonth', data.currentMonth);
+          if (data.currentYear) localStorage.setItem('currentYear', data.currentYear);
+          
+          // Recharger la page pour afficher les données
+          location.reload();
         }
-        // Cas 3: Les deux ont des données → On garde le local (ne rien faire)
       } else {
         console.log('☁️ Aucune donnée cloud, première connexion');
         
