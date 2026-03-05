@@ -4975,9 +4975,10 @@ window.addEventListener('DOMContentLoaded', () => {
   async function loadFromCloud() {
     if (!currentUser || typeof firebase === 'undefined') return;
     
-    // Empêcher la boucle infinie
-    if (sessionStorage.getItem('cloudLoaded') === 'true') {
-      console.log('✅ Données déjà chargées cette session');
+    // Empêcher la boucle infinie (flag valable 5 secondes)
+    const lastLoad = sessionStorage.getItem('cloudLoadTime');
+    if (lastLoad && Date.now() - parseInt(lastLoad) < 5000) {
+      console.log('✅ Données déjà chargées récemment');
       return;
     }
     
@@ -5003,8 +5004,8 @@ window.addEventListener('DOMContentLoaded', () => {
           if (data.currentMonth) localStorage.setItem('currentMonth', data.currentMonth);
           if (data.currentYear) localStorage.setItem('currentYear', data.currentYear);
           
-          // Marquer comme chargé avant reload
-          sessionStorage.setItem('cloudLoaded', 'true');
+          // Marquer le timestamp de chargement
+          sessionStorage.setItem('cloudLoadTime', Date.now().toString());
           
           // Recharger la page pour afficher les données
           location.reload();
@@ -5023,8 +5024,8 @@ window.addEventListener('DOMContentLoaded', () => {
           if (data.currentMonth) localStorage.setItem('currentMonth', data.currentMonth);
           if (data.currentYear) localStorage.setItem('currentYear', data.currentYear);
           
-          // Marquer comme chargé avant reload
-          sessionStorage.setItem('cloudLoaded', 'true');
+          // Marquer le timestamp de chargement
+          sessionStorage.setItem('cloudLoadTime', Date.now().toString());
           
           // Recharger la page pour afficher les données
           location.reload();
@@ -6433,12 +6434,58 @@ document.getElementById('planningsBtn').addEventListener('click', () => {
 setTimeout(() => {
   const cloudLoginBtn = document.getElementById('cloudLoginBtn');
   if (cloudLoginBtn) {
-    cloudLoginBtn.addEventListener('click', async () => {
-      if (currentUser) {
-        // Déjà connecté → Déconnexion
-        if (confirm('☁️ Se déconnecter du cloud ?')) {
-          await firebase.auth().signOut();
+    let longPressTimer;
+    let isLongPress = false;
+    
+    // Appui long = Déconnexion
+    cloudLoginBtn.addEventListener('touchstart', () => {
+      isLongPress = false;
+      longPressTimer = setTimeout(() => {
+        isLongPress = true;
+        if (currentUser && confirm('☁️ Se déconnecter du cloud ?')) {
+          firebase.auth().signOut();
           location.reload();
+        }
+      }, 800);
+    });
+    
+    cloudLoginBtn.addEventListener('touchend', () => {
+      clearTimeout(longPressTimer);
+    });
+    
+    cloudLoginBtn.addEventListener('touchmove', () => {
+      clearTimeout(longPressTimer);
+    });
+    
+    // Clic court = Sync ou connexion
+    cloudLoginBtn.addEventListener('click', async (e) => {
+      if (isLongPress) {
+        isLongPress = false;
+        return; // Appui long déjà géré
+      }
+      
+      if (currentUser) {
+        // Connecté → Synchroniser
+        cloudLoginBtn.textContent = '⏳';
+        cloudLoginBtn.disabled = true;
+        
+        try {
+          // Forcer le rechargement depuis le cloud
+          sessionStorage.removeItem('cloudLoadTime'); // Supprimer le flag
+          await loadFromCloud();
+          
+          cloudLoginBtn.textContent = '✅';
+          setTimeout(() => {
+            cloudLoginBtn.textContent = '☁️';
+            cloudLoginBtn.disabled = false;
+          }, 2000);
+        } catch (error) {
+          console.error('Erreur sync:', error);
+          cloudLoginBtn.textContent = '❌';
+          setTimeout(() => {
+            cloudLoginBtn.textContent = '☁️';
+            cloudLoginBtn.disabled = false;
+          }, 2000);
         }
       } else {
         // Pas connecté → Afficher modal de connexion
