@@ -6434,45 +6434,30 @@ document.getElementById('planningsBtn').addEventListener('click', () => {
 setTimeout(() => {
   const cloudLoginBtn = document.getElementById('cloudLoginBtn');
   if (cloudLoginBtn) {
-    let longPressTimer;
-    let isLongPress = false;
     
-    // Appui long = Déconnexion
-    cloudLoginBtn.addEventListener('touchstart', () => {
-      isLongPress = false;
-      longPressTimer = setTimeout(() => {
-        isLongPress = true;
-        if (currentUser && confirm('☁️ Se déconnecter du cloud ?')) {
-          firebase.auth().signOut();
-          location.reload();
-        }
-      }, 800);
-    });
-    
-    cloudLoginBtn.addEventListener('touchend', () => {
-      clearTimeout(longPressTimer);
-    });
-    
-    cloudLoginBtn.addEventListener('touchmove', () => {
-      clearTimeout(longPressTimer);
-    });
-    
-    // Clic court = Sync ou connexion
+    // Clic gauche = Sync ou connexion
     cloudLoginBtn.addEventListener('click', async (e) => {
-      if (isLongPress) {
-        isLongPress = false;
-        return; // Appui long déjà géré
-      }
-      
       if (currentUser) {
         // Connecté → Synchroniser
         cloudLoginBtn.textContent = '⏳';
         cloudLoginBtn.disabled = true;
         
         try {
-          // Forcer le rechargement depuis le cloud
-          sessionStorage.removeItem('cloudLoadTime'); // Supprimer le flag
-          await loadFromCloud();
+          // Recharger les données depuis le cloud
+          const doc = await firebase.firestore().collection('users').doc(currentUser.uid).get();
+          if (doc.exists) {
+            const data = doc.data();
+            if (data.planning_shifts) {
+              localStorage.setItem('planning_shifts', data.planning_shifts);
+              shifts = JSON.parse(data.planning_shifts);
+            }
+            if (data.planning_notes) {
+              localStorage.setItem('planning_notes', data.planning_notes);
+              notes = JSON.parse(data.planning_notes);
+            }
+            renderCalendar();
+            updateStats();
+          }
           
           cloudLoginBtn.textContent = '✅';
           setTimeout(() => {
@@ -6491,6 +6476,15 @@ setTimeout(() => {
         // Pas connecté → Afficher modal de connexion
         localStorage.removeItem('skippedGoogleLogin');
         document.getElementById('googleLoginModal').style.display = 'flex';
+      }
+    });
+    
+    // Clic droit = Déconnexion
+    cloudLoginBtn.addEventListener('contextmenu', async (e) => {
+      e.preventDefault();
+      if (currentUser && confirm('☁️ Se déconnecter du cloud ?')) {
+        await firebase.auth().signOut();
+        location.reload();
       }
     });
   }
