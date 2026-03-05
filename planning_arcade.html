@@ -4975,6 +4975,12 @@ window.addEventListener('DOMContentLoaded', () => {
   async function loadFromCloud() {
     if (!currentUser || typeof firebase === 'undefined') return;
     
+    // Empêcher la boucle infinie
+    if (sessionStorage.getItem('cloudLoaded') === 'true') {
+      console.log('✅ Données déjà chargées cette session');
+      return;
+    }
+    
     try {
       const doc = await firebase.firestore().collection('users').doc(currentUser.uid).get();
       
@@ -4997,6 +5003,9 @@ window.addEventListener('DOMContentLoaded', () => {
           if (data.currentMonth) localStorage.setItem('currentMonth', data.currentMonth);
           if (data.currentYear) localStorage.setItem('currentYear', data.currentYear);
           
+          // Marquer comme chargé avant reload
+          sessionStorage.setItem('cloudLoaded', 'true');
+          
           // Recharger la page pour afficher les données
           location.reload();
         } else if (!cloudHasData && localHasData) {
@@ -5013,6 +5022,9 @@ window.addEventListener('DOMContentLoaded', () => {
           if (data.lastRadioStation) localStorage.setItem('lastRadioStation', data.lastRadioStation);
           if (data.currentMonth) localStorage.setItem('currentMonth', data.currentMonth);
           if (data.currentYear) localStorage.setItem('currentYear', data.currentYear);
+          
+          // Marquer comme chargé avant reload
+          sessionStorage.setItem('cloudLoaded', 'true');
           
           // Recharger la page pour afficher les données
           location.reload();
