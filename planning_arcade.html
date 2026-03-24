@@ -3251,7 +3251,7 @@ function createDayCell(date, otherMonth) {
   else if (shift === 'arret') cell.classList.add('arret-shift');
   else if (shift === 'depannage_day') cell.classList.add('depannage_day-shift');
   else if (shift === 'depannage_night') cell.classList.add('depannage_night-shift');
-  else if (shift === 'rc') cell.classList.add('rc-shift');
+  else if (shift && typeof shift === 'string' && shift.startsWith('rc')) cell.classList.add('rc-shift');
   
   // Vérifier repos de 11h minimum
   if (shift && !otherMonth) {
@@ -3304,8 +3304,12 @@ function createDayCell(date, otherMonth) {
       shiftTime.textContent = 'Dép J 7h-19h';
     } else if (shift === 'depannage_night') {
       shiftTime.textContent = 'Dép N 19h-7h';
-    } else if (shift === 'rc') {
-      shiftTime.textContent = 'RC 12h';
+    } else if (shift && typeof shift === 'string' && shift.startsWith('rc')) {
+      // Format: rc|08:00-16:00
+      const parts = shift.split('|');
+      const horaires = parts[1] || '';
+      const horairesCourt = horaires.replace(':00', 'h').replace(':30', 'h30').replace('-', '-');
+      shiftTime.textContent = `RC ${horairesCourt}`;
     }
     
     cell.appendChild(shiftTime);
@@ -3356,6 +3360,13 @@ function createDayCell(date, otherMonth) {
           document.getElementById('urgenceFin').value = '';
           document.getElementById('urgenceDepannage').checked = false;
           return; // Sortir sans render
+        } else if (selectedShiftType === 'rc') {
+          // Ouvrir modal RC
+          window.currentRCDate = dateStr;
+          document.getElementById('rcModal').style.display = 'flex';
+          document.getElementById('rcDebut').value = '';
+          document.getElementById('rcFin').value = '';
+          return; // Sortir sans render
         } else if (shifts[dateStr] === selectedShiftType) {
           // Si déjà le même type, on efface
           delete shifts[dateStr];
@@ -3388,7 +3399,14 @@ function createDayCell(date, otherMonth) {
         } else if (shifts[dateStr] === 'depannage_day') {
           shifts[dateStr] = 'depannage_night';
         } else if (shifts[dateStr] === 'depannage_night') {
-          shifts[dateStr] = 'rc';
+          // Ouvrir modal RC
+          window.currentRCDate = dateStr;
+          document.getElementById('rcModal').style.display = 'flex';
+          document.getElementById('rcDebut').value = '';
+          document.getElementById('rcFin').value = '';
+          return; // Sortir sans render
+        } else if (shifts[dateStr] && typeof shifts[dateStr] === 'string' && shifts[dateStr].startsWith('rc')) {
+          delete shifts[dateStr]; // Supprimer RC
         } else {
           delete shifts[dateStr];
         }
@@ -3558,10 +3576,22 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
       return;
     }
     
-    if (shift === 'rc') {
-      // RC = Repos Compensateur : 12h (calcul spécifique à définir plus tard)
-      totalHours += 12;
-      workedHours += 12;
+    // Traiter RC avec horaires
+    if (shift && typeof shift === 'string' && shift.startsWith('rc')) {
+      const parts = shift.split('|');
+      const horaires = parts[1];
+      
+      if (horaires) {
+        const [debut, fin] = horaires.split('-');
+        const [hDebut, mDebut] = debut.split(':').map(Number);
+        const [hFin, mFin] = fin.split(':').map(Number);
+        
+        let totalH = hFin - hDebut + (mFin - mDebut) / 60;
+        if (totalH < 0) totalH += 24;
+        
+        totalHours += totalH;
+        workedHours += totalH;
+      }
       return;
     }
     
@@ -3817,6 +3847,23 @@ function updateRegulations() {
             if (isDep) {
               monthsInRegule[monthKey].depannage += totalH;
             }
+          }
+        }
+        
+        // Traiter RC avec horaires
+        if (shift && typeof shift === 'string' && shift.startsWith('rc')) {
+          const parts = shift.split('|');
+          const horaires = parts[1];
+          
+          if (horaires) {
+            const [debut, fin] = horaires.split('-');
+            const [hDebut, mDebut] = debut.split(':').map(Number);
+            const [hFin, mFin] = fin.split(':').map(Number);
+            
+            let totalH = hFin - hDebut + (mFin - mDebut) / 60;
+            if (totalH < 0) totalH += 24;
+            
+            monthsInRegule[monthKey].total += totalH;
           }
         }
       }
@@ -4807,6 +4854,34 @@ window.addEventListener('DOMContentLoaded', () => {
     updateStats();
     updateRegulations();
     closeUrgenceModal();
+  }
+  
+  // ========== RC (Repos Compensateur) ==========
+  
+  window.currentRCDate = null;
+  
+  window.closeRCModal = function() {
+    document.getElementById('rcModal').style.display = 'none';
+  }
+  
+  window.saveRC = function() {
+    const debut = document.getElementById('rcDebut').value;
+    const fin = document.getElementById('rcFin').value;
+    
+    if (!debut || !fin) {
+      alert('⚠️ Veuillez renseigner les horaires');
+      return;
+    }
+    
+    // Format: rc|08:00-16:00
+    const rcData = `rc|${debut}-${fin}`;
+    shifts[window.currentRCDate] = rcData;
+    
+    saveToStorage();
+    renderCalendar();
+    updateStats();
+    updateRegulations();
+    closeRCModal();
   }
   
   // ========== VUE ÉQUIPE ==========
@@ -7003,6 +7078,32 @@ initPlanningsDB();
         Valider
       </button>
       <button onclick="closeUrgenceModal()" style="flex:1;background:rgba(100,100,100,0.3);border:2px solid #666;color:#ccc;padding:15px;border-radius:10px;font-family:'Rajdhani',sans-serif;font-size:1.1em;cursor:pointer">
+        Annuler
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal RC (Repos Compensateur) -->
+<div id="rcModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:10000;align-items:center;justify-content:center">
+  <div style="background:linear-gradient(145deg,rgba(0,203,240,0.2),rgba(0,224,255,0.1));backdrop-filter:blur(20px);border:3px solid #00E0FF;border-radius:20px;padding:30px;box-shadow:0 0 40px rgba(0,224,255,0.5);max-width:400px;width:90%">
+    <h2 style="color:#00E0FF;font-family:'Black Ops One',cursive;text-align:center;margin-bottom:25px;text-shadow:0 0 10px rgba(0,224,255,0.8)">🔵 REPOS COMPENSATEUR</h2>
+    
+    <div style="margin-bottom:20px">
+      <label style="color:#e8e8e8;font-family:'Rajdhani',sans-serif;font-size:1.1em;display:block;margin-bottom:8px">🕐 Heure de début</label>
+      <input type="time" id="rcDebut" style="width:100%;padding:12px;background:rgba(0,0,0,0.5);border:2px solid rgba(0,224,255,0.5);border-radius:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:1.1em" />
+    </div>
+    
+    <div style="margin-bottom:20px">
+      <label style="color:#e8e8e8;font-family:'Rajdhani',sans-serif;font-size:1.1em;display:block;margin-bottom:8px">🕐 Heure de fin</label>
+      <input type="time" id="rcFin" style="width:100%;padding:12px;background:rgba(0,0,0,0.5);border:2px solid rgba(0,224,255,0.5);border-radius:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:1.1em" />
+    </div>
+    
+    <div style="display:flex;gap:10px">
+      <button onclick="saveRC()" style="flex:1;background:linear-gradient(145deg,#00E0FF,#00CBF0);border:none;color:#000;padding:15px;border-radius:10px;font-family:'Black Ops One',cursive;font-size:1.1em;cursor:pointer;box-shadow:0 4px 15px rgba(0,224,255,0.4)">
+        Valider
+      </button>
+      <button onclick="closeRCModal()" style="flex:1;background:rgba(100,100,100,0.3);border:2px solid #666;color:#ccc;padding:15px;border-radius:10px;font-family:'Rajdhani',sans-serif;font-size:1.1em;cursor:pointer">
         Annuler
       </button>
     </div>
