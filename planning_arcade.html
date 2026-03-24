@@ -3674,8 +3674,15 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
   document.getElementById('carryOverHolidayHours').textContent = carryOverHoliday + 'h';
   document.getElementById('carryOverSundayHours').textContent = carryOverSunday + 'h';
   document.getElementById('totalNightHours').textContent = (nightHours + carryOverNight) + 'h';
-  // Prime habillage = toutes heures travaillées ce mois (sans couper à minuit)
-  document.getElementById('primeHabillage').textContent = totalHours + 'h';
+  
+  // Prime habillage = heures complètes (12h pour nuit même dernier jour)
+  let primeHabillage = totalHours;
+  const lastDayStr = formatDate(new Date(year, month, daysInMonth));
+  if (shifts[lastDayStr] === 'night' || shifts[lastDayStr] === 'depannage_night') {
+    primeHabillage += 7; // Ajouter les 7h après minuit
+  }
+  document.getElementById('primeHabillage').textContent = primeHabillage + 'h';
+  
   document.getElementById('totalHolidayHours').textContent = (holidayHours + carryOverHoliday) + 'h';
   document.getElementById('totalCP').textContent = totalCP.toFixed(2) + 'h';
   document.getElementById('totalFormation').textContent = totalFormation + 'h';
