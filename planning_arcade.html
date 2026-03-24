@@ -3520,8 +3520,8 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
         
         if (isDep) {
           depannageHours += totalH;
-          primeHabillageVacations++;
-          paniers++;
+          primeHabillageVacations += totalH; // Heures, pas vacations !
+          if (totalH >= 6) paniers++; // Panier seulement si ≥6h
         }
         
         if (isSunday) sundayHours += totalH;
