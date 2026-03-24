@@ -3245,7 +3245,7 @@ function createDayCell(date, otherMonth) {
   
   if (shift === 'day') cell.classList.add('day-shift');
   else if (shift === 'night') cell.classList.add('night-shift');
-  else if (shift === 'urgence') cell.classList.add('urgence-shift');
+  else if (shift && typeof shift === 'string' && shift.startsWith('urgence')) cell.classList.add('urgence-shift');
   else if (shift === 'cp') cell.classList.add('cp-shift');
   else if (shift === 'formation') cell.classList.add('formation-shift');
   else if (shift === 'arret') cell.classList.add('arret-shift');
