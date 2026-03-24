@@ -561,7 +561,7 @@ header {
   background: linear-gradient(135deg, #A6A600, #b8b800) !important;
 }
 
-.day-cell.indispo-shift {
+.day-cell.urgence-shift {
   background: linear-gradient(135deg, #9C009C, #b000b0) !important;
 }
 
@@ -601,7 +601,7 @@ header {
   opacity: 1 !important;
 }
 
-.day-cell.other-month.indispo-shift {
+.day-cell.other-month.urgence-shift {
   background: linear-gradient(135deg, #d66ed6, #e484e4) !important;
   opacity: 1 !important;
 }
@@ -2675,9 +2675,9 @@ h3::after {
 <span class="legend-box" style="background:linear-gradient(135deg,#0036A1,#0042bb)"></span>
 <span>Nuit</span>
 </div>
-<div class="legend-item" data-shift-type="indispo">
+<div class="legend-item" data-shift-type="urgence">
 <span class="legend-box" style="background:linear-gradient(135deg,#9C009C,#b000b0)"></span>
-<span>Indispo</span>
+<span>Urgence</span>
 </div>
 <div class="legend-item" data-shift-type="cp">
 <span class="legend-box" style="background:linear-gradient(135deg,#207E96,#2894ac)"></span>
@@ -3245,7 +3245,7 @@ function createDayCell(date, otherMonth) {
   
   if (shift === 'day') cell.classList.add('day-shift');
   else if (shift === 'night') cell.classList.add('night-shift');
-  else if (shift === 'indispo') cell.classList.add('indispo-shift');
+  else if (shift === 'urgence') cell.classList.add('urgence-shift');
   else if (shift === 'cp') cell.classList.add('cp-shift');
   else if (shift === 'formation') cell.classList.add('formation-shift');
   else if (shift === 'arret') cell.classList.add('arret-shift');
@@ -3285,8 +3285,13 @@ function createDayCell(date, otherMonth) {
       shiftTime.textContent = '19h-7h';
     } else if (shift === 'cp') {
       shiftTime.textContent = 'CP 5.83h';
-    } else if (shift === 'indispo') {
-      shiftTime.textContent = 'Indisp';
+    } else if (shift && typeof shift === 'string' && shift.startsWith('urgence')) {
+      // Format: urgence|19:00-00:00|dep ou urgence|19:00-00:00
+      const parts = shift.split('|');
+      const horaires = parts[1] || '';
+      const isDep = parts[2] === 'dep';
+      const horairesCourt = horaires.replace(':00', 'h').replace(':30', 'h30').replace('-', '-');
+      shiftTime.textContent = `U ${horairesCourt}${isDep ? ' 🚨' : ''}`;
     } else if (shift === 'formation') {
       shiftTime.textContent = 'Form 7h';
     } else if (shift === 'arret') {
@@ -3343,7 +3348,15 @@ function createDayCell(date, otherMonth) {
     if (!otherMonth) {
       // Mode sélection activé
       if (selectedShiftType) {
-        if (shifts[dateStr] === selectedShiftType) {
+        if (selectedShiftType === 'urgence') {
+          // Ouvrir modal urgence
+          window.currentUrgenceDate = dateStr;
+          document.getElementById('urgenceModal').style.display = 'flex';
+          document.getElementById('urgenceDebut').value = '';
+          document.getElementById('urgenceFin').value = '';
+          document.getElementById('urgenceDepannage').checked = false;
+          return; // Sortir sans render
+        } else if (shifts[dateStr] === selectedShiftType) {
           // Si déjà le même type, on efface
           delete shifts[dateStr];
         } else {
@@ -3357,8 +3370,14 @@ function createDayCell(date, otherMonth) {
         } else if (shifts[dateStr] === 'day') {
           shifts[dateStr] = 'night';
         } else if (shifts[dateStr] === 'night') {
-          shifts[dateStr] = 'indispo';
-        } else if (shifts[dateStr] === 'indispo') {
+          // Ouvrir modal urgence
+          window.currentUrgenceDate = dateStr;
+          document.getElementById('urgenceModal').style.display = 'flex';
+          document.getElementById('urgenceDebut').value = '';
+          document.getElementById('urgenceFin').value = '';
+          document.getElementById('urgenceDepannage').checked = false;
+          return; // Sortir sans render
+        } else if (shifts[dateStr] && typeof shifts[dateStr] === 'string' && shifts[dateStr].startsWith('urgence')) {
           shifts[dateStr] = 'cp';
         } else if (shifts[dateStr] === 'cp') {
           shifts[dateStr] = 'formation';
@@ -3456,7 +3475,60 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
     const isSaturday = date.getDay() === 6;
     const isHol = isHoliday(dateStr);
     
-    if (shift === 'indispo') return;
+    // Traiter urgence avec horaires
+    if (shift && typeof shift === 'string' && shift.startsWith('urgence')) {
+      const parts = shift.split('|');
+      const horaires = parts[1]; // Ex: "19:00-00:00"
+      const isDep = parts[2] === 'dep';
+      
+      if (horaires) {
+        const [debut, fin] = horaires.split('-');
+        const [hDebut, mDebut] = debut.split(':').map(Number);
+        const [hFin, mFin] = fin.split(':').map(Number);
+        
+        // Calculer total heures
+        let totalH = hFin - hDebut + (mFin - mDebut) / 60;
+        if (totalH < 0) totalH += 24; // Passage minuit
+        
+        // Calculer heures de nuit (21h-6h)
+        let heuresNuit = 0;
+        let heuresJour = totalH;
+        
+        // Si passe minuit
+        if (hFin < hDebut) {
+          // Avant minuit
+          if (hDebut < 21) {
+            heuresJour = 21 - hDebut - mDebut/60;
+            heuresNuit = (24 - 21) + hFin + mFin/60;
+          } else {
+            heuresNuit = (24 - hDebut - mDebut/60) + hFin + mFin/60;
+            heuresJour = 0;
+          }
+        } else {
+          // Même jour
+          if (hDebut >= 21 || hFin <= 6) {
+            heuresNuit = totalH;
+            heuresJour = 0;
+          } else if (hDebut < 21 && hFin > 21) {
+            heuresJour = 21 - hDebut - mDebut/60;
+            heuresNuit = hFin - 21 + mFin/60;
+          }
+        }
+        
+        totalHours += totalH;
+        nightHours += heuresNuit;
+        
+        if (isDep) {
+          depannageHours += totalH;
+          primeHabillageVacations++;
+          paniers++;
+        }
+        
+        if (isSunday) sundayHours += totalH;
+        if (isHol) holidayHours += totalH;
+      }
+      return;
+    }
     
     if (shift === 'arret') {
       if (!isSunday && !isSaturday) {
@@ -4227,7 +4299,7 @@ function applyTheme(themeName) {
       background: linear-gradient(135deg, rgba(166, 166, 0, 0.6), rgba(184, 184, 0, 0.6)) !important;
     }
     
-    .day-cell.indispo-shift {
+    .day-cell.urgence-shift {
       background: linear-gradient(135deg, rgba(156, 0, 156, 0.6), rgba(176, 0, 176, 0.6)) !important;
     }
     
@@ -4666,6 +4738,35 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('guideModal').style.display = 'none';
   }
   
+  // ========== URGENCE ==========
+  
+  window.currentUrgenceDate = null;
+  
+  window.closeUrgenceModal = function() {
+    document.getElementById('urgenceModal').style.display = 'none';
+  }
+  
+  window.saveUrgence = function() {
+    const debut = document.getElementById('urgenceDebut').value;
+    const fin = document.getElementById('urgenceFin').value;
+    const depannage = document.getElementById('urgenceDepannage').checked;
+    
+    if (!debut || !fin) {
+      alert('⚠️ Veuillez renseigner les horaires');
+      return;
+    }
+    
+    // Format: urgence|19:00-00:00|dep ou urgence|19:00-00:00
+    const urgenceData = `urgence|${debut}-${fin}${depannage ? '|dep' : ''}`;
+    shifts[window.currentUrgenceDate] = urgenceData;
+    
+    saveToStorage();
+    renderCalendar();
+    updateStats();
+    updateRegulations();
+    closeUrgenceModal();
+  }
+  
   // ========== VUE ÉQUIPE ==========
   
   let currentTeamWeek = null;
@@ -4784,7 +4885,7 @@ window.addEventListener('DOMContentLoaded', () => {
       'night': 'linear-gradient(135deg,#0036A1,#0042bb)',
       'cp': 'linear-gradient(135deg,#207E96,#2894ac)',
       'formation': 'linear-gradient(135deg,#A6A600,#b8b800)',
-      'indispo': 'linear-gradient(135deg,#9C009C,#b000b0)',
+      'urgence': 'linear-gradient(135deg,#9C009C,#b000b0)',
       'arret': 'linear-gradient(135deg,#946868,#a47878)',
       'depannage_day': 'linear-gradient(135deg,#FF6B00,#FF8C00)',
       'depannage_night': 'linear-gradient(135deg,#B35E00,#C86F00)',
@@ -4796,7 +4897,7 @@ window.addEventListener('DOMContentLoaded', () => {
       'night': 'N',
       'cp': 'CP',
       'formation': 'F',
-      'indispo': 'I',
+      'urgence': 'I',
       'arret': 'A',
       'depannage_day': 'DJ',
       'depannage_night': 'DN',
@@ -6829,6 +6930,39 @@ initPlanningsDB();
         <div style="width:30px;height:30px;background:#0a0a0a;border-radius:5px;border:1px solid rgba(255,255,255,0.2)"></div>
         <span style="color:#e8e8e8;font-family:'Rajdhani',sans-serif">Repos</span>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Urgence -->
+<div id="urgenceModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center">
+  <div style="background:linear-gradient(145deg,rgba(156,0,156,0.2),rgba(176,0,176,0.1));backdrop-filter:blur(20px);border:3px solid #b000b0;border-radius:20px;padding:30px;box-shadow:0 0 40px rgba(176,0,176,0.5);max-width:400px;width:90%">
+    <h2 style="color:#b000b0;font-family:'Black Ops One',cursive;text-align:center;margin-bottom:25px;text-shadow:0 0 10px rgba(176,0,176,0.8)">🚨 URGENCE 🚨</h2>
+    
+    <div style="margin-bottom:20px">
+      <label style="color:#e8e8e8;font-family:'Rajdhani',sans-serif;font-size:1.1em;display:block;margin-bottom:8px">🕐 Heure de début</label>
+      <input type="time" id="urgenceDebut" style="width:100%;padding:12px;background:rgba(0,0,0,0.5);border:2px solid rgba(176,0,176,0.5);border-radius:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:1.1em" />
+    </div>
+    
+    <div style="margin-bottom:20px">
+      <label style="color:#e8e8e8;font-family:'Rajdhani',sans-serif;font-size:1.1em;display:block;margin-bottom:8px">🕐 Heure de fin</label>
+      <input type="time" id="urgenceFin" style="width:100%;padding:12px;background:rgba(0,0,0,0.5);border:2px solid rgba(176,0,176,0.5);border-radius:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:1.1em" />
+    </div>
+    
+    <div style="margin-bottom:25px">
+      <label style="color:#e8e8e8;font-family:'Rajdhani',sans-serif;font-size:1.1em;display:flex;align-items:center;cursor:pointer">
+        <input type="checkbox" id="urgenceDepannage" style="width:20px;height:20px;margin-right:10px;cursor:pointer" />
+        <span>🚨 Dépannage (prime habillage)</span>
+      </label>
+    </div>
+    
+    <div style="display:flex;gap:10px">
+      <button onclick="saveUrgence()" style="flex:1;background:linear-gradient(145deg,#b000b0,#9C009C);border:none;color:#fff;padding:15px;border-radius:10px;font-family:'Black Ops One',cursive;font-size:1.1em;cursor:pointer;box-shadow:0 4px 15px rgba(176,0,176,0.4)">
+        Valider
+      </button>
+      <button onclick="closeUrgenceModal()" style="flex:1;background:rgba(100,100,100,0.3);border:2px solid #666;color:#ccc;padding:15px;border-radius:10px;font-family:'Rajdhani',sans-serif;font-size:1.1em;cursor:pointer">
+        Annuler
+      </button>
     </div>
   </div>
 </div>
