@@ -3798,6 +3798,27 @@ function updateRegulations() {
           monthsInRegule[monthKey].total += depHoursToAdd;
           monthsInRegule[monthKey].depannage += depHoursToAdd;
         }
+        
+        // Traiter urgence avec horaires
+        if (shift && typeof shift === 'string' && shift.startsWith('urgence')) {
+          const parts = shift.split('|');
+          const horaires = parts[1];
+          const isDep = parts[2] === 'dep';
+          
+          if (horaires) {
+            const [debut, fin] = horaires.split('-');
+            const [hDebut, mDebut] = debut.split(':').map(Number);
+            const [hFin, mFin] = fin.split(':').map(Number);
+            
+            let totalH = hFin - hDebut + (mFin - mDebut) / 60;
+            if (totalH < 0) totalH += 24;
+            
+            monthsInRegule[monthKey].total += totalH;
+            if (isDep) {
+              monthsInRegule[monthKey].depannage += totalH;
+            }
+          }
+        }
       }
     });
     
