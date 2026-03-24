@@ -30,7 +30,7 @@
   --red: #730000;
   --cp: #207E96;
   --formation: #A6A600;
-  --indispo: #9C009C;
+  --indispo: #CC5500;
   --arret: #946868;
   --accent: #00d4ff;
 }
@@ -562,7 +562,7 @@ header {
 }
 
 .day-cell.urgence-shift {
-  background: linear-gradient(135deg, #9C009C, #b000b0) !important;
+  background: linear-gradient(135deg, #CC5500, #FF6600) !important;
 }
 
 .day-cell.arret-shift {
@@ -2676,7 +2676,7 @@ h3::after {
 <span>Nuit</span>
 </div>
 <div class="legend-item" data-shift-type="urgence">
-<span class="legend-box" style="background:linear-gradient(135deg,#9C009C,#b000b0)"></span>
+<span class="legend-box" style="background:linear-gradient(135deg,#CC5500,#FF6600)"></span>
 <span>Urgence</span>
 </div>
 <div class="legend-item" data-shift-type="cp">
@@ -3674,11 +3674,8 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
   document.getElementById('carryOverHolidayHours').textContent = carryOverHoliday + 'h';
   document.getElementById('carryOverSundayHours').textContent = carryOverSunday + 'h';
   document.getElementById('totalNightHours').textContent = (nightHours + carryOverNight) + 'h';
-  // Prime habillage = heures ce mois (sans report mois précédent)
-  let primeHabillageHeures = totalHours;
-  if (shifts[lastDayPrevMonthStr] === 'night') primeHabillageHeures -= 7;
-  if (shifts[lastDayPrevMonthStr] === 'depannage_night') primeHabillageHeures -= 7;
-  document.getElementById('primeHabillage').textContent = primeHabillageHeures + 'h';
+  // Prime habillage = toutes heures travaillées ce mois (sans couper à minuit)
+  document.getElementById('primeHabillage').textContent = totalHours + 'h';
   document.getElementById('totalHolidayHours').textContent = (holidayHours + carryOverHoliday) + 'h';
   document.getElementById('totalCP').textContent = totalCP.toFixed(2) + 'h';
   document.getElementById('totalFormation').textContent = totalFormation + 'h';
@@ -4902,7 +4899,7 @@ window.addEventListener('DOMContentLoaded', () => {
       'night': 'linear-gradient(135deg,#0036A1,#0042bb)',
       'cp': 'linear-gradient(135deg,#207E96,#2894ac)',
       'formation': 'linear-gradient(135deg,#A6A600,#b8b800)',
-      'urgence': 'linear-gradient(135deg,#9C009C,#b000b0)',
+      'urgence': 'linear-gradient(135deg,#CC5500,#FF6600)',
       'arret': 'linear-gradient(135deg,#946868,#a47878)',
       'depannage_day': 'linear-gradient(135deg,#FF6B00,#FF8C00)',
       'depannage_night': 'linear-gradient(135deg,#B35E00,#C86F00)',
@@ -6952,9 +6949,9 @@ initPlanningsDB();
 </div>
 
 <!-- Modal Urgence -->
-<div id="urgenceModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center">
-  <div style="background:linear-gradient(145deg,rgba(156,0,156,0.2),rgba(176,0,176,0.1));backdrop-filter:blur(20px);border:3px solid #b000b0;border-radius:20px;padding:30px;box-shadow:0 0 40px rgba(176,0,176,0.5);max-width:400px;width:90%">
-    <h2 style="color:#b000b0;font-family:'Black Ops One',cursive;text-align:center;margin-bottom:25px;text-shadow:0 0 10px rgba(176,0,176,0.8)">🚨 URGENCE 🚨</h2>
+<div id="urgenceModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:10000;align-items:center;justify-content:center">
+  <div style="background:linear-gradient(145deg,rgba(156,0,156,0.2),rgba(176,0,176,0.1));backdrop-filter:blur(20px);border:3px solid #FF6600;border-radius:20px;padding:30px;box-shadow:0 0 40px rgba(176,0,176,0.5);max-width:400px;width:90%">
+    <h2 style="color:#FF6600;font-family:'Black Ops One',cursive;text-align:center;margin-bottom:25px;text-shadow:0 0 10px rgba(176,0,176,0.8)">🚨 URGENCE 🚨</h2>
     
     <div style="margin-bottom:20px">
       <label style="color:#e8e8e8;font-family:'Rajdhani',sans-serif;font-size:1.1em;display:block;margin-bottom:8px">🕐 Heure de début</label>
@@ -6974,7 +6971,7 @@ initPlanningsDB();
     </div>
     
     <div style="display:flex;gap:10px">
-      <button onclick="saveUrgence()" style="flex:1;background:linear-gradient(145deg,#b000b0,#9C009C);border:none;color:#fff;padding:15px;border-radius:10px;font-family:'Black Ops One',cursive;font-size:1.1em;cursor:pointer;box-shadow:0 4px 15px rgba(176,0,176,0.4)">
+      <button onclick="saveUrgence()" style="flex:1;background:linear-gradient(145deg,#FF6600,#CC5500);border:none;color:#fff;padding:15px;border-radius:10px;font-family:'Black Ops One',cursive;font-size:1.1em;cursor:pointer;box-shadow:0 4px 15px rgba(176,0,176,0.4)">
         Valider
       </button>
       <button onclick="closeUrgenceModal()" style="flex:1;background:rgba(100,100,100,0.3);border:2px solid #666;color:#ccc;padding:15px;border-radius:10px;font-family:'Rajdhani',sans-serif;font-size:1.1em;cursor:pointer">
