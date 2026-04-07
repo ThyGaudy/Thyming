@@ -3430,6 +3430,7 @@ function updateStats() {
   let holidayHours = 0;
   let totalHours = 0;
   let workedHours = 0;  // Heures travaillées CE mois (sans reports)
+  let heuresTravaillees = 0;  // Heures vraiment travaillées (jour/nuit/dép/urgence, PAS cp/rc/formation/arrêt)
   let paniers = 0;
   let carryOverNight = 0;
   let carryOverHoliday = 0;
@@ -3536,6 +3537,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
         
         totalHours += totalH;
         workedHours += totalH;  // Heures ce mois
+        heuresTravaillees += totalH;  // Prime habillage
         nightHours += heuresNuit;
         
         if (totalH >= 6) paniers++; // Panier pour toute vacation ≥6h
@@ -3573,6 +3575,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
       totalFormation += 7;
       totalHours += 7;
       workedHours += 7;
+      heuresTravaillees += 7;  // Prime habillage
       return;
     }
     
@@ -3600,6 +3603,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
       paniers++;
       totalHours += 12;
       workedHours += 12;
+      heuresTravaillees += 12;  // Prime habillage
       depannageHours += 12;
       if (isSunday) sundayHours += 12;
       if (isHol) holidayHours += 12;
@@ -3609,6 +3613,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
     if (shift === 'depannage_night') {
       primeHabillageVacations++;  // Compte pour prime d'habillage
       paniers++;
+      heuresTravaillees += 12;  // Prime habillage = toujours 12h
       
       if (d === daysInMonth) {
         // Dernier jour du mois : seulement 19h-00h (5h) sur ce mois
@@ -3641,6 +3646,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
       paniers++;
       totalHours += 12;
       workedHours += 12;
+      heuresTravaillees += 12;  // Prime habillage
       if (isSunday) sundayHours += 12;
       if (isHol) holidayHours += 12;
       return;
@@ -3649,6 +3655,7 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
     if (shift === 'night') {
       primeHabillageVacations++;  // Compte pour prime d'habillage
       paniers++;
+      heuresTravaillees += 12;  // Prime habillage = toujours 12h
       
       if (d === daysInMonth) {
         // Dernier jour du mois : seulement 19h-00h (5h)
@@ -3705,13 +3712,8 @@ if (shifts[lastDayPrevMonthStr] === 'depannage_night') {
   document.getElementById('carryOverSundayHours').textContent = carryOverSunday + 'h';
   document.getElementById('totalNightHours').textContent = (nightHours + carryOverNight) + 'h';
   
-  // Prime habillage = heures complètes (12h pour nuit même dernier jour)
-  let primeHabillage = totalHours;
-  const lastDayStr = formatDate(new Date(year, month, daysInMonth));
-  if (shifts[lastDayStr] === 'night' || shifts[lastDayStr] === 'depannage_night') {
-    primeHabillage += 7; // Ajouter les 7h après minuit
-  }
-  document.getElementById('primeHabillage').textContent = primeHabillage + 'h';
+  // Prime habillage = heures vraiment travaillées (pas CP/RC/formation/arrêt)
+  document.getElementById('primeHabillage').textContent = heuresTravaillees.toFixed(2) + 'h';
   
   document.getElementById('totalHolidayHours').textContent = (holidayHours + carryOverHoliday) + 'h';
   document.getElementById('totalCP').textContent = totalCP.toFixed(2) + 'h';
